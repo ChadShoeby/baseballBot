@@ -16,10 +16,10 @@ class ScoringCriteria(models.Model):
 
     #pitcher scoring fields
     innings_pitched_value = models.FloatField(default=7.4)
-    strikeouts_value = models.IntegerField(default=2)
-    hits_pitcher_value = models.IntegerField(default=-2.6)
-    walks_pitcher_value = models.IntegerField(default=-3)
-    hbps_pitcher_value = models.IntegerField(default=-3)
-    homeruns_pitcher_value = models.IntegerField(default=-12.3)
-    saves_value = models.IntegerField(default=5)
-    holds_value = models.IntegerField(default=4)
+    strikeouts_value = models.FloatField(default=2)
+    hits_pitcher_value = models.FloatField(default=-2.6)
+    walks_pitcher_value = models.FloatField(default=-3)
+    hbps_pitcher_value = models.FloatField(default=-3)
+    homeruns_pitcher_value = models.FloatField(default=-12.3)
+    saves_value = models.FloatField(default=5)
+    holds_value = models.FloatField(default=4)
