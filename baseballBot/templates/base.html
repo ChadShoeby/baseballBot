@@ -1,0 +1,74 @@
+{% load static %}
+
+{% block html %}
+<!DOCTYPE html>
+<html lang="en"> 
+
+{% block head %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    {# Load the tag library #}
+    {% load bootstrap4 %}
+
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
+
+    <link href="{% static "baseballBot/css/base.css" %}" rel="stylesheet">
+
+    <title>{% block title %}{% endblock %}</title>
+    {% block extra_css %}{% endblock %}
+</head>
+{% endblock %}
+
+{% block body %}
+    <body>
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="">
+        BaseballBot Home
+      </a>
+            <ul class="navbar-nav px-3" style="margin-right: 50px;">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Dropdown
+                </a>
+                <div class="dropdown-menu" style="position:absolute;" aria-labelledby="navbarDropdownMenuLink">
+                  <a class="dropdown-item" href="">Edit Profile</a>
+                  <a class="dropdown-item" href="">Log out</a>
+                </div>
+              </li>
+            </ul>
+    </nav>
+
+    {% bootstrap_messages %}
+
+    {% block body_content %}
+        <div class="container-fluid">
+            <div class="row">
+
+                {# put side navbar here #}
+                {% include "sideNav.html" %}   
+
+                <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h1 class="h2">{% block dashboardTitle %}{% endblock %}</h1>
+                    </div>
+                {% block dashboardBody %}{% endblock %}
+                </main>
+            </div>
+            </div>
+    {% endblock %}
+
+    {% block foot %}
+        <footer>
+            {% block footer %}{% endblock %}
+        </footer>
+    {% endblock %}
+
+    {% block javascript %}{% endblock %}
+  </body>
+{% endblock %}
+</html>
+{% endblock %}
