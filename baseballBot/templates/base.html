@@ -18,7 +18,7 @@
 
     <link href="{% static "baseballBot/css/base.css" %}" rel="stylesheet">
 
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}Baseball Bot{% endblock %}</title>
     {% block extra_css %}{% endblock %}
 </head>
 {% endblock %}
@@ -54,11 +54,13 @@
                 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                         <h1 class="h2">{% block dashboardTitle %}{% endblock %}</h1>
+                        <div class="font-weight-bold">{% block managerTitle %}{% endblock %}</div>
                     </div>
+
                 {% block dashboardBody %}{% endblock %}
                 </main>
             </div>
-            </div>
+        </div>
     {% endblock %}
 
     {% block foot %}

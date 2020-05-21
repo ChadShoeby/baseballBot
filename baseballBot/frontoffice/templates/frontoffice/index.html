@@ -1,8 +1,14 @@
 {% extends "../base.html" %}
 
-{% block title %}Front Office{% endblock %}
-{% block dashboardTitle %}Front Office{% endblock %}
+{% block title %}{{ team }} Front Office{% endblock %}
+{% block dashboardTitle %}{{ team }} Front Office{% endblock %}
+{% block managerTitle %}Team Manager: {{ request.user|title }}{% endblock %}
 
 {% block dashboardBody %}
-Hello, world. You're at the Front Office index.<br>Here we will put code to manage and run your team.
+    <div>
+        {% for player in players %}
+            {{ player.player_name }} {{ player.getPosAbbr }}<br>
+        {% endfor %}
+    </div>
+
 {% endblock %}

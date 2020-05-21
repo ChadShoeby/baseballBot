@@ -1,17 +1,26 @@
 from django.db import models
 from django.utils import timezone
+from frontoffice.models import PlayerUser 
 from frontoffice.models import ScoringCriteria
 
 class Team(models.Model):
+    user = models.ForeignKey(
+        PlayerUser,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+        )
+
     team_name = models.CharField(max_length=200)
-    save_date = models.DateTimeField('date saved')
-    league_name = models.CharField(max_length=200,null=True)
+    save_date = models.DateTimeField('date saved', default=timezone.now())
+    league_name = models.CharField(max_length=200,null=True,blank=True)
     
     scoring_criteria = models.OneToOneField(
         ScoringCriteria,
         on_delete=models.CASCADE,
         verbose_name="scoring criteria",
-        null=True
+        null=True,
+        blank=True
         )
 
     # to-do

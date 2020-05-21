@@ -14,3 +14,19 @@ class Player(models.Model):
 
     def __str__(self):
         return self.player_name
+
+    def getPosAbbr(self):
+        posAbbr = {
+            'First Base':'1B',
+            'Second Base':'2B',
+            'Third Base': '3B'
+                    }
+        if self.player_position in posAbbr:
+            return posAbbr[self.player_position]
+
+        titles = self.player_position.split(' ')
+
+        abbr = ''
+        for i,title in enumerate(titles):
+            abbr += title[0]
+        return abbr
