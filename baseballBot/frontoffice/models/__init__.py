@@ -3,3 +3,6 @@ from frontoffice.models.Team import *
 from frontoffice.models.Player import *
 from frontoffice.models.TeamRecord import *
 from frontoffice.models.PlayerRecord import *
+from frontoffice.models.PlayerUser import *
+from frontoffice.models.YahooSettings import *
+
