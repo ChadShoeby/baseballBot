@@ -25,11 +25,10 @@ def index(request):
         	{'team': 'No Team Created',
          	'players' : players,
          	})  
-	
-# def record(request)
-# 	record = TeamRecord.objects.filter(team = team.id)
-# 		return render(request,
-# 			'frontoffice/record.html',
-# 			{'wins': wins,
-# 			'loss': loss,
-# 			'season_year': season_year})
+def record(request):
+    team = Team.objects.get(user__username=request.user)
+    record = TeamRecord.objects.filter(team = team.id)
+    return render(request,
+        'frontoffice/record.html',
+        {'record': record ,
+        })
