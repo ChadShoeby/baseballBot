@@ -9,7 +9,8 @@
     <div>
 
         {% for player in players %}
-            {{ player.player_name }} {{ player.getPosAbbr }} {{ player.player_status }} <br>
+
+            {{ player.name }} {{ player.getPosAbbr }} {{ player.status }} <br>
         {% endfor %}
     </div>
 
