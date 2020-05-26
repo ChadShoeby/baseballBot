@@ -5,4 +5,5 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('record', views.record, name='record'),    
+    path('yahooQueryTest', views.yahooQueryTest, name='yahooQueryTest'),    
 ]

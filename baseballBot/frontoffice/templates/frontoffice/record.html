@@ -1,7 +1,7 @@
 {% extends "../base.html" %}
 
-{% block title %}{{ team }}{{ record.team }} Record{% endblock %}
-{% block dashboardTitle %} For the {{ record.season_year }}{% endblock %}
+{% block title %}{{ record.team.name }} Record{% endblock %}
+{% block dashboardTitle %} {{ record.team.name }} Record <br>For the {{ record.season_year }} season{% endblock %}
 
 {% block dashboardBody %}
     <div>
