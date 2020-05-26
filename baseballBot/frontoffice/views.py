@@ -24,10 +24,11 @@ def index(request):
         	'frontoffice/index.html',
         	{'team': 'No Team Created',
          	'players' : players,
-         	})  
+         	})
+
 def record(request):
     team = Team.objects.get(user__username=request.user)
-    record = TeamRecord.objects.filter(team = team.id)
+    record = TeamRecord.objects.get(team = team.id)
     return render(request,
         'frontoffice/record.html',
         {'record': record ,
