@@ -1,0 +1,1 @@
+from frontoffice.YahooQuery import *
