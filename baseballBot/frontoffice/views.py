@@ -1,14 +1,35 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-from frontoffice.models import Team, Player
+from django.shortcuts import get_object_or_404
+from frontoffice.models import Team, Player, TeamRecord
 
 # Create your views here.
 
 def index(request):
-    team = Team.objects.get(user__username=request.user)
-    players = Player.objects.filter(team = team.id)
-    return render(request, 
-        'frontoffice/index.html',
-        {'team': team,
-         'players' : players,
-         })
+    try:
+        team = Team.objects.get(user__username=request.user)
+    except Team.DoesNotExist:
+        team = None
+
+    players = []
+    if team:
+    	players = Player.objects.filter(team = team.id)
+    	return render(request, 
+        	'frontoffice/index.html',
+        	{'team': team,
+         	'players' : players,
+         	})    
+    else:
+    	 return render(request, 
+        	'frontoffice/index.html',
+        	{'team': 'No Team Created',
+         	'players' : players,
+         	})  
+	
+# def record(request)
+# 	record = TeamRecord.objects.filter(team = team.id)
+# 		return render(request,
+# 			'frontoffice/record.html',
+# 			{'wins': wins,
+# 			'loss': loss,
+# 			'season_year': season_year})

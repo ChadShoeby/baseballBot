@@ -1,0 +1,12 @@
+{% extends "../base.html" %}
+
+{% block title %}{{ team }}{{ record.team }} Record{% endblock %}
+{% block dashboardTitle %} For the {{ record.season_year }}{% endblock %}
+
+{% block dashboardBody %}
+    <div>
+    	W:{record.wins} - L:{record.loss} for {record.season_year}
+    </div>
+
+ {#add total points by players #}
+{% endblock %}
