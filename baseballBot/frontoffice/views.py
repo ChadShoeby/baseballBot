@@ -1,22 +1,35 @@
 from django.http import HttpResponse
-from django.shortcuts import render
-from frontoffice.models import Team, Player
-from frontoffice.YahooQuery import *
+from django.shortcuts import render, redirect, get_object_or_404
+from frontoffice.models import Team, Player, TeamRecord, YahooQuery
+from frontoffice.YahooAPITESTQuery import *
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
 
 def index(request):
-    team = Team.objects.get(user__username=request.user)
-    players = Player.objects.filter(team = team.id)
-    return render(request, 
-        'frontoffice/index.html',
-        {'team': team,
-         'players' : players,
-         })
+    try:
+        team = Team.objects.get(user__username=request.user)
+    except ObjectDoesNotExist:
+        team = None
+
+    players = []
+    if team:
+        players = Player.objects.filter(team = team.id)
+        return render(request, 
+            'frontoffice/index.html',
+            {'team': team,
+            'players' : players,
+            })    
+    else:
+         return render(request, 
+            'frontoffice/index.html',
+            {'team': 'No Team Created',
+            'players' : players,
+            })
 
 def testyfpy(request):
     data = []
-    yq = YahooQuery()
+    yq = YahooAPITESTQuery()
     yq.setUp()
     data += [yq.test_get_all_yahoo_fantasy_game_keys()]
 
@@ -25,3 +38,26 @@ def testyfpy(request):
         {'data': data,
          })
 
+def yahooQueryTest(request):
+    queryResults = {}
+    # test = YahooQuery.get_all_players_by_season()
+    queryResults['allPlayersBySeason'] = YahooQuery.get_all_players_by_season()
+    queryResults['playerStats'] = YahooQuery.get_player_stats(1)
+
+    return render(request,
+        'frontoffice/yahooQueryTest.html',
+        {'queryResults': queryResults ,
+        })
+
+def record(request):
+    try:
+        team = Team.objects.get(user__username=request.user)
+    except Team.DoesNotExist:
+        return redirect(index)
+
+    # team = Team.objects.get(user__username=request.user)
+    record = TeamRecord.objects.get(team = team.id)
+    return render(request,
+        'frontoffice/record.html',
+        {'record': record ,
+        })

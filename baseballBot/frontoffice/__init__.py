@@ -1,1 +1,1 @@
-from frontoffice.YahooQuery import *
+from frontoffice.YahooAPITESTQuery import *

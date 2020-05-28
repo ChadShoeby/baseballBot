@@ -4,12 +4,12 @@ from unittest import skip, TestCase
 from django.conf import settings
 
 from yfpy import Data
-from yfpy.models import Game, StatCategories, User, Scoreboard, Settings, Standings, League, Player, Team, \
-    TeamPoints, TeamStandings, Roster
+# from yfpy.models import Game, StatCategories, User, Scoreboard, Settings, Standings, League, Player, Team, \
+    # TeamPoints, TeamStandings, Roster
 from yfpy.query import YahooFantasySportsQuery
 
 
-class YahooQuery():
+class YahooAPITESTQuery():
 
     def setUp(self):
         # Suppress YahooFantasySportsQuery debug logging

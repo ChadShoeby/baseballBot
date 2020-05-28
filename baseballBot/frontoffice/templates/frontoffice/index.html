@@ -4,10 +4,13 @@
 {% block dashboardTitle %}{{ team }} Front Office{% endblock %}
 {% block managerTitle %}Team Manager: {{ request.user|title }}{% endblock %}
 
+
 {% block dashboardBody %}
     <div>
+
         {% for player in players %}
-            {{ player.name }} {{ player.getPosAbbr }}<br>
+
+            {{ player.name }} {{ player.getPosAbbr }} {{ player.status }} <br>
         {% endfor %}
     </div>
 

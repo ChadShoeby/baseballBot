@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 from frontoffice.models import PlayerUser 
 from frontoffice.models import ScoringCriteria
 

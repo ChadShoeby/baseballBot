@@ -16,6 +16,9 @@ class Player(models.Model):
         return self.name
 
     def getPosAbbr(self):
+        return ""
+
+
         posAbbr = {
             'First Base':'1B',
             'Second Base':'2B',
