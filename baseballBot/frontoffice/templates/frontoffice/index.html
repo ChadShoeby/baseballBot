@@ -1,17 +1,20 @@
 {% extends "../base.html" %}
 
 {% block title %}{{ team }} Front Office{% endblock %}
-{% block dashboardTitle %}{{ team }} Front Office{% endblock %}
+{% block dashboardTitle %}
+{% if team.yahoo_team_logo_url %}
+<img style="height:50px;" src="{{ team.yahoo_team_logo_url }}" class="img-thumbnail">
+{% endif %}
+
+{{ team }} Front Office
+
+{% endblock %}
 {% block managerTitle %}Team Manager: {{ request.user|title }}{% endblock %}
 
 
 {% block dashboardBody %}
     <div>
 
-        {% for player in players %}
-
-            {{ player.name }} {{ player.getPosAbbr }} {{ player.status }} <br>
-        {% endfor %}
     </div>
 
 {% endblock %}

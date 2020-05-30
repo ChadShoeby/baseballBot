@@ -19,6 +19,7 @@ from yfpy.query import YahooFantasySportsQuery
 
 
 class QueryTestCase(TestCase):
+# player info can be found https://baseball.fantasysports.yahoo.com/b1/156718/players
 
     def setUp(self):
         # Suppress YahooFantasySportsQuery debug logging
@@ -28,14 +29,65 @@ class QueryTestCase(TestCase):
         warnings.simplefilter("ignore", ResourceWarning)
 
         # Turn on/off example code stdout printing output
-        self.print_output = False
+        self.print_output = True
 
         # Put private.json (see README.md) in examples directory
-        auth_dir = "."
+        auth_dir = os.path.dirname(os.path.realpath(__file__))
 
         # Example code will output data here
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_output")
 
+        #yfpy examples
+        self.useYFPYExamples = False
+
+        if self.useYFPYExamples:   
+            self.setYFPYExamples()
+        else:
+            #set to True to use 2019
+            if False :
+                #vars from the 2019 mlb test output
+                self.game_id = "388" 
+                self.game_code = "mlb"
+                self.season = "2019"
+                self.league_id = "156718"
+                # self.league_id = "34177" #2019 Ray's brother league
+
+                # Test vars
+                self.chosen_week = 3
+                self.chosen_date = "2019-03-20"
+                self.team_id = 1
+                self.team_name = "TheAutoBots"
+                self.player_id = "10646"  # MLB: Ronald Acuña Jr.
+                self.player_key = self.game_id + ".p." + self.player_id
+
+            else :
+                #vars from the 2020 mlb test output
+                self.game_id = "398" 
+                self.game_code = "mlb"
+                self.season = "2020"
+                self.league_id = "156718"
+
+                # Test vars
+                self.chosen_week = 1
+                self.chosen_date = "2020-06-11"
+                self.team_id = 1
+                self.team_name = "TheAutoBots"
+                self.player_id = "10646"  # MLB: Ronald Acuña Jr.
+                self.player_key = self.game_id + ".p." + self.player_id
+
+
+        # Instantiate yfpy objects
+        self.yahoo_data = Data(self.data_dir)
+        self.yahoo_query = YahooFantasySportsQuery(auth_dir, self.league_id, game_id=self.game_id,
+                                                   game_code=self.game_code, offline=False, all_output_as_json=False)
+
+        # Manually override league key for example code to work
+        self.yahoo_query.league_key = self.game_id + ".l." + self.league_id
+
+    # ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ •
+    # ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ SAVING AND LOADING FANTASY FOOTBALL GAME DATA • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ •
+    # ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ •
+    def setYFPYExamples(self):
         # Example vars using public Yahoo league (still requires auth through a personal Yahoo account - see README.md)
         self.game_id = "331"
         # self.game_id = "390"
@@ -63,17 +115,6 @@ class QueryTestCase(TestCase):
         # self.player_id = "4588"  # NHL: Braden Holtby
         self.player_key = self.game_id + ".p." + self.player_id
 
-        # Instantiate yfpy objects
-        self.yahoo_data = Data(self.data_dir)
-        self.yahoo_query = YahooFantasySportsQuery(auth_dir, self.league_id, game_id=self.game_id,
-                                                   game_code=self.game_code, offline=False, all_output_as_json=False)
-
-        # Manually override league key for example code to work
-        self.yahoo_query.league_key = self.game_id + ".l." + self.league_id
-
-    # ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ •
-    # ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ SAVING AND LOADING FANTASY FOOTBALL GAME DATA • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ •
-    # ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ • ~ •
 
     def test_get_all_yahoo_fantasy_game_keys(self):
         """Retrieve all Yahoo fantasy football game keys.
