@@ -15,7 +15,7 @@ class YahooQueryUtil():
         self.game_code = "mlb"
         self.season = "2020"
         # only thing to change for each user
-        #to do figure out best way to change this for each user
+        # to do figure out best way to change this for each user
         self.league_id = "156718"
 
         # self.yahoo_data = Data(self.data_dir)

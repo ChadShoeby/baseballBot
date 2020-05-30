@@ -17,7 +17,6 @@ def index(request):
         #check if user has league ID in database. 
         try:
             manager_profile = ManagerProfile.objects.get(user__username=request.user)
-            print("here we found it")
         except ObjectDoesNotExist:
             print("can't find profile. trying to update by querying yahoo.")
             
@@ -36,7 +35,6 @@ def index(request):
         #check if user has a yahoo team in the database
         try:
             team = Team.objects.get(user__username=request.user)
-            print("here we found the team")
         except ObjectDoesNotExist:
             # try to get it from yahoo
             yqu = YahooQueryUtil()
@@ -58,8 +56,6 @@ def index(request):
         if team:
             players = Player.objects.filter(team = team.id)
      
-    yqu = YahooQueryUtil()
-    user_games = yqu.get_user_games()
     return render(request, 
         'frontoffice/index.html',
         {'team': team,
