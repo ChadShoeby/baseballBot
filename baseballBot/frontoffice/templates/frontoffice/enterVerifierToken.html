@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Enter Verifier{% endblock %}
+
+{% block dashboardBody %}
+    <p>Please click here to get your verification code from Yahoo. Then return to this page to enter the code. (the link will open a new tab)</p>
+    <p>
+        <a href="{{ auth_url }}" target="_blank">{{ auth_url }}</a>
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form }}
+      <button type="submit">Submit</button>
+    </form>
+{% endblock %}

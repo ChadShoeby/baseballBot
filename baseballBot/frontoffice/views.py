@@ -1,10 +1,12 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from frontoffice.models import Team, Player, ManagerProfile, TeamRecord, YahooQuery
 from django.core.exceptions import ObjectDoesNotExist
-from frontoffice.yahooQueryUtil import YahooQueryUtil
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django import forms
+from frontoffice.models import Team, Player, ManagerProfile, TeamRecord, YahooQuery
+from frontoffice.yahooQueryUtil import YahooQueryUtil
+from frontoffice.yahooQuery import OauthGetAuthKeyHelper
 
 # Create your views here.
 @login_required
@@ -12,8 +14,13 @@ def index(request):
     team = "No Team Found"
     players = []
 
-    if settings.USEREALQUERY :
-        
+    if settings.USEREALQUERY:
+
+        #check if user needs to get a verifier code from yahoo
+        oauth_helper = OauthGetAuthKeyHelper(request.user.id)
+        if oauth_helper.need_verifier_code():
+            return redirect(get_verifier_token)
+
         #check if user has league ID in database. 
         try:
             manager_profile = ManagerProfile.objects.get(user__username=request.user)
@@ -21,7 +28,7 @@ def index(request):
             print("can't find profile. trying to update by querying yahoo.")
             
             #if not, try to get data from yahoo
-            yqu = YahooQueryUtil()
+            yqu = YahooQueryUtil(request.user.id)
             data = yqu.get_user_leagues_by_game_key()
             if len(data) == 1:
                 manager_profile = ManagerProfile()
@@ -37,7 +44,7 @@ def index(request):
             team = Team.objects.get(user__username=request.user)
         except ObjectDoesNotExist:
             # try to get it from yahoo
-            yqu = YahooQueryUtil()
+            yqu = YahooQueryUtil(request.user.id)
             data = yqu.get_user_teams()
             team = Team()
             team.user = request.user
@@ -87,3 +94,33 @@ def record(request):
         'frontoffice/record.html',
         {'record': record ,
         })
+
+@login_required
+def get_verifier_token(request):
+    oauth_helper = OauthGetAuthKeyHelper(request.user.id)
+    auth_url = oauth_helper.get_auth_url()
+
+    if request.method == 'POST':
+        form = verifierTokenForm(request.POST)
+
+        if form.is_valid():
+            # send info to back to get called
+            verifier_code = form.cleaned_data['verifier_code']
+
+            yqu = YahooQueryUtil(request.user.id, verifier_code)
+
+            # redirect to a new URL:
+            return redirect(index)
+    else:
+        form = verifierTokenForm()   
+
+    return render(request,
+        'frontoffice/enterVerifierToken.html',
+        {'form': form ,
+        'auth_url' : auth_url
+        })
+
+class verifierTokenForm(forms.Form):
+    verifier_code = forms.CharField(label='Enter Your Verifier code:', max_length=100)
+
+
