@@ -1,0 +1,10 @@
+{% extends "../base.html" %}
+
+{% block title %}{{ league }} Players{% endblock %}
+{% block dashboardTitle %}{{ league }} Players{% endblock %}
+
+
+{% block dashboardBody %}
+    {% include 'frontoffice/playerTable.html' with players=allPlayers %}
+{% endblock %}
+

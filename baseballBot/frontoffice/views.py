@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django import forms
-from frontoffice.models import Team, Player, ManagerProfile, TeamRecord, YahooQuery
+from frontoffice.models import Team, ManagerProfile, TeamRecord, YahooQuery
 from frontoffice.yahooQueryUtil import YahooQueryUtil
 from frontoffice.yahooQuery import OauthGetAuthKeyHelper
 
@@ -67,11 +67,32 @@ def index(request):
         })
 
 @login_required
+def leaguePlayers(request):
+    #check if user needs to get a verifier code from yahoo
+    oauth_helper = OauthGetAuthKeyHelper(request.user.id)
+    if oauth_helper.need_verifier_code():
+        return redirect(get_verifier_token)
+
+    yqu = YahooQueryUtil(request.user.id)
+   
+    return render(request,
+        'frontoffice/leaguePlayers.html',
+        {
+        'allPlayers': yqu.get_all_players_by_season() ,
+        })
+
+@login_required
 def yahooQueryTest(request):
+    #check if user needs to get a verifier code from yahoo
+    oauth_helper = OauthGetAuthKeyHelper(request.user.id)
+    if oauth_helper.need_verifier_code():
+        return redirect(get_verifier_token)
+
     queryResults = {}
+    yqu = YahooQueryUtil(request.user.id)
     # test = YahooQuery.get_all_players_by_season()
-    queryResults['allPlayersBySeason'] = YahooQuery.get_all_players_by_season()
-    queryResults['playerStats'] = YahooQuery.get_player_stats(1)
+    queryResults['allPlayersBySeason'] = yqu.get_all_players_by_season()
+    # queryResults['playerStats'] = yqu.get_player_stats(1)
 
     return render(request,
         'frontoffice/yahooQueryTest.html',

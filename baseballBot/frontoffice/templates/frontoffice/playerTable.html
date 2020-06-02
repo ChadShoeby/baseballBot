@@ -1,0 +1,42 @@
+<table id="playerTable" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th>Yahoo Id</th>
+            <th>Player</th>
+            <th>Position</th>
+            <th>MLB Team</th>
+            <th>Player key</th>
+            <th>Position Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in players  %}
+            <tr>
+                <td>{{ data.player.player_id }}</td>
+                <td>
+                    <img src="{{ data.player.headshot_url }}">
+                {{ data.player.full_name }}</td>
+
+                <td>{{ data.player.display_position }}
+                ({% for pos in data.player.eligible_positions %}
+                {{ pos.position }}{% if not forloop.last %}, {% endif %}
+                {% endfor %})
+                </td>
+
+                <td>{{ data.player.editorial_team_abbr }}</td>
+
+                <td>{{ data.player.player_key }}</td>
+
+                <td>{{ data.player.position_type }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% block javascript %}
+<script>
+$(document).ready(function() {
+    $('#playerTable').DataTable();
+} );
+</script>
+{% endblock %}

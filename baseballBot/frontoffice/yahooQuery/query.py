@@ -1041,7 +1041,7 @@ class YahooFantasySportsQuery(object):
             "https://fantasysports.yahooapis.com/fantasy/v2/league/" + self.get_league_key() + "/teams",
             ["league", "teams"])
 
-    def get_league_players(self):
+    def get_league_players(self, start_at_player=0):
         """Retrieve valid players for chosen league.
 
         :rtype: list
@@ -1088,8 +1088,9 @@ class YahooFantasySportsQuery(object):
                   ...
                 ]
         """
+        uri = "https://fantasysports.yahooapis.com/fantasy/v2/league/" + self.get_league_key() + "/players;start=%s,count=25" % str(start_at_player)
         return self.query(
-            "https://fantasysports.yahooapis.com/fantasy/v2/league/" + self.get_league_key() + "/players",
+            uri,
             ["league", "players"])
 
     def get_league_draft_results(self):

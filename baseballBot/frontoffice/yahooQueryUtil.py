@@ -43,7 +43,6 @@ class YahooQueryUtil():
     def get_user_games(self):
         query_result_data = self.yahoo_query.get_user_games()
         return query_result_data
-        pass
 
     def get_user_teams(self):
         query_result_data = self.yahoo_query.get_user_teams()
@@ -89,3 +88,21 @@ class YahooQueryUtil():
 
     def test_get_league_info(self):
         pass
+
+    def get_all_players_by_season(self):
+        
+        # yahoo seems to ignore the start and count vars.
+        # if true, this will only ever return 25 players.
+        # if this isn't true, remove the "and False" to adjust
+        # for number of times the query should run
+        i = 0
+        players = self.yahoo_query.get_league_players(0)
+        num_returned_from_query = len(players)
+
+        while num_returned_from_query == 25 and False:
+            i += 25
+            query_result_data = self.yahoo_query.get_league_players(start_at_player=i)
+            players += query_result_data
+            num_returned_from_query = len(query_result_data)
+
+        return players
