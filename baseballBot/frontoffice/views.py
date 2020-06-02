@@ -56,12 +56,9 @@ def index(request):
     else:
         try:
             team = Team.objects.get(user__username=request.user)
+            players = Player.objects.filter(team = team.id)
         except ObjectDoesNotExist:
             team = "No Team Found"
-
-        players = []
-        if team:
-            players = Player.objects.filter(team = team.id)
      
     return render(request, 
         'frontoffice/index.html',
