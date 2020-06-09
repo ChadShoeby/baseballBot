@@ -30,11 +30,17 @@ def index(request):
                 manager_profile.yahoo_league_key = data['league'].league_key
                 manager_profile.yahoo_league_name = data['league'].name
 
+
                 manager_profile.save()
 
         #check if user has a yahoo team in the database
         try:
             team = Team.objects.get(user__username=request.user)
+            manager_profile.yahoo_season_year = '2020'
+            manager_profile.yahoo_game_code = 'mlb'
+            manager_profile.yahoo_game_id = '398'
+
+
         except ObjectDoesNotExist:
             # try to get it from yahoo
             yqu = YahooQueryUtil()

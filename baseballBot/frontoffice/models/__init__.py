@@ -6,4 +6,4 @@ from frontoffice.models.PlayerRecord import *
 from frontoffice.models.YahooSettings import *
 from frontoffice.models.YahooQuery import *
 from frontoffice.models.ManagerProfile import *
-
+#from frontoffice.models.PlayerUser import *
