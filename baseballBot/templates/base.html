@@ -17,6 +17,7 @@
     {% bootstrap_javascript jquery='full' %}
 
     <link href="{% static "baseballBot/css/base.css" %}" rel="stylesheet">
+    <link href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet">
 
     <title>{% block title %}Baseball Bot{% endblock %}</title>
     {% block extra_css %}{% endblock %}
@@ -70,6 +71,7 @@
     {% endblock %}
 
     {% block javascript %}{% endblock %}
+    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
   </body>
 {% endblock %}
 </html>

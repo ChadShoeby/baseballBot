@@ -30,7 +30,7 @@ logger.propagate = False
 class BaseOAuth(object):
     """
     """
-    def __init__(self, oauth_version, consumer_key, consumer_secret, **kwargs):
+    def __init__(self, oauth_version, consumer_key, consumer_secret, verifier_code, **kwargs):
         """
         consumer_key : client key
         consumer_secret : client secret
@@ -86,7 +86,7 @@ class BaseOAuth(object):
             if not self.token_is_valid():
                 data.update(self.refresh_access_token())
         else:
-            data.update(self.handler()) 
+            data.update(self.handler(verifier_code)) 
         
         # Getting session
         if self.oauth_version == 'oauth1':
@@ -97,7 +97,7 @@ class BaseOAuth(object):
         write_data(data, vars(self).get('from_file','secrets.json'))
 
 
-    def handler(self,):
+    def handler(self, verifier_code):
         """* get request token if OAuth1
             * Get user authorization
             * Get access token
@@ -113,8 +113,11 @@ class BaseOAuth(object):
         logger.debug("AUTHORISATION URL : {0}".format(authorize_url))
         # Open authorize_url
         print(authorize_url)
-        webbrowser.open(authorize_url)
-        self.verifier = input("Enter verifier : ")
+        if verifier_code is None:
+            webbrowser.open(authorize_url)
+            self.verifier = input("Enter verifier : ")
+        else:
+            self.verifier = verifier_code
 
         self.token_time = time.time()
     
@@ -226,8 +229,8 @@ class OAuth2(BaseOAuth):
     """Calss handling OAuth v2
     """
 
-    def __init__(self, consumer_key, consumer_secret, **kwargs):
+    def __init__(self, consumer_key, consumer_secret, verifier_code, **kwargs):
        
-        super(OAuth2, self).__init__('oauth2', consumer_key, consumer_secret, **kwargs)
+        super(OAuth2, self).__init__('oauth2', consumer_key, consumer_secret, verifier_code, **kwargs)
 
      

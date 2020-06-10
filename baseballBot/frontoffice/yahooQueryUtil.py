@@ -3,12 +3,12 @@ from unittest import skip, TestCase
 from django.conf import settings
 
 from frontoffice.yahooQuery.query import YahooFantasySportsQuery
-
+from frontoffice.yahooQuery.OauthGetAuthKeyHelper import OauthGetAuthKeyHelper
 
 class YahooQueryUtil():
-    def __init__(self):
-        # Put private.json (see README.md) in examples directory
-        auth_dir = os.path.dirname(os.path.realpath(__file__))
+    def __init__(self, user_id, verifier_code=None):
+        self.oauth_helper = OauthGetAuthKeyHelper(user_id)
+        auth_dir = self.oauth_helper.auth_dir
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_output")
 
         self.game_id = "398" 
@@ -17,11 +17,15 @@ class YahooQueryUtil():
         # only thing to change for each user
         # to do figure out best way to change this for each user
         self.league_id = "156718"
+        self.get_verifier_code = False
 
         # self.yahoo_data = Data(self.data_dir)
-        self.yahoo_query = YahooFantasySportsQuery(auth_dir, self.league_id, game_id=self.game_id,
+        self.yahoo_query = YahooFantasySportsQuery(auth_dir, self.league_id, self.oauth_helper.token_file_dir, verifier_code=verifier_code, game_id=self.game_id,
                                                    game_code=self.game_code, offline=False, all_output_as_json=False)
 
+    def update_verifier_code (self, verifier_code):
+        self.yahoo_query.process_verifier_token(verifier_code)
+        self.get_verifier_code = False
 
     """Retrieve metadata for current logged-in user.
 
@@ -39,7 +43,6 @@ class YahooQueryUtil():
     def get_user_games(self):
         query_result_data = self.yahoo_query.get_user_games()
         return query_result_data
-        pass
 
     def get_user_teams(self):
         query_result_data = self.yahoo_query.get_user_teams()
@@ -85,3 +88,21 @@ class YahooQueryUtil():
 
     def test_get_league_info(self):
         pass
+
+    def get_all_players_by_season(self):
+        
+        # yahoo seems to ignore the start and count vars.
+        # if true, this will only ever return 25 players.
+        # if this isn't true, remove the "and False" to adjust
+        # for number of times the query should run
+        i = 0
+        players = self.yahoo_query.get_league_players(0)
+        num_returned_from_query = len(players)
+
+        while num_returned_from_query == 25 and False:
+            i += 25
+            query_result_data = self.yahoo_query.get_league_players(start_at_player=i)
+            players += query_result_data
+            num_returned_from_query = len(query_result_data)
+
+        return players

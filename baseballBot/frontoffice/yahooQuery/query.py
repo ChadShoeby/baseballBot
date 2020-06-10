@@ -22,7 +22,7 @@ class YahooFantasySportsQuery(object):
     """Yahoo fantasy sports query to retrieve all types of fantasy sports data
     """
 
-    def __init__(self, auth_dir, league_id, game_id=None, game_code="nfl", offline=False, all_output_as_json=False,
+    def __init__(self, auth_dir, league_id, token_file_dir, verifier_code=None, game_id=None, game_code="nfl", offline=False, all_output_as_json=False,
                  consumer_key=None, consumer_secret=None):
         """Instantiate a Yahoo query object for running queries against the Yahoo fantasy REST API.
 
@@ -67,8 +67,16 @@ class YahooFantasySportsQuery(object):
                 self._yahoo_consumer_key = auth_info["consumer_key"]
                 self._yahoo_consumer_secret = auth_info["consumer_secret"]
 
+
+            pathToTokenDir = os.path.join(auth_dir + "/tokens/" + token_file_dir) 
+            pathToToken = os.path.join(auth_dir + "/tokens/" + token_file_dir, "token.json") 
+
+            # check if directory for user token directory exists
+            if not os.path.isdir(pathToTokenDir) :
+              os.mkdir(pathToTokenDir)
+
             # load or create OAuth2 refresh token
-            token_file_path = os.path.join(auth_dir, "token.json")
+            token_file_path = os.path.join(pathToTokenDir, "token.json")
             if os.path.isfile(token_file_path):
                 with open(token_file_path) as yahoo_oauth_token:
                     auth_info = json.load(yahoo_oauth_token)
@@ -81,7 +89,7 @@ class YahooFantasySportsQuery(object):
 
             # complete OAuth2 3-legged handshake by either refreshing existing token or requesting account access
             # and returning a verification code to input to the command line prompt
-            self.oauth = OAuth2(None, None, from_file=token_file_path)
+            self.oauth = OAuth2(None, None, verifier_code, from_file=token_file_path)
             if not self.oauth.token_is_valid():
                 self.oauth.refresh_access_token()
 
@@ -1033,7 +1041,7 @@ class YahooFantasySportsQuery(object):
             "https://fantasysports.yahooapis.com/fantasy/v2/league/" + self.get_league_key() + "/teams",
             ["league", "teams"])
 
-    def get_league_players(self):
+    def get_league_players(self, start_at_player=0):
         """Retrieve valid players for chosen league.
 
         :rtype: list
@@ -1080,8 +1088,9 @@ class YahooFantasySportsQuery(object):
                   ...
                 ]
         """
+        uri = "https://fantasysports.yahooapis.com/fantasy/v2/league/" + self.get_league_key() + "/players;start=%s,count=25" % str(start_at_player)
         return self.query(
-            "https://fantasysports.yahooapis.com/fantasy/v2/league/" + self.get_league_key() + "/players",
+            uri,
             ["league", "players"])
 
     def get_league_draft_results(self):
