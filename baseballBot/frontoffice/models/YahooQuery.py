@@ -1,4 +1,4 @@
-from frontoffice.models import Team, Player, PlayerUser
+from frontoffice.models import Team, Player
 
 
 #https://developer.yahoo.com/fantasysports/guide/league-resource
