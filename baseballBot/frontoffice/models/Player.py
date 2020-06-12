@@ -44,6 +44,16 @@ class Player(models.Model):
             ]
         return fieldsUpdated
 
+    @property  
+    def editorial_team_abbr(self):
+        return self.mlb_team_abbr
+    @property  
+    def player_key(self):
+        return self.yahoo_key
+    @property  
+    def player_id(self):
+        return self.yahoo_id
+
     def getPosAbbr(self):
 
         posAbbr = {
