@@ -6,7 +6,7 @@ from frontoffice.yahooQuery.query import YahooFantasySportsQuery
 from frontoffice.yahooQuery.OauthGetAuthKeyHelper import OauthGetAuthKeyHelper
 
 class YahooQueryUtil():
-    def __init__(self, user_id, verifier_code=None):
+    def __init__(self, user_id, league_id=None, verifier_code=None ):
         self.oauth_helper = OauthGetAuthKeyHelper(user_id)
         auth_dir = self.oauth_helper.auth_dir
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_output")
@@ -16,7 +16,9 @@ class YahooQueryUtil():
         self.season = "2020"
         # only thing to change for each user
         # to do figure out best way to change this for each user
-        self.league_id = "156718"
+        if league_id == None:
+            league_id = "156718"
+        self.league_id = league_id
         self.get_verifier_code = False
 
         # self.yahoo_data = Data(self.data_dir)
@@ -106,3 +108,11 @@ class YahooQueryUtil():
             num_returned_from_query = len(query_result_data)
 
         return players
+
+    def get_team_roster_player_info_by_week(self, team_id):
+        query_result_data = self.yahoo_query.get_team_roster_player_info_by_week(team_id)
+        return query_result_data
+
+    def get_league_teams(self):
+        query_result_data = self.yahoo_query.get_league_teams()
+        return query_result_data

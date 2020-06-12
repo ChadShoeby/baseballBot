@@ -9,7 +9,7 @@ from ..models import Player
 
 class PlayerAdmin(admin.ModelAdmin):
     actions = ["import_bulk_players_csv"]
-    list_display = ('name', 'position')
+    list_display = ('full_name', 'position')
     change_list_template = "admin/players_changelist.html"
 
     def get_urls(self):

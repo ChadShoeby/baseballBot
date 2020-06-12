@@ -611,7 +611,7 @@ class YahooFantasySportsQuery(object):
 
         games = self.query("https://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games;codes=" +
                        self.game_code + "/", ["users", "0", "user", "games"])
-        print("here BRO")
+
         if isinstance(games, list):
             return sorted(games, key=lambda x: x.get("game").season)
         else:
