@@ -1,0 +1,6 @@
+#messages {
+    position: fixed;
+    left: 30%;
+    z-index: 1;
+    width: 40%;
+}

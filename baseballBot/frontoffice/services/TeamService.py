@@ -99,7 +99,7 @@ class TeamService():
                     yahoo_team_data = raw_team_data['team']
 
                     if yahoo_team_data.team_key in teamsFromDB:
-                        team = teamsFromDB[t]
+                        team = teamsFromDB[yahoo_team_data.team_key]
                     else:
                         team = Team()
                         team.processYahooData(yahoo_team_data)
@@ -115,7 +115,10 @@ class TeamService():
         playersInDB = self.get_players_in_db_by_yahoo_id()
         for team in teams:
             self.update_team_roster(team, playersInDB)
-                
+        
+        self.manager_profile.league_updated()
+        self.manager_profile.save()
+        
         return True
 
     def get_players_in_db_by_yahoo_id(self):
@@ -189,5 +192,8 @@ class TeamService():
             RosterEntry.objects.bulk_create(newRosterEntries)
         if len(updatedRosterEntries) > 0:
             RosterEntry.objects.bulk_update(updatedRosterEntries, ['at_position'])
+
+        team.roster_updated()
+        team.save()
 
         return roster

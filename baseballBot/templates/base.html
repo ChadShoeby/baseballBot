@@ -43,7 +43,7 @@
             </ul>
     </nav>
 
-    {% bootstrap_messages %}
+    
 
     {% block body_content %}
         <div class="container-fluid">
@@ -51,6 +51,19 @@
 
                 {# put side navbar here #}
                 {% include "sideNav.html" %}   
+
+                {% if messages %}
+                <div id="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                      <strong>{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Error{% else %}{{ message.tags|title }}{% endif %}</strong> {{ message }}
+                      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>      
+                    {% endfor %}
+                </div>
+                {% endif %}
 
                 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">

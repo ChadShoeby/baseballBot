@@ -13,9 +13,44 @@
 
 
 {% block dashboardBody %}
+<p><button id="update_team_roster" type="button" class="btn btn-info btn-sm">Update Roster</button>(last updated: {{ team.roster_last_updated_at|date:"SHORT_DATETIME_FORMAT" }})</p>
+<p><button id="update_league_info" type="button" class="btn btn-info btn-sm">Update League</button>(last updated: {{ manager_profile.yahoo_league_last_updated_at|date:"SHORT_DATETIME_FORMAT" }})</p>
     <div>
     {% include 'frontoffice/playerTable.html' with players=players %}
 
     </div>
 
+{% endblock %}
+{% block javascript %}
+  <script>
+    $("#update_team_roster").click(function () {
+      $.ajax({
+        url: '{% url "ajax_update_team_roster" %}',
+
+        dataType: 'json',
+        success: function (data) {
+          if (data) {
+            console.log("response is "+data.data);
+            location.reload();
+          }
+        }
+      });
+
+    });
+
+    $("#update_league_info").click(function () {
+      $.ajax({
+        url: '{% url "ajax_update_league" %}',
+
+        dataType: 'json',
+        success: function (data) {
+          if (data) {
+            console.log("response is "+data.data);
+            location.reload();
+          }
+        }
+      });
+
+    });
+  </script>
 {% endblock %}

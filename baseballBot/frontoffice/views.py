@@ -1,5 +1,7 @@
 import logging
-from django.http import HttpResponse
+from django.utils import timezone
+from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
@@ -18,6 +20,7 @@ logger = logging.getLogger(__name__)
 def index(request):
     team = "No Team Found"
     players = []
+    manager_profile = None
 
     if settings.USEREALQUERY:
 
@@ -29,10 +32,8 @@ def index(request):
         team_service = TeamService(request.user)
         manager_profile = team_service.manager_profile
         team = team_service.get_team()
-        
         players = team_service.get_team_roster(team)
-        # team_service.update_league_rosters()
-        # players = team_service.update_team_roster(team)
+
     else:
         try:
             team = Team.objects.get(user__username=request.user)
@@ -44,6 +45,7 @@ def index(request):
         'frontoffice/index.html',
         {'team': team,
         'players' : players,
+        'manager_profile': manager_profile,
         })
 
 @login_required
@@ -121,4 +123,46 @@ def get_verifier_token(request):
 class verifierTokenForm(forms.Form):
     verifier_code = forms.CharField(label='Enter Your Verifier code:', max_length=100)
 
+@login_required
+def ajax_update_team_roster(request):
 
+    # messages.add_message(request, messages.ERROR, 'Roster updated too recently.')
+    response = {
+        'data': 'Team Roster Updated too recently. Please wait 5 minutes before updating again.',
+        'status': 'error'
+    }
+    if settings.USEREALQUERY:
+
+        team_service = TeamService(request.user)
+        team = team_service.get_team()
+        if team.can_update_roster():
+            team_service.update_team_roster(team)
+            messages.add_message(request, messages.SUCCESS, 'Roster updated successfully.')
+            response['data'] = 'Success. Roster Updated.'
+            response['status'] = 'success'
+        else:
+            messages.add_message(request, messages.ERROR, 'Roster updated too recently.')
+
+    return JsonResponse(response)
+
+@login_required
+def ajax_update_league(request):
+
+    # messages.add_message(request, messages.ERROR, 'Roster updated too recently.')
+    response = {
+        'data': 'League updated too recently. Please wait 5 minutes before updating again.',
+        'status': 'error'
+    }
+    if settings.USEREALQUERY:
+
+        team_service = TeamService(request.user)
+        manager_profile = team_service.manager_profile
+        if manager_profile.can_update_leauge():
+            team_service.update_league_rosters(forceUpdate=True)
+            messages.add_message(request, messages.SUCCESS, 'League updated successfully.')
+            response['data'] = 'Success. League Updated.'
+            response['status'] = 'success'
+        else:
+            messages.add_message(request, messages.ERROR, 'League updated too recently.')
+
+    return JsonResponse(response)
