@@ -35,6 +35,27 @@ class TeamService():
 
         return manager_profile
 
+    def update_team_data(self, team, forceUpdate=False):
+
+        if forceUpdate or not team.yahoo_team_key:
+            yqu = self.yahoo_query_utility
+            data = yqu.get_user_teams()
+
+            if not forceUpdate:
+                # try to get it from database by yahoo_id and then update user
+                try:
+                    team = Team.objects.get(
+                        yahoo_team_key=data['game'].teams["team"].team_key)
+                except ObjectDoesNotExist:
+                    team = Team()
+
+            # udpate team with yahoo data and user in either case
+            team.user = self.user
+            team.processYahooData(data['game'].teams["team"])
+            team.save()
+
+        return team
+
     def get_team(self):
         team = False
         #check if user has a yahoo team in the database
@@ -44,6 +65,9 @@ class TeamService():
             if len(teams) >=1:
                 team = teams[0]
             
+            if not team.yahoo_team_key:
+                team = self.update_team_data(team, forceUpdate=True)
+
         except ObjectDoesNotExist:
             print("can't find team by user id. trying to update by querying yahoo.")
             # try to get it from yahoo
@@ -131,6 +155,9 @@ class TeamService():
     @transaction.atomic
     def update_team_roster(self, team, playersByYahooId = None):
         yqu = self.yahoo_query_utility
+        if not team.yahoo_team_id:
+            return False
+
         team_roster_from_yahoo = yqu.get_team_roster_player_info_by_week(team.yahoo_team_id)
          
         if playersByYahooId == None:

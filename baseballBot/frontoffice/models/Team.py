@@ -34,8 +34,8 @@ class Team(models.Model):
             result = self.yahoo_team_key.split("t.")
             if len(result) == 2:
                 return result[1]
-
-        return self._yahoo_team_id
+                
+        return False
 
     def processYahooData(self,data):
         self.name = data.name
