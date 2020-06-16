@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import sys
 from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -133,24 +134,62 @@ STATICFILES_DIRS = [
 ]
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
+# has to be imported after secret
+from debug_toolbar.panels.logging import collector
+
+# make /logs dir if does not exist
+log_dir = os.path.join(BASE_DIR, 'logs')
+if not os.path.isdir(log_dir) :
+  os.mkdir(log_dir)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['djdt_log','file','console'],
+    },
+    'formatters': {
+        'console': {
+            'format': '%(name)-12s %(levelname)-8s %(message)s'
+        },
+        'file': {
+            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+        }
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            # 'stream': sys.stdout,
-        }
+            'formatter': 'console',
+            'stream': sys.stdout,
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'file',
+            'filename': os.path.join(log_dir, 'debug.log')
+        },
+        'djdt_log': {
+            'level': 'DEBUG',
+            'class': 'debug_toolbar.panels.logging.ThreadTrackingHandler',
+            'collector': collector,
+        },
     },
     'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file'],
+        },
         'app.management.commands.check_log': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': True,
-        },
-    }
+        }
+    },
 }
 
+# print(os.path.realpath('/tmp/debug.log'))
+# print(os.path.realpath('/..'))
 LOGIN_REDIRECT_URL = 'home'
 
 DEBUG_TOOLBAR_PANELS = [

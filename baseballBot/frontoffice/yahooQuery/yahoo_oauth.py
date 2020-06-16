@@ -20,10 +20,11 @@ from rauth.utils import parse_utf8_qsl
 
 from yahoo_oauth.utils import services, CALLBACK_URI
 from yahoo_oauth.utils import get_data, write_data
-from yahoo_oauth.logger import YahooLogger
+# from yahoo_oauth.logger import YahooLogger
 
-logging.setLoggerClass(YahooLogger)
+# logging.setLoggerClass(YahooLogger)
 logger = logging.getLogger('yahoo_oauth')
+logger = logging.getLogger(__name__)
 logger.propagate = False
 
 

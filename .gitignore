@@ -9,3 +9,4 @@ dist/
 *backup*
 venv/
 baseballBot/frontoffice/test_output/
+debug.log

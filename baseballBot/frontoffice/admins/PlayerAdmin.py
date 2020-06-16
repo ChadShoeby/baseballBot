@@ -1,11 +1,15 @@
+import csv
+import logging
+from io import StringIO
+from django import forms
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import render,redirect
-import csv
 from django.http import HttpResponse
-from io import StringIO
-from django import forms
-from ..models import Player
+from django.core.exceptions import ObjectDoesNotExist
+from frontoffice.models import Player
+
+logger = logging.getLogger(__name__)
 
 class PlayerAdmin(admin.ModelAdmin):
     actions = ["import_bulk_players_csv"]
@@ -28,9 +32,21 @@ class PlayerAdmin(admin.ModelAdmin):
             header = True
             newPlayerCounter = 0 
             rowCount = 0
+
+            playersInDB = Player.objects.all()
+            playersByYahooId = {}
+            for p in playersInDB:
+                playersByYahooId[str(p.yahoo_id)] = p
+
             for row in reader:
                 rowCount += 1
+               
                 if header:
+                    # yahoo id = 23
+                    # estimated points = 42
+                    # full_name = 1
+                    print(row[23])
+                    print(row[42])
                     header = False
                     continue
 
@@ -38,26 +54,23 @@ class PlayerAdmin(admin.ModelAdmin):
                     continue
                     return HttpResponse("error on row:"+str(rowCount)+". player "+str(newPlayerCounter))
 
-                data = row[1].split("(")
-                name = data[0]
-                teamAndPos = data[1].split("-")
-                mlb_team=teamAndPos[0]
+                if row[23] == "":
+                    continue
 
-                def cleanPositionData(rawData):
-                    cleanedStr = ''
-                    cleanedStr = rawData.split(")")
-                    return cleanedStr[0]
-
-                if len(teamAndPos) == 1:
-                    mlb_team = ""
-                    position = cleanPositionData(teamAndPos[0])
+                if row[23] in playersByYahooId:
+                    player = playersByYahooId[row[23]]
                 else:
-                    position = cleanPositionData(teamAndPos[1])
+                    player = Player()
+                    player.full_name = row[1]
+                    player.yahoo_id = row[23]
 
-                p = Player(name=data[0], mlb_team=mlb_team, position = position )
-                p.save()
+                player.estimated_season_points = int(row[42])
+                # Ray add new player data here
+
+
+                player.save()
                 newPlayerCounter +=1
-
+                
             self.message_user(request, "Success: "+str(newPlayerCounter)+" players have been added.")
             return redirect("..")
         form = CsvImportForm()
