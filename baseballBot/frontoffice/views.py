@@ -7,11 +7,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django import forms
-from frontoffice.models import Team, ManagerProfile, TeamRecord, YahooQuery
+from frontoffice.models import RosterEntry, Team, ManagerProfile, TeamRecord, YahooQuery, Player
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
 from frontoffice.services.TeamService import TeamService
 from frontoffice.yahooQuery import OauthGetAuthKeyHelper
-
 
 logger = logging.getLogger(__name__)
 
@@ -50,17 +49,21 @@ def index(request):
 
 @login_required
 def leaguePlayers(request):
-    #check if user needs to get a verifier code from yahoo
-    oauth_helper = OauthGetAuthKeyHelper(request.user.id)
-    if oauth_helper.need_verifier_code():
-        return redirect(get_verifier_token)
-
-    yqu = YahooQueryUtil(request.user.id)
-   
     return render(request,
-        'frontoffice/leaguePlayers.html',
+        'frontoffice/displayPlayers.html',
         {
-        'allPlayers': yqu.get_all_players_by_season() ,
+        'page_title': 'League Players',
+        'players': Player.objects.all() ,
+        })
+
+@login_required
+def freeAgents(request):
+    team_service = TeamService(request.user)
+    return render(request,
+        'frontoffice/displayPlayers.html',
+        {
+        'page_title': 'Free Agents',
+        'players':  team_service.get_free_agents_in_league(),
         })
 
 @login_required

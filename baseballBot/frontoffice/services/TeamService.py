@@ -224,3 +224,7 @@ class TeamService():
         team.save()
 
         return roster
+
+    def get_free_agents_in_league(self):
+        playersOnTeamsInLeague = RosterEntry.objects.filter(team__manger_profiles__user=self.user).values_list('player_id', flat=True)
+        return Player.objects.all().exclude(id__in=playersOnTeamsInLeague)

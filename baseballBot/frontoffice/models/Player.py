@@ -46,6 +46,10 @@ class Player(models.Model):
         return fieldsUpdated
 
     @property  
+    def player(self):
+        return self
+
+    @property  
     def editorial_team_abbr(self):
         return self.mlb_team_abbr
     @property  

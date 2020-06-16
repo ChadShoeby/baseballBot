@@ -15,8 +15,9 @@
             <tr>
                 <td>{{ data.player.player_id }}</td>
                 <td>
-                    <img src="{{ data.player.headshot_url }}">
-                {{ data.player.full_name }}</td>
+                    {% if data.player.headshot_url %}<img src="{{ data.player.headshot_url }}">{% endif %}
+                    {{ data.player.full_name }}
+                </td>
 
                 <td>{{ data.player.estimated_season_points }}</td>
                 <td>{{ data.player.display_position }}

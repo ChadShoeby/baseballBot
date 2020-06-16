@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.index, name='home'),
     path('record', views.record, name='record'),
     path('league-players', views.leaguePlayers, name='league_players'),
+    path('free-agents', views.freeAgents, name='free_agents'),
     path('yahooQueryTest', views.yahooQueryTest, name='yahooQueryTest'),    
     path('enter-verifier-token', views.get_verifier_token, name='enterVerifierTokenForm'),
     url(r'^ajax/update_team_roster/$', views.ajax_update_team_roster, name='ajax_update_team_roster'),
