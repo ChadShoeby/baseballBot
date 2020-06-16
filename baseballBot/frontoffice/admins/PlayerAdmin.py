@@ -64,7 +64,19 @@ class PlayerAdmin(admin.ModelAdmin):
                     player.full_name = row[1]
                     player.yahoo_id = row[23]
 
+
                 player.estimated_season_points = int(row[42])
+                player.mlb_team_abbr = str(row[5])
+                player.position = str(row[7])
+                player.eligibile_positions_raw = str(row[40])
+                player.espn_id = str(row[18])
+                player.fangraphs_id = str(row[8])
+                player.league_name = str(row[6])
+
+                if row[7] == "P":
+                    player.position_type = "P"
+                else:
+                    player.position_type = "B"
                 # Ray add new player data here
 
 
