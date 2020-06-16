@@ -3,6 +3,7 @@
         <tr>
             <th>Yahoo Id</th>
             <th>Player</th>
+            <th>Est Points</th>
             <th>Position</th>
             <th>MLB Team</th>
             <th>Player key</th>
@@ -17,10 +18,13 @@
                     <img src="{{ data.player.headshot_url }}">
                 {{ data.player.full_name }}</td>
 
+                <td>{{ data.player.estimated_season_points }}</td>
                 <td>{{ data.player.display_position }}
-                ({% for pos in data.player.eligible_positions %}
-                {{ pos.position }}{% if not forloop.last %}, {% endif %}
-                {% endfor %})
+                    {% if data.player.eligible_positions|length %}
+                        ({% for pos in data.player.eligible_positions %}
+                        {{ pos.position }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %})
+                    {% endif %}
                 </td>
 
                 <td>{{ data.player.editorial_team_abbr }}</td>
