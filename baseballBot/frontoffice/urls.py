@@ -12,4 +12,5 @@ urlpatterns = [
     path('enter-verifier-token', views.get_verifier_token, name='enterVerifierTokenForm'),
     url(r'^ajax/update_team_roster/$', views.ajax_update_team_roster, name='ajax_update_team_roster'),
     url(r'^ajax/update_league/$', views.ajax_update_league, name='ajax_update_league'),
+    url(r'^ajax/drop_player/$', views.ajax_drop_player, name='ajax_drop_player'),
 ]

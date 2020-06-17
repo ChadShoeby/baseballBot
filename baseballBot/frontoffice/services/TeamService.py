@@ -87,15 +87,15 @@ class TeamService():
 
         return team
 
-    def get_team_roster(self, team):
+    def get_team_roster(self, team, forceUpdate=False):
 
         #check if user has a yahoo team in the database
         players = team.roster_entries.all()
         logger.debug("players found in db %s",str(len(players)))
 
         # if less than 20 players check yahoo
-        if players.count() < 23:
-            logger.debug("less than 23 players found, checking yahoo for updates")
+        if players.count() < 18 or forceUpdate:
+            logger.debug("less than 18 players found, checking yahoo for updates")
             yqu = self.yahoo_query_utility
             players = self.update_team_roster(team)
 
@@ -168,6 +168,7 @@ class TeamService():
 
         roster = []
         teamRosterInDB = {}
+        processed_team_roster_from_yahoo = {}
 
         newPlayers = []
         updatedPlayers = []
@@ -180,12 +181,13 @@ class TeamService():
 
         for d in team_roster_from_yahoo:
             pfy = d['player']
+            processed_team_roster_from_yahoo[pfy.player_id] = pfy
+
             # Update the app database with the most recent player data
-            logger.debug("yahoo id of player "+pfy.player_id)
+            # logger.debug("yahoo id of player "+pfy.player_id)
             if pfy.player_id in playersByYahooId:
-                # player = Player.objects.get(yahoo_id=pfy.player_id)
                 player = playersByYahooId[pfy.player_id]
-                logger.debug("yahoo id of player "+pfy.player_id +" found in db id "+str(player.id))
+                # logger.debug("yahoo id of player "+pfy.player_id +" found in db id "+str(player.id))
                 updatedPlayers.append(player)
                 fieldsUpdatedForPlayer = player.processYahooData(pfy)
             else:
@@ -198,20 +200,20 @@ class TeamService():
             Player.objects.bulk_update(updatedPlayers, fieldsUpdatedForPlayer)
         
         players = newPlayers+updatedPlayers
-        logger.debug(players)
         for player in players:
-            logger.debug(str(player.id) +" "+player.full_name)
+
             # Add those players to the team roster
             if player.id in teamRosterInDB:
                 roster_entry = teamRosterInDB[player.id]
                 updatedRosterEntries.append(roster_entry)
+                teamRosterInDB.pop(player.id)
             else:
                 roster_entry = RosterEntry()
                 roster_entry.team = team
                 roster_entry.player = player
                 newRosterEntries.append(roster_entry)
 
-            roster_entry.at_position = pfy.selected_position.position
+            roster_entry.at_position = processed_team_roster_from_yahoo[player.yahoo_id].selected_position_value
 
             roster.append(roster_entry)
 
@@ -219,6 +221,13 @@ class TeamService():
             RosterEntry.objects.bulk_create(newRosterEntries)
         if len(updatedRosterEntries) > 0:
             RosterEntry.objects.bulk_update(updatedRosterEntries, ['at_position'])
+
+        # remove any roster entries that are no longer on team
+        for re_id in teamRosterInDB:
+            logger.debug("removing this roster entry")
+            logger.debug(teamRosterInDB[re_id])
+            teamRosterInDB[re_id].delete()
+            
 
         team.roster_updated()
         team.save()
@@ -228,3 +237,9 @@ class TeamService():
     def get_free_agents_in_league(self):
         playersOnTeamsInLeague = RosterEntry.objects.filter(team__manger_profiles__user=self.user).values_list('player_id', flat=True)
         return Player.objects.all().exclude(id__in=playersOnTeamsInLeague)
+
+    def drop_player(self, player, team):
+        return self.yahoo_query_utility.drop_player(player, team)
+
+    def add_player(self, player, team):
+        return self.yahoo_query_utility.add_player(player, team)

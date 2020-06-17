@@ -20,7 +20,12 @@ def index(request):
     team = "No Team Found"
     players = []
     manager_profile = None
-
+    # team_service = TeamService(request.user)
+    # manager_profile = team_service.manager_profile
+    # team = team_service.get_team()
+    # # logger.debug(team_service.drop_player(team))
+    # team_service.update_team_data(team, forceUpdate=True)
+    # team = team_service.get_team()
     if settings.USEREALQUERY:
 
         #check if user needs to get a verifier code from yahoo
@@ -31,6 +36,7 @@ def index(request):
         team_service = TeamService(request.user)
         manager_profile = team_service.manager_profile
         team = team_service.get_team()
+        # team_service.update_team_roster(team)
         players = team_service.get_team_roster(team)
 
     else:
@@ -169,3 +175,62 @@ def ajax_update_league(request):
             messages.add_message(request, messages.ERROR, 'League updated too recently.')
 
     return JsonResponse(response)
+
+@login_required
+def ajax_drop_player(request):
+
+    response = {
+        'data': 'Something went wrong!',
+        'status': 'error'
+    }
+    roster_entry_id_from_front_end = request.GET.get('roster', None)
+
+    response = {
+        'data': 'Success! player dropped! '+ roster_entry_id_from_front_end,
+        'status': 'Success',
+        'roster_entry_id': roster_entry_id_from_front_end
+    }
+    messages.add_message(request, messages.SUCCESS, 'Success! ' +roster_entry_id_from_front_end+' dropped!')
+
+    return JsonResponse(response)
+
+    try:
+        roster_entry_id = int(roster_entry_id_from_front_end)
+    except ValueError:
+        return JsonResponse(response)
+
+    if not isinstance(roster_entry_id, int):
+        return JsonResponse(response)
+
+    if settings.USEREALQUERY:
+        team_service = TeamService(request.user)
+        manager_profile = team_service.manager_profile
+        team = team_service.get_team()
+        try:
+            roster_entry = RosterEntry.objects.get(pk=roster_entry_id)
+        except ObjectDoesNotExist:
+            return JsonResponse(response)
+
+        print(roster_entry.team.id, team.id, roster_entry.at_position)
+        # get team and check if roster is on team
+        # check if player is benched because you cannot drop non-benched players
+        if roster_entry.team != team or roster_entry.at_position != "BN":
+            print("in error message")
+            return JsonResponse(response)
+
+        # all good to drop player and update db
+        if team_service.drop_player(roster_entry.player, team):
+            player_name = roster_entry.player.full_name
+            roster_entry.delete()
+            response = {
+                'data': 'Success! ' +player_name+' dropped!',
+                'status': 'Success',
+                'roster_entry_id': roster_entry_id
+            }
+            messages.add_message(request, messages.SUCCESS, 'Success! ' +player_name+' dropped!')
+
+            return JsonResponse(response)
+
+    messages.add_message(request, messages.ERROR, 'Something went wrong!')
+    return JsonResponse(response)
+

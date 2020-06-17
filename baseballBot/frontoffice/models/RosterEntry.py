@@ -7,8 +7,11 @@ class RosterEntry(models.Model):
 
     player = models.ForeignKey(Player, on_delete=models.DO_NOTHING)
 
-    at_position = models.CharField(max_length=200,default="P")
+    at_position = models.CharField(max_length=10,default="P")
 
     def bench_player(self):
         self.at_position = "BN"
         return True
+
+    def class_name(self):
+        return "RosterEntry"

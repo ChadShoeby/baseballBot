@@ -6,6 +6,8 @@ import os
 import sys
 import time
 
+from string import Template
+
 from requests.exceptions import HTTPError
 from frontoffice.yahooQuery.yahoo_oauth import OAuth2
 
@@ -93,8 +95,12 @@ class YahooFantasySportsQuery(object):
             if not self.oauth.token_is_valid():
                 self.oauth.refresh_access_token()
 
-    def get_response(self, url, retries=0):
-        response = self.oauth.session.get(url, params={"format": "json"})
+    def get_response(self, url, retries=0, put_data=None):
+        if put_data :
+          headers = {'Content-Type':'application/xml' }
+          response = self.oauth.session.post(url,headers=headers,params={"format": "json"}, data=put_data)
+        else:
+          response = self.oauth.session.get(url, params={"format": "json"})
 
         try:
             response.raise_for_status()
@@ -109,7 +115,7 @@ class YahooFantasySportsQuery(object):
                     url, response.status_code, 4 - retries
                 ))
                 time.sleep(0.3 * retries)
-                response = self.get_response(url, retries)
+                response = self.get_response(url, retries, put_data=put_data)
             else:
                 # log error and terminate query if status code is not 200 after 3 retries
                 logger.error("REQUEST FAILED WITH STATUS CODE: {} - {}".format(response.status_code, e))
@@ -117,7 +123,7 @@ class YahooFantasySportsQuery(object):
 
         return response
 
-    def query(self, url, data_key_list, data_type_class=None):
+    def query(self, url, data_key_list, data_type_class=None, put_data=None):
         """Base query class to retrieve requested data from the Yahoo fantasy sports REST API.
 
         :param url: web url for desired Yahoo fantasy data
@@ -130,7 +136,7 @@ class YahooFantasySportsQuery(object):
         :return: object from yfpy/models.py, dict, or list (depending on query) with unpacked and parsed response data
         """
         if not self.offline:
-            response = self.get_response(url)
+            response = self.get_response(url, put_data=put_data)
             response_json = response.json()
             logger.debug("Response (JSON): {}".format(response_json))
 
@@ -2350,3 +2356,91 @@ class YahooFantasySportsQuery(object):
         return self.query(
             "https://fantasysports.yahooapis.com/fantasy/v2/league/" + self.get_league_key() + "/players;player_keys=" +
             str(player_key) + "/draft_analysis", ["league", "players", "0", "player"], Player)
+
+    def add_player_to_team(self, player_key, team_key):
+      return self.add_drop_player_from_team(player_key, team_key, transaction_type="add")
+    
+    def drop_player_from_team(self, player_key, team_key):
+      return self.add_drop_player_from_team(player_key, team_key, transaction_type="drop")
+
+    def add_drop_player_from_team(self, player_key, team_key, transaction_type="add"):
+
+        """Retrieve roster with ALL player info of specific team by team_id and by week for chosen league.
+        
+        https://developer.yahoo.com/fantasysports/guide/roster-resource.html
+
+        <fantasy_content>
+          <transaction>
+            <type>drop</type>
+            <player>
+              <player_key>{player_key}</player_key>
+              <transaction_data>
+                <type>drop</type>
+                <source_team_key>{team_key}</source_team_key>
+              </transaction_data>
+            </player>
+          </transaction>
+        </fantasy_content>
+
+        :param team_id: team id of chosen team (can be integers 1 through n where n = number of teams in the league)
+        :param chosen_week: selected week for which to retrieve data
+        :rtype: list
+        :return: yfpy Player object containing the keys "draft_analysis", "ownership", "percent_owned", and
+            "player_stats" and respective yfpy objects
+        """
+        # xml_data = "<fantasy_content>\n<transaction>\n<type>drop</type>\n<player>\n<player_key>398.p.9877</player_key>\n<transaction_data>\n<type>drop</type>\n<source_team_key>398.l.156718.t.1</source_team_key>\n</transaction_data>\n</player>\n</transaction>\n</fantasy_content>"
+
+        #         <fantasy_content>
+        #   <transaction>
+        #     <type>add</type>
+        #     <player>
+        #       <player_key>{player_key}</player_key>
+        #       <transaction_data>
+        #         <type>add</type>
+        #         <destination_team_key>{team_key}</destination_team_key>
+        #       </transaction_data>
+        #     </player>
+        #   </transaction>
+        # </fantasy_content>
+
+        # xml_data = "<fantasy_content>\n\
+        #               <transaction>\n\
+        #                 <type>drop</type>\n\
+        #               <player>\n\
+        #                 <player_key>398.p.9877</player_key>\n\
+        #                 <transaction_data>\n\
+        #                     <type>drop</type>\n\
+        #                     <source_team_key>398.l.156718.t.1</source_team_key>\n\
+        #                   </transaction_data>\n\
+        #                 </player>\n\
+        #               </transaction>\n\
+        #             </fantasy_content>"
+
+        if transaction_type == "drop":
+          xml_team_label = "source_team_key"
+        elif transaction_type == "add":
+          xml_team_label = "destination_team_key"
+
+        xml_data = Template("""<fantasy_content>
+                      <transaction>
+                        <type>$transaction_type</type>
+                      <player>
+                        <player_key>$player_key</player_key>
+                        <transaction_data>
+                            <type>drop</type>
+                            <$xml_team_label>$team_key</$xml_team_label>
+                          </transaction_data>
+                        </player>
+                      </transaction>
+                    </fantasy_content>""")
+
+        xml_data = xml_data.substitute(transaction_type=transaction_type, 
+          player_key=player_key, 
+          team_key=team_key,
+          xml_team_label=xml_team_label)
+
+        return self.query(
+          "https://fantasysports.yahooapis.com/fantasy/v2/league/" + self.get_league_key() + "/transactions",
+            ["league", "transactions"],
+            put_data = xml_data
+            )

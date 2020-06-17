@@ -46,6 +46,10 @@ class Player(models.Model):
         return fieldsUpdated
 
     @property  
+    def class_name(self):
+        return "Player"
+
+    @property  
     def player(self):
         return self
 

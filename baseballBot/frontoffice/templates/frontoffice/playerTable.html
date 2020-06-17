@@ -8,11 +8,16 @@
             <th>MLB Team</th>
             <th>Player key</th>
             <th>Position Type</th>
+            {% if editableRoster %}
+            <th>Actions</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
         {% for data in players  %}
-            <tr>
+            <tr {% if editableRoster and data.class_name == "RosterEntry"%}
+            id="roster_entry_row_{{ data.id }}"{% endif %}
+            >
                 <td>{{ data.player.player_id }}</td>
                 <td>
                     {% if data.player.headshot_url %}<img src="{{ data.player.headshot_url }}">{% endif %}
@@ -20,7 +25,12 @@
                 </td>
 
                 <td>{{ data.player.estimated_season_points }}</td>
-                <td>{{ data.player.display_position }}
+
+                <td>{% if data.at_position|length %}
+                        {{ data.at_position }}
+                    {% else %}
+                        {{ data.player.display_position }}
+                    {% endif %}
                     {% if data.player.eligible_positions|length %}
                         ({% for pos in data.player.eligible_positions %}
                         {{ pos.position }}{% if not forloop.last %}, {% endif %}
@@ -33,15 +43,41 @@
                 <td>{{ data.player.player_key }}</td>
 
                 <td>{{ data.player.position_type }}</td>
+                {% if editableRoster %}
+                <td>
+                    {% if data.class_name == "RosterEntry" and data.at_position == "BN" %}
+                    <button id="drop_player_roster_{{ data.id }}" type="button" class="drop_player_roster btn btn-info btn-sm" data-roster="{{ data.id }}">Drop</button>
+                    {% endif %}
+                </td>
+                {% endif %}
             </tr>
         {% endfor %}
     </tbody>
 </table>
-
+ajax_drop_player
 {% block javascript %}
 <script>
 $(document).ready(function() {
-    $('#playerTable').DataTable();
-} );
+    playerTable = $('#playerTable').DataTable();
+
+
+    {% if editableRoster %}
+    $(".drop_player_roster").click(function () {
+      $.ajax({
+        url: '{% url "ajax_drop_player" %}',
+        data: {
+          'roster': $(this).data("roster")
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.status == 'Success') {
+            playerTable.row("#roster_entry_row_"+data.roster_entry_id).remove().draw();
+          }
+        }
+      });
+    });
+    {% endif %}
+
+});
 </script>
 {% endblock %}

@@ -116,3 +116,11 @@ class YahooQueryUtil():
     def get_league_teams(self):
         query_result_data = self.yahoo_query.get_league_teams()
         return query_result_data
+
+    def drop_player(self, player, team):
+        query_result_data = self.yahoo_query.drop_player_from_team(player.player_key, team.yahoo_team_key)
+        return query_result_data
+
+    def add_player(self, player, team):
+        query_result_data = self.yahoo_query.add_player_to_team(player.player_key, team.yahoo_team_key)
+        return query_result_data

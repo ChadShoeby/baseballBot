@@ -26,18 +26,28 @@
 
 {% block body %}
     <body>
-    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="">
-        BaseballBot Home
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-row-md-nowrap p-0">
+      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{% url "home" %}">
+        BaseballBot
       </a>
-            <ul class="navbar-nav px-3" style="margin-right: 50px;">
-              <li class="nav-item dropdown">
+          <ul class="navbar-nav px-3 flex-sm-row" style="margin-right: 50px;">
+              <li class="nav-item dropdown px-sm-3">
                 <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Dropdown
+                    League
                 </a>
                 <div class="dropdown-menu" style="position:absolute;" aria-labelledby="navbarDropdownMenuLink">
-                  <a class="dropdown-item" href="">Edit Profile</a>
-                  <a class="dropdown-item" href="">Log out</a>
+                  <a class="dropdown-item" href="{% url "league_players" %}">Players</a>
+                  <a class="dropdown-item" href="{% url "free_agents" %}">Free Agents</a>
+                </div>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Account
+                </a>
+                <div class="dropdown-menu" style="position:absolute;" aria-labelledby="navbarDropdownMenuLink">
+                  <a class="dropdown-item" href="{% url 'home' %}">Dashboard</a>
+                  <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
                 </div>
               </li>
             </ul>
