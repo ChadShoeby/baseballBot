@@ -16,6 +16,21 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 @login_required
+def matchup(request):
+    team_service = TeamService(request.user)
+    team = team_service.get_team()
+    opponent = "other guys team"
+    thierplayers = ['a','b','c']
+    myplayers = team_service.get_team_roster(team)
+    return render(request, 
+        'frontoffice/matchup.html',
+        {'team': team,
+        'opponent' : opponent,
+        'myplayers': myplayers,
+        'thierplayers': thierplayers,
+        })
+
+@login_required
 def index(request):
     team = "No Team Found"
     players = []
@@ -92,13 +107,15 @@ def yahooQueryTest(request):
 
 @login_required
 def record(request):
+    
+    team_service = TeamService(request.user)
     try:
-        team = Team.objects.get(user__username=request.user)
+        team = team_service.get_team()
     except Team.DoesNotExist:
         return redirect(index)
 
-    # team = Team.objects.get(user__username=request.user)
-    record = TeamRecord.objects.get(team = team.id)
+    #Ask Jon for help
+    record = TeamRecord.objects.filter(team)
     return render(request,
         'frontoffice/record.html',
         {'record': record ,
