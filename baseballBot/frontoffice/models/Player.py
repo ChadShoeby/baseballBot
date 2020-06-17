@@ -12,10 +12,13 @@ class Player(models.Model):
     #active, injured, probable
     status = models.CharField(max_length=200,default="active")
     yahoo_id = models.IntegerField(null=True)
+    espn_id = models.CharField(max_length=200,null=True)
+    fangraphs_id = models.CharField(max_length=200,null=True)
     yahoo_key = models.CharField(max_length=200,null=True)
     display_position = models.CharField(max_length=10,null=True)
     eligibile_positions_raw = models.CharField(max_length=200,null=True)
     mlb_team_abbr = models.CharField(max_length=200,null=True)
+    league_name = models.CharField(max_length=200,null=True)
     position_type = models.CharField(max_length=10,null=True)
     headshot_url = models.CharField(max_length=500,null=True)
     primary_position = models.CharField(max_length=10,null=True)
