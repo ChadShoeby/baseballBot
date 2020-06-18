@@ -18,21 +18,6 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 @login_required
-def matchup(request):
-    team_service = TeamService(request.user)
-    team = team_service.get_team()
-    opponent = "other guys team"
-    thierplayers = ['a','b','c']
-    myplayers = team_service.get_team_roster(team)
-    return render(request, 
-        'frontoffice/matchup.html',
-        {'team': team,
-        'opponent' : opponent,
-        'myplayers': myplayers,
-        'thierplayers': thierplayers,
-        })
-
-@login_required
 def index(request):
     team = "No Team Found"
     players = []
@@ -71,6 +56,25 @@ def index(request):
         {'team': team,
         'players' : players,
         'manager_profile': manager_profile,
+        })
+
+@login_required
+def matchup(request):
+    team_service = TeamService(request.user)
+    user_team = team_service.get_team()
+    user_team_players = team_service.get_team_roster(user_team)
+
+    # go to yahoo and get next opponent
+    opposing_team_yahoo_team_key = "398.l.156718.t.2"
+    opposing_team = Team.objects.get(yahoo_team_key=opposing_team_yahoo_team_key)
+    opposing_team_players = team_service.get_team_roster(opposing_team)
+    
+    return render(request, 
+        'frontoffice/matchup.html',
+        {'user_team': user_team,
+        'opposing_team' : opposing_team,
+        'user_team_players': user_team_players,
+        'opposing_team_players': opposing_team_players,
         })
 
 @login_required

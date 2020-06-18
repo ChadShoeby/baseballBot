@@ -1,16 +1,18 @@
 {% extends "../base.html" %}
 
-{% block title %}{{ team }} Front Office{% endblock %}
-{% block dashboardTitle %}
+{% block title %}{{ user_team }} Front Office{% endblock %}
+{% block dashboardTitle %}{{ user_team }} vs {{ opposing_team }}{% endblock %}
 
-This Weeks Match 
-{% endblock %}
 {% block dashboardBody %}
-	<h2>{{ team }}{% if team.yahoo_team_logo_url %}
-<img style="height:50px;" src="{{ team.yahoo_team_logo_url }}" class="img-thumbnail">
+	<h2>{{ user_team }}{% if user_team.yahoo_team_logo_url %}
+<img style="height:50px;" src="{{ user_team.yahoo_team_logo_url }}" class="img-thumbnail">
 {% endif %}</h2> 
-	<p>{% include 'frontoffice/playerTable.html' with myplayers=myplayers %}</p>
+	<p>{% include 'frontoffice/playerTable.html' with players=user_team_players team=user_team %}</p>
 
-	<h2> vs {{opponent}}</h2>
-	<p> {{thierplayers}}</p>
+
+    <h2>{{ opposing_team }}{% if opposing_team.yahoo_team_logo_url %}
+    <img style="height:50px;" src="{{ opposing_team.yahoo_team_logo_url }}" class="img-thumbnail">
+    {% endif %}</h2> 
+    <p>{% include 'frontoffice/playerTable.html' with players=opposing_team_players team=opposing_team %}</p>
+
 {% endblock %}

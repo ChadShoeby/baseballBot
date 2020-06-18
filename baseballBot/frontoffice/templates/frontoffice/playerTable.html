@@ -1,4 +1,4 @@
-<table id="playerTable" class="display" style="width:100%">
+<table id="playerTable{% if team %}_team_{{ team.id }}{% endif %}" class="display" style="width:100%">
     <thead>
         <tr>
             <th>Yahoo Id</th>
@@ -61,15 +61,16 @@
         {% endfor %}
     </tbody>
 </table>
-ajax_drop_player
+
 {% block javascript %}
 <script>
 $(document).ready(function() {
-    playerTable = $('#playerTable').DataTable();
+    playerTableId = "playerTable{% if team %}_team_{{ team.id }}{% endif %}"
+    playerTable = $('#'+playerTableId).DataTable();
 
 
     {% if editableRoster %}
-    $("#playerTable").on('click', ".drop_player_roster",function () {
+    $('#'+playerTableId).on('click', ".drop_player_roster",function () {
     // $(".drop_player_roster").click(function () {
       $.ajax({
         url: '{% url "ajax_drop_player" %}',
@@ -87,7 +88,7 @@ $(document).ready(function() {
     {% endif %}
 
     {% if canAddPlayers %}
-    $("#playerTable").on('click', ".add_player",function () {
+    $('#'+playerTableId).on('click', ".add_player",function () {
     // $(".add_player").click(function () {
       $.ajax({
         url: '{% url "ajax_add_player" %}',
