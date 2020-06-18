@@ -102,6 +102,7 @@ class YahooFantasySportsQuery(object):
         else:
           response = self.oauth.session.get(url, params={"format": "json"})
 
+        logger.debug(response)
         try:
             response.raise_for_status()
             # when you exceed Yahoo's allowed data request limits, they throw a request status code of 999
@@ -109,7 +110,7 @@ class YahooFantasySportsQuery(object):
                 raise HTTPError("Yahoo data unavailable due to rate limiting. Please try again later.")
         except HTTPError as e:
             # retry with incremental back-off
-            if retries < 3:
+            if retries < 0:
                 retries += 1
                 logger.warning("Request for URL {} failed with status code {}. Retrying {} more times...".format(
                     url, response.status_code, 4 - retries
@@ -119,7 +120,7 @@ class YahooFantasySportsQuery(object):
             else:
                 # log error and terminate query if status code is not 200 after 3 retries
                 logger.error("REQUEST FAILED WITH STATUS CODE: {} - {}".format(response.status_code, e))
-                sys.exit()
+                # sys.exit()
 
         return response
 
@@ -144,7 +145,8 @@ class YahooFantasySportsQuery(object):
             if response_json.get("error"):
                 response_error_msg = response_json.get("error").get("description")
                 logger.error("ATTEMPT TO RETRIEVE DATA FAILED WITH ERROR: \"{}\"".format(response_error_msg))
-                sys.exit()
+                # sys.exit()
+                return False
             else:
                 raw_response_data = response_json.get("fantasy_content")
 
@@ -160,7 +162,8 @@ class YahooFantasySportsQuery(object):
                     raw_response_data))
             else:
                 logger.error("NO DATA FOUND WHEN ATTEMPTING EXTRACTION FROM FIELD \"fantasy_content\"")
-                sys.exit()
+                # sys.exit()
+                return False
 
             # iterate through list of data keys and drill down to final desired data field
             for i in range(len(data_key_list)):
@@ -187,7 +190,8 @@ class YahooFantasySportsQuery(object):
                                                                                            raw_response_data))
             else:
                 logger.error("NO DATA FOUND WHEN ATTEMPTING EXTRACTION FROM FIELDS {}".format(data_key_list))
-                sys.exit()
+                # sys.exit()
+                return False
 
             # unpack, parse, and assign data types to all retrieved data content
             unpacked = unpack_data(raw_response_data, YahooFantasyObject)
@@ -2427,18 +2431,41 @@ class YahooFantasySportsQuery(object):
                       <player>
                         <player_key>$player_key</player_key>
                         <transaction_data>
-                            <type>drop</type>
+                            <type>$transaction_type</type>
                             <$xml_team_label>$team_key</$xml_team_label>
                           </transaction_data>
                         </player>
                       </transaction>
                     </fantasy_content>""")
-
+        # xml_data = """<fantasy_content>
+        #             <transaction>
+        #               <type>add</type>
+        #             <player>
+        #               <player_key>398.p.5127</player_key>
+        #               <transaction_data>
+        #                   <type>add</type>
+        #                   <destination_team_key>398.l.156718.t.1</destination_team_key>
+        #                 </transaction_data>
+        #               </player>
+        #             </transaction>
+        #           </fantasy_content>"""
+        # <fantasy_content>
+        #               <transaction>
+        #                 <type>drop</type>
+        #               <player>
+        #                 <player_key>398.p.8967</player_key>
+        #                 <transaction_data>
+        #                     <type>drop</type>
+        #                     <source_team_key>398.l.156718.t.1</source_team_key>
+        #                   </transaction_data>
+        #                 </player>
+        #               </transaction>
+        #             </fantasy_content>
         xml_data = xml_data.substitute(transaction_type=transaction_type, 
           player_key=player_key, 
           team_key=team_key,
           xml_team_label=xml_team_label)
-
+        logger.debug(xml_data)
         return self.query(
           "https://fantasysports.yahooapis.com/fantasy/v2/league/" + self.get_league_key() + "/transactions",
             ["league", "transactions"],

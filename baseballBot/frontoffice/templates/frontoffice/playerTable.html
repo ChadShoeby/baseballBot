@@ -8,7 +8,7 @@
             <th>MLB Team</th>
             <th>Player key</th>
             <th>Position Type</th>
-            {% if editableRoster %}
+            {% if editableRoster or canAddPlayers %}
             <th>Actions</th>
             {% endif %}
         </tr>
@@ -16,7 +16,10 @@
     <tbody>
         {% for data in players  %}
             <tr {% if editableRoster and data.class_name == "RosterEntry"%}
-            id="roster_entry_row_{{ data.id }}"{% endif %}
+            id="roster_entry_row_{{ data.id }}"
+            {% elif canAdd %}
+            id="player_row_{{ data.player.id }}"
+            {% endif %}
             >
                 <td>{{ data.player.player_id }}</td>
                 <td>
@@ -43,8 +46,12 @@
                 <td>{{ data.player.player_key }}</td>
 
                 <td>{{ data.player.position_type }}</td>
-                {% if editableRoster %}
+                {% if editableRoster or canAddPlayers %}
                 <td>
+                    {% if canAddPlayers %}
+                    <button id="add_player_{{ data.player.id }}" type="button" class="add_player btn btn-info btn-sm" data-player="{{ data.player.id }}">Add</button>
+                    {% endif %}
+
                     {% if data.class_name == "RosterEntry" and data.at_position == "BN" %}
                     <button id="drop_player_roster_{{ data.id }}" type="button" class="drop_player_roster btn btn-info btn-sm" data-roster="{{ data.id }}">Drop</button>
                     {% endif %}
@@ -62,7 +69,8 @@ $(document).ready(function() {
 
 
     {% if editableRoster %}
-    $(".drop_player_roster").click(function () {
+    $("#playerTable").on('click', ".drop_player_roster",function () {
+    // $(".drop_player_roster").click(function () {
       $.ajax({
         url: '{% url "ajax_drop_player" %}',
         data: {
@@ -78,6 +86,23 @@ $(document).ready(function() {
     });
     {% endif %}
 
+    {% if canAddPlayers %}
+    $("#playerTable").on('click', ".add_player",function () {
+    // $(".add_player").click(function () {
+      $.ajax({
+        url: '{% url "ajax_add_player" %}',
+        data: {
+          'player': $(this).data("player")
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.status == 'Success') {
+            playerTable.row("#player_row_"+data.player_id).remove().draw();
+          }
+        }
+      });
+    });
+    {% endif %}
 });
 </script>
 {% endblock %}

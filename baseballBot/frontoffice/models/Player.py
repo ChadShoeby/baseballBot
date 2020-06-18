@@ -61,7 +61,10 @@ class Player(models.Model):
         return self.mlb_team_abbr
     @property  
     def player_key(self):
+        if not self.yahoo_key:
+            return "398.p."+str(self.yahoo_id)
         return self.yahoo_key
+
     @property  
     def player_id(self):
         return self.yahoo_id
