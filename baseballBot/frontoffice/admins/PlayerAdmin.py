@@ -38,6 +38,8 @@ class PlayerAdmin(admin.ModelAdmin):
             for p in playersInDB:
                 playersByYahooId[str(p.yahoo_id)] = p
 
+            newPlayers = []
+            updatedPlayers = []
             for row in reader:
                 rowCount += 1
                
@@ -57,12 +59,16 @@ class PlayerAdmin(admin.ModelAdmin):
                 if row[23] == "":
                     continue
 
+                # if player is in database, update that player,
+                # else create a new player
                 if row[23] in playersByYahooId:
                     player = playersByYahooId[row[23]]
+                    updatedPlayers.append(player)
                 else:
                     player = Player()
                     player.full_name = row[1]
                     player.yahoo_id = row[23]
+                    newPlayers.append(player)
 
                 player.estimated_season_points = int(row[42])
                 player.mlb_team_abbr = str(row[5])
@@ -78,9 +84,13 @@ class PlayerAdmin(admin.ModelAdmin):
                 else:
                     player.position_type = "B"
                 
-                player.save()
                 newPlayerCounter +=1
-                
+            
+            if len(newPlayers) > 0:
+                Player.objects.bulk_create(newPlayers)
+            if len(updatedPlayers) > 0:
+                Player.objects.bulk_update(updatedPlayers, ['estimated_season_points','mlb_team_abbr','display_position','primary_position','eligibile_positions_raw','espn_id','fangraphs_id','league_name','position_type'])
+
             self.message_user(request, "Success: "+str(newPlayerCounter)+" players have been added.")
             return redirect("..")
         form = CsvImportForm()
