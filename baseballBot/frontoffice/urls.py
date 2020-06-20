@@ -1,12 +1,14 @@
-from django.urls import path
+from django.urls import include, path
 from django.conf.urls import url
 
 from . import views
 
 urlpatterns = [
+    path('', include('django.contrib.auth.urls')),
     path('', views.index, name='home'),
     path('record', views.record, name='record'),
     path('league-players', views.leaguePlayers, name='league_players'),
+    path('best-lineup', views.best_lineup, name='best_lineup'),
     path('free-agents', views.freeAgents, name='free_agents'),
     path('yahooQueryTest', views.yahooQueryTest, name='yahooQueryTest'),    
     path('enter-verifier-token', views.get_verifier_token, name='enterVerifierTokenForm'),

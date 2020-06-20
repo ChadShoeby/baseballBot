@@ -68,20 +68,3 @@ class Player(models.Model):
     @property  
     def player_id(self):
         return self.yahoo_id
-
-    def getPosAbbr(self):
-
-        posAbbr = {
-            'First Base':'1B',
-            'Second Base':'2B',
-            'Third Base': '3B'
-                    }
-        if self.position in posAbbr:
-            return posAbbr[self.position]
-
-        titles = self.position.split(' ')
-
-        abbr = ''
-        for i,title in enumerate(titles):
-            abbr += title[0]
-        return abbr

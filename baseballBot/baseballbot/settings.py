@@ -188,9 +188,9 @@ LOGGING = {
     },
 }
 
-# print(os.path.realpath('/tmp/debug.log'))
-# print(os.path.realpath('/..'))
 LOGIN_REDIRECT_URL = 'home'
+LOGIN_URL = '/frontoffice/login'
+LOGOUT_REDIRECT_URL = '/frontoffice'
 
 DEBUG_TOOLBAR_PANELS = [
 

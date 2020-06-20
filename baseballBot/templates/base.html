@@ -87,11 +87,12 @@
         </div>
     {% endblock %}
 
-    {% block foot %}
-        <footer>
-            {% block footer %}{% endblock %}
-        </footer>
-    {% endblock %}
+   {#  {% block foot %} #}
+        {# <footer> #}
+            {# {% block footer %}{% endblock %} #}
+            {% include "footer.html" %}
+        {# </footer> #}
+    {# {% endblock %} #}
 
     {% block javascript %}{% endblock %}
     <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>

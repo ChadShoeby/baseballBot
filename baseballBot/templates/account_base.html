@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+    <title>{% block title %}Baseball Bot{% endblock %}</title>
+    {% block extra_css %}
+    <!--Fontawesome CDN-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+    <style>
+    /* Adapted from Mutiullah Samim 's snippet here https://bootsnipp.com/snippets/vl4R7 */
+
+@import url('https://fonts.googleapis.com/css?family=Numans');
+
+html,body{
+background-image: url({% static "baseballBot/img/stadium_background.png" %});
+background-size: cover;
+background-repeat: no-repeat;
+background-position: center center;   
+height: 100%;
+width:100%;
+font-family: 'Numans', sans-serif;
+}
+
+.container{
+height: 100%;
+align-content: center;
+}
+
+.card{
+/*height: 370px;*/
+margin-top: auto;
+margin-bottom: auto;
+width: 400px;
+background-color: rgba(0,0,0,0.85) !important;
+}
+
+.social_icon span{
+font-size: 60px;
+margin-left: 10px;
+color: #FFC312;
+}
+
+.social_icon span:hover{
+color: white;
+cursor: pointer;
+}
+
+.card-header h3{
+color: white;
+}
+
+.social_icon{
+position: absolute;
+right: 20px;
+top: -45px;
+}
+
+.input-group-prepend span{
+width: 50px;
+background-color: #FFC312;
+color: black;
+border:0 !important;
+}
+
+input:focus{
+outline: 0 0 0 0  !important;
+box-shadow: 0 0 0 0 !important;
+
+}
+
+.remember{
+color: white;
+}
+
+.remember input
+{
+width: 20px;
+height: 20px;
+margin-left: 15px;
+margin-right: 5px;
+}
+
+.login_btn{
+color: black;
+background-color: #FFC312;
+/*width: 100px;*/
+}
+
+.login_btn:hover{
+color: black;
+background-color: white;
+}
+
+.links{
+color: white;
+}
+
+.links a{
+margin-left: 4px;
+}
+
+.errors {
+
+}
+</style>
+
+{% endblock %}
+
+
+
+{% block body_content %}
+<div class="d-flex justify-content-center" style="height: 89%!important;">
+   {% block account_body %}{% endblock %}
+</div>
+{% endblock %}
+
+
