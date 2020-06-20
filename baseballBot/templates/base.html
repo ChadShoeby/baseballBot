@@ -18,18 +18,21 @@
 
     <link href="{% static "baseballBot/css/base.css" %}" rel="stylesheet">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.21/datatables.min.css"/>
 {#     <link href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet"> #}
 
     <title>{% block title %}Baseball Bot{% endblock %}</title>
     <style>
 main{
-background-image: url({% static "baseballBot/img/grass.jpg" %});
-background-repeat: repeat; 
-/*background-size: cover;
-background-repeat: no-repeat;*/
-/*background-position: center center;   */
-/*height: 100%;*/
-/*width:100%;*/
+/*background-image: url({% static "baseballBot/img/feild_main.jpg" %});
+background-repeat: repeat;*/ 
+/*background-image: url({% static "baseballBot/img/stadium_background.png" %});*/
+background-image: url({% static "baseballBot/img/stadium_lights_wind_main.jpg" %});
+background-size: cover;
+background-repeat: no-repeat;
+background-position: center center; 
+height: 100%;
+width:100%;
 }
     </style>
     {% block extra_css %}{% endblock %}
@@ -38,6 +41,7 @@ background-repeat: no-repeat;*/
 
 {% block body %}
     <body>
+
     <nav class="navbar navbar-dark sticky-top bg-dark flex-row-md-nowrap p-0">
       <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{% url "home" %}">
         BaseballBot
@@ -63,7 +67,8 @@ background-repeat: no-repeat;*/
                 </div>
               </li>
             </ul>
-    </nav>
+    </nav> 
+
 
     
 
@@ -72,7 +77,7 @@ background-repeat: no-repeat;*/
             <div class="row">
 
                 {# put side navbar here #}
-                {% include "sideNav.html" %}   
+                {# {% include "sideNav.html" %}    #}
 
                 {% if messages %}
                 <div id="messages">
@@ -87,10 +92,16 @@ background-repeat: no-repeat;*/
                 </div>
                 {% endif %}
 
-                <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                        <h1 class="h2">{% block dashboardTitle %}{% endblock %}</h1>
-                        <div class="font-weight-bold">{% block managerTitle %}{% endblock %}</div>
+                <main role="main" class="ml-sm-auto pt-3 px-4">
+                  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+
+                  <div class="card">
+                    <div class="card-header" style="background-color: #fff;">
+                      <h3 class="m-0 font-weight-bold text-primary">
+                        {% block dashboardTitle %}{% endblock %}
+                      </h3>
+                    </div>
+                  </div>
                     </div>
 
                 {% block dashboardBody %}{% endblock %}
@@ -107,7 +118,8 @@ background-repeat: no-repeat;*/
     {# {% endblock %} #}
 
     {% block javascript %}{% endblock %}
-    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    {#} <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>#}
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.21/datatables.min.js"></script>
   </body>
 {% endblock %}
 </html>

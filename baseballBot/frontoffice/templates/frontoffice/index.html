@@ -2,20 +2,14 @@
 
 {% block title %}{{ team }} Front Office{% endblock %}
 {% block dashboardTitle %}
-<div class="card">
-<div class="card-header" style="background-color: #fff;">
+
 {% if team.yahoo_team_logo_url %}
-<h3 class="m-0 font-weight-bold text-primary">
 <img style="height:50px;" src="{{ team.yahoo_team_logo_url }}" class="img-thumbnail">
 {% endif %}
 
 {{ team }} Front Office
-</h3>
-</div>
-</div>
-{% endblock %}
-{# {% block managerTitle %}Team Manager: {{ request.user|title }}{% endblock %} #}
 
+{% endblock %}
 
 {% block dashboardBody %}
 <div class="row">
