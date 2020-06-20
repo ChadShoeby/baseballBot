@@ -17,9 +17,21 @@
     {% bootstrap_javascript jquery='full' %}
 
     <link href="{% static "baseballBot/css/base.css" %}" rel="stylesheet">
-    <link href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+{#     <link href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet"> #}
 
     <title>{% block title %}Baseball Bot{% endblock %}</title>
+    <style>
+main{
+background-image: url({% static "baseballBot/img/grass.jpg" %});
+background-repeat: repeat; 
+/*background-size: cover;
+background-repeat: no-repeat;*/
+/*background-position: center center;   */
+/*height: 100%;*/
+/*width:100%;*/
+}
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 {% endblock %}

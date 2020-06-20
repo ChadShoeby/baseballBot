@@ -2,23 +2,118 @@
 
 {% block title %}{{ team }} Front Office{% endblock %}
 {% block dashboardTitle %}
+<div class="card">
+<div class="card-header" style="background-color: #fff;">
 {% if team.yahoo_team_logo_url %}
+<h3 class="m-0 font-weight-bold text-primary">
 <img style="height:50px;" src="{{ team.yahoo_team_logo_url }}" class="img-thumbnail">
 {% endif %}
 
 {{ team }} Front Office
-
+</h3>
+</div>
+</div>
 {% endblock %}
-{% block managerTitle %}Team Manager: {{ request.user|title }}{% endblock %}
+{# {% block managerTitle %}Team Manager: {{ request.user|title }}{% endblock %} #}
 
 
 {% block dashboardBody %}
-<p><button id="update_team_roster" type="button" class="btn btn-info btn-sm">Update Roster</button>(last updated: {{ team.roster_last_updated_at|date:"SHORT_DATETIME_FORMAT" }})</p>
-<p><button id="update_league_info" type="button" class="btn btn-info btn-sm">Update League</button>(last updated: {{ manager_profile.yahoo_league_last_updated_at|date:"SHORT_DATETIME_FORMAT" }})</p>
-    <div>
-    {% include 'frontoffice/playerTable.html' with players=players editableRoster=True %}
+<div class="row">
+ 
+ {#  <p><button id="update_league_info" type="button" class="btn btn-info btn-sm">Update League</button>(last updated: {{ manager_profile.yahoo_league_last_updated_at|date:"SHORT_DATETIME_FORMAT" }})</p> #}
+
+  <!--Lineup Card-->
+  <div class="col-s-8 col-lg-6">
+    <div class="card shadow mb-4">
+      <!-- Card Header - Dropdown -->
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Current Lineup</h6><small class="font-italic font-weight-light text-muted">last updated: {{ team.roster_last_updated_at|date:"SHORT_DATETIME_FORMAT" }}</small>
+      </div>
+          
+      <!-- Card Body -->
+      <div class="card-body">
+        
+        {% include 'frontoffice/rosterTable.html' with players=players editableRoster=True %}
+
+        <div class="float-right">
+          <button id="update_team_roster" type="button" class="btn btn-info btn-sm">Update Roster</button>
+        </div>
+      </div>
 
     </div>
+  </div> <!-- end lineup card-->
+
+
+<div class="col-s-4 col-lg-5">
+
+  <!-- Team Info Card -->
+  <div class="card shadow mb-4">
+    <!-- Card Header - Dropdown -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold text-primary">{{ team }}
+      </h6>{% if team.yahoo_team_logo_url %}
+        <img style="height:50px;" src="{{ team.yahoo_team_logo_url }}" class="img-thumbnail">
+        {% endif %}
+    </div>
+    <!-- Card Body -->
+    <div class="card-body">
+        <div class="container" style="display: block;">
+          <div class="row mt-2">
+            <div class="col-6"><span class="small font-weight-bold">Owner</span><br> {{ request.user|title }}</div>
+            <div class="col-6"><span class="small font-weight-bold">League</span><br>{{ manager_profile.yahoo_league_name }}<p><small class="font-italic font-weight-light text-muted">{{ manager_profile.yahoo_league_id }}</small></p>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-6"><span class="small font-weight-bold">Next Matchup</span><br> </div>
+            <div class="col-6"><span class="small font-weight-bold">Total Estimated Points</span><br>{{ team.total_est_points }} </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-6"><span class="small font-weight-bold">Joined on:</span><br> {{ team.created_at|date:"SHORT_DATETIME_FORMAT" }}</div>
+          </div>
+        </div>
+    </div>
+  </div><!-- end team info card-->
+
+  <!-- League Info Card -->
+  <div class="card shadow mb-4">
+    <!-- Card Header - Dropdown -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold text-primary">{{ manager_profile.yahoo_league_name }}
+      </h6>
+    </div>
+    <!-- Card Body -->
+    <div class="card-body">
+        <div class="container" style="display: block;">
+          <div class="row mt-2">
+            <div class="col-6"><span class="small font-weight-bold">Team</span><br></div>
+            <div class="col-6"><span class="small font-weight-bold">Points estimate</span>
+            </div>
+          </div>
+
+          {% for otherTeam in manager_profile.teams_in_league.all %}
+            {% if otherTeam.id != team.id %}
+          <div class="row mt-2">
+            <div class="col-6">
+            {% if otherTeam.yahoo_team_logo_url %}
+            <img style="height:50px;" src="{{ otherTeam.yahoo_team_logo_url }}" class="img-thumbnail">
+            {% endif %}
+            {{ otherTeam }}</div>
+
+            <div class="col-6">{{ otherTeam.total_est_points }}
+            </div>
+          </div>
+            {% endif %}
+          {% endfor %}
+          
+        </div>
+    </div>
+  </div>
+</div> <!-- end team info card-->
+
+</div> <!-- end row-->
+
+
+  
 
 {% endblock %}
 {% block javascript %}

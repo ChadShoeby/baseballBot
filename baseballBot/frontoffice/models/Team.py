@@ -37,6 +37,15 @@ class Team(models.Model):
                 
         return False
 
+    @property
+    def total_est_points(self):
+        total = 0
+        for re in self.roster_entries.all():
+            if re.at_position != 'BN': 
+                total +=re.player.estimated_season_points
+
+        return total
+    
     def processYahooData(self,data):
         self.name = data.name
         self.yahoo_team_key = data.team_key
