@@ -237,9 +237,8 @@ def ajax_drop_player(request):
             return JsonResponse(response)
 
         # all good to drop player and update db
+        player_name = roster_entry.player.full_name
         if team_service.drop_player(roster_entry.player, team):
-            player_name = roster_entry.player.full_name
-            roster_entry.delete()
             response = {
                 'data': 'Success! ' +player_name+' dropped!',
                 'status': 'Success',
@@ -302,11 +301,11 @@ def ajax_add_player(request):
         if team_service.add_player(player, team):
 
             response = {
-                'data': 'Success! ' +player.full_name+' dropped!',
+                'data': 'Success! ' +player.full_name+' added!',
                 'status': 'Success',
                 'player_id': player_id
             }
-            messages.add_message(request, messages.SUCCESS, 'Success! ' +player.full_name+' dropped!')
+            messages.add_message(request, messages.SUCCESS, 'Success! ' +player.full_name+' added!')
 
             return JsonResponse(response)
 
