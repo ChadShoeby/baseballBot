@@ -228,7 +228,6 @@ class TeamService():
             logger.debug(teamRosterInDB[re_id])
             teamRosterInDB[re_id].delete()
             
-
         team.roster_updated()
         team.save()
 
@@ -260,7 +259,37 @@ class TeamService():
         return available_players_list
 
     def drop_player(self, player, team):
-        return self.yahoo_query_utility.drop_player(player, team)
+        try:
+            result = self.yahoo_query_utility.drop_player(player, team)
+        except:
+            return False
+
+        # player dropped successfully update roster
+        try:
+            roster_entry = RosterEntry.objects.get(team=team,player=player)
+            roster_entry.delete()
+            print(roster_entry)
+        except ObjectDoesNotExist:
+            pass
+
+        return result 
 
     def add_player(self, player, team):
-        return self.yahoo_query_utility.add_player(player, team)
+        try:
+            result = self.yahoo_query_utility.add_player(player, team)
+        except:
+            return False
+
+        # player added successfully update roster
+        try:
+            roster_entry = RosterEntry.objects.get(team=team,player=player)
+        except ObjectDoesNotExist:
+            roster_entry = RosterEntry()
+            roster_entry.team = team
+            roster_entry.player = player
+            roster_entry.at_position = "BN"
+            roster_entry.save()
+
+        return result
+
+

@@ -1,42 +1,32 @@
 import logging
 
-from django import forms
 from django.conf import settings
 from django.utils import timezone
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
+
 from django.contrib.auth.decorators import login_required
 
-from frontoffice.models import RosterEntry, Team, ManagerProfile, TeamRecord, YahooQuery, Player
-from frontoffice.services.YahooQueryUtil import YahooQueryUtil
+from frontoffice.models import Team, Player, RosterEntry
 from frontoffice.services.TeamService import TeamService
 from frontoffice.yahooQuery import OauthGetAuthKeyHelper
 
 logger = logging.getLogger(__name__)
 
-# Create your views here.
 @login_required
 def index(request):
     team = "No Team Found"
     players = []
     manager_profile = None
-    # team_service = TeamService(request.user)
-    # # manager_profile = team_service.manager_profile
-    # # team = team_service.get_team()
-    # # # logger.debug(team_service.drop_player(team))
-    # # team_service.update_team_data(team, forceUpdate=True)
-    # team = team_service.get_team()
-    # player = Player.objects.get(pk=1600)
-    # team_service.add_player(player, team)
 
     if settings.USEREALQUERY:
 
         #check if user needs to get a verifier code from yahoo
         oauth_helper = OauthGetAuthKeyHelper(request.user.id)
         if oauth_helper.need_verifier_code():
-            return redirect(get_verifier_token)
+            return redirect('enterVerifierTokenForm')
 
         team_service = TeamService(request.user)
         manager_profile = team_service.manager_profile
@@ -59,6 +49,7 @@ def index(request):
         })
 
 @login_required
+<<<<<<< HEAD:baseballBot/frontoffice/views.py
 def matchup(request):
     team_service = TeamService(request.user)
     user_team = team_service.get_team()
@@ -173,9 +164,9 @@ class verifierTokenForm(forms.Form):
     verifier_code = forms.CharField(label='Enter Your Verifier code:', max_length=100)
 
 @login_required
+=======
+>>>>>>> c0f9644c0115df51f24700e2e475a92fb10df1e5:baseballBot/frontoffice/views/dashboard.py
 def ajax_update_team_roster(request):
-
-    # messages.add_message(request, messages.ERROR, 'Roster updated too recently.')
     response = {
         'data': 'Team Roster Updated too recently. Please wait 5 minutes before updating again.',
         'status': 'error'
@@ -197,11 +188,11 @@ def ajax_update_team_roster(request):
 @login_required
 def ajax_update_league(request):
 
-    # messages.add_message(request, messages.ERROR, 'Roster updated too recently.')
     response = {
         'data': 'League updated too recently. Please wait 5 minutes before updating again.',
         'status': 'error'
     }
+
     if settings.USEREALQUERY:
 
         team_service = TeamService(request.user)
@@ -242,7 +233,6 @@ def ajax_drop_player(request):
         except ObjectDoesNotExist:
             return JsonResponse(response)
 
-        print(roster_entry.team.id, team.id, roster_entry.at_position)
         # get team and check if roster is on team
         # check if player is benched because you cannot drop non-benched players
         if roster_entry.team != team or roster_entry.at_position != "BN":
@@ -250,9 +240,8 @@ def ajax_drop_player(request):
             return JsonResponse(response)
 
         # all good to drop player and update db
+        player_name = roster_entry.player.full_name
         if team_service.drop_player(roster_entry.player, team):
-            player_name = roster_entry.player.full_name
-            roster_entry.delete()
             response = {
                 'data': 'Success! ' +player_name+' dropped!',
                 'status': 'Success',
@@ -306,23 +295,16 @@ def ajax_add_player(request):
 
         # player exists and player not on team already
         # go ahead and add the player
-
-        # print(player)
-        # print(num_roster_entry)
-
-        # return JsonResponse(response)
-
         if team_service.add_player(player, team):
 
             response = {
-                'data': 'Success! ' +player.full_name+' dropped!',
+                'data': 'Success! ' +player.full_name+' added!',
                 'status': 'Success',
                 'player_id': player_id
             }
-            messages.add_message(request, messages.SUCCESS, 'Success! ' +player.full_name+' dropped!')
+            messages.add_message(request, messages.SUCCESS, 'Success! ' +player.full_name+' added!')
 
             return JsonResponse(response)
 
     messages.add_message(request, messages.ERROR, 'Something went wrong!')
     return JsonResponse(response)
-
