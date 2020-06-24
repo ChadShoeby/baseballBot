@@ -83,7 +83,12 @@ class PlayerAdmin(admin.ModelAdmin):
                     player.position_type = "P"
                 else:
                     player.position_type = "B"
-                
+                #Put if statement team = N/A for former players
+                if str(row[5]) == "N/A":
+                    player.active_mlb_player = False
+                else:
+                    player.active_mlb_player = True
+
                 newPlayerCounter +=1
             
             if len(newPlayers) > 0:

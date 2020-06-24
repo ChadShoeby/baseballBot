@@ -23,7 +23,8 @@ class Player(models.Model):
     headshot_url = models.CharField(max_length=500,null=True)
     primary_position = models.CharField(max_length=10,null=True)
     estimated_season_points = models.FloatField(null=True)
-    
+    active_mlb_player = models.BooleanField(null=False, default=False)
+
     def processYahooData(self, pfy):
         self.full_name = pfy.full_name
         self.yahoo_id = pfy.player_id

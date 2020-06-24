@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from frontoffice.services.TeamService import TeamService
+from frontoffice.models import Team
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,18 @@ def matchup(request):
         'opposing_team' : opposing_team,
         'user_team_players': user_team_players,
         'opposing_team_players': opposing_team_players,
+        })
+
+@login_required
+def user_settings(request):
+    team_service = TeamService(request.user)
+    user_team = team_service.get_team()
+    auto_manager = True
+
+    return render(request, 
+        'frontoffice/user_settings.html',
+        {'user_team': user_team,
+        'auto_manager' : auto_manager,
         })
 
 @login_required
