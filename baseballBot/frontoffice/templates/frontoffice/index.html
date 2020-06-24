@@ -13,8 +13,6 @@
 
 {% block dashboardBody %}
 <div class="row">
- 
- {#  <p><button id="update_league_info" type="button" class="btn btn-info btn-sm">Update League</button>(last updated: {{ manager_profile.yahoo_league_last_updated_at|date:"SHORT_DATETIME_FORMAT" }})</p> #}
 
   <!--Lineup Card-->
   <div class="col-s-8 col-lg-6">
@@ -54,7 +52,7 @@
         <div class="container" style="display: block;">
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Owner</span><br> {{ request.user|title }}</div>
-            <div class="col-6"><span class="small font-weight-bold">League</span><br>{{ manager_profile.yahoo_league_name }}<p><small class="font-italic font-weight-light text-muted">{{ manager_profile.yahoo_league_id }}</small></p>
+            <div class="col-6"><span class="small font-weight-bold">League</span><br>{{ league.name }}<p><small class="font-italic font-weight-light text-muted">{{ league.yahoo_id }}</small></p>
             </div>
           </div>
           <div class="row mt-2">
@@ -72,8 +70,9 @@
   <div class="card shadow mb-4">
     <!-- Card Header - Dropdown -->
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-      <h6 class="m-0 font-weight-bold text-primary">{{ manager_profile.yahoo_league_name }}
+      <h6 class="m-0 font-weight-bold text-primary">{{ league.name }}
       </h6>
+      <small class="font-italic font-weight-light text-muted">last updated: {{ league.updated_at|date:"SHORT_DATETIME_FORMAT" }}</small>
     </div>
     <!-- Card Body -->
     <div class="card-body">
@@ -84,7 +83,7 @@
             </div>
           </div>
 
-          {% for otherTeam in manager_profile.teams_in_league.all %}
+          {% for otherTeam in league.teams_in_league.all %}
             {% if otherTeam.id != team.id %}
           <div class="row mt-2">
             <div class="col-6">
@@ -98,7 +97,11 @@
           </div>
             {% endif %}
           {% endfor %}
-          
+
+          <div class="float-right">
+              <button id="update_league_info" type="button" class="btn btn-info btn-sm">Update League</button>
+          </div>
+
         </div>
     </div>
   </div>

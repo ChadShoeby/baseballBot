@@ -2,10 +2,12 @@ from django.db import models
 from datetime import datetime   
 from django.utils import timezone
 from django.contrib.auth.models import User
-from frontoffice.models import ScoringCriteria
+from frontoffice.models import ScoringCriteria, League
 
 class Team(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    league = models.ForeignKey(League, related_name="teams_in_league",on_delete=models.CASCADE,null=True)
+
     yahoo_team_key = models.CharField(max_length=200,null=True)
     yahoo_team_logo_url = models.CharField(max_length=200,null=True)
     name = models.CharField(max_length=200)

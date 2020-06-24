@@ -1,4 +1,5 @@
 from frontoffice.models.ScoringCriteria import *
+from frontoffice.models.League import *
 from frontoffice.models.Team import *
 from frontoffice.models.Player import *
 from frontoffice.models.TeamRecord import *

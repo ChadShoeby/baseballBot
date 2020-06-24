@@ -1,37 +1,57 @@
 import logging
+
 from django.core.exceptions import ObjectDoesNotExist
-from frontoffice.models import RosterEntry, Team, ManagerProfile, TeamRecord, Player, RosterEntry
-from frontoffice.services.YahooQueryUtil import YahooQueryUtil
 from django.db import transaction
+
+from frontoffice.services.YahooQueryUtil import YahooQueryUtil
+from frontoffice.models import RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry
+
 
 logger = logging.getLogger(__name__)
 
 class TeamService():
 
     def __init__(self, user):
-        self.manager_profile = self.get_manager_profile(user)
         self.user = user
-        self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.manager_profile.yahoo_league_id)
+        self.manager_profile = self.get_manager_profile()
+        self.league = self.get_league()
+        self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id)
+        # self.update_league_rosters()
 
-    def get_manager_profile(self,user):
+    def get_league(self):
+        league = False
+        try:
+            league = League.objects.get(manager_profile=self.manager_profile)
+        except ObjectDoesNotExist:
+            yqu = YahooQueryUtil(self.user.id)
+            data = yqu.get_user_leagues_by_game_key()
+
+            # try to find an existing league by yahoo id
+            try:
+                league = League.objects.get(yahoo_id=data['league'].league_id)
+            except ObjectDoesNotExist:
+                league = League()
+                league.yahoo_id = data['league'].league_id
+                league.yahoo_key = data['league'].league_key
+                league.name = data['league'].name
+                league.save()
+
+            self.manager_profile.league = league
+            self.manager_profile.save()
+
+        return league
+
+    def get_manager_profile(self):
         manager_profile = False
         #check if user has league ID in database.
         try:
-            manager_profile = ManagerProfile.objects.get(user__id=user.id)
+            manager_profile = ManagerProfile.objects.get(user__id=self.user.id)
         except ObjectDoesNotExist:
             print("can't find profile. trying to update by querying yahoo.")
             
-            #if not in database, try to get data from yahoo
-            yqu = YahooQueryUtil(user.id)
-            data = yqu.get_user_leagues_by_game_key()
-            if len(data) == 1:
-                manager_profile = ManagerProfile()
-                manager_profile.user = user
-                manager_profile.yahoo_league_id = data['league'].league_id
-                manager_profile.yahoo_league_key = data['league'].league_key
-                manager_profile.yahoo_league_name = data['league'].name
-
-                manager_profile.save()
+            manager_profile = ManagerProfile()
+            manager_profile.user = self.user
+            manager_profile.save()
 
         return manager_profile
 
@@ -51,24 +71,23 @@ class TeamService():
 
             # udpate team with yahoo data and user in either case
             team.user = self.user
+            team.league = self.league
             team.processYahooData(data['game'].teams["team"])
             team.save()
 
         return team
 
     def get_team(self):
-        team = False
-        #check if user has a yahoo team in the database
-        try:
-            teams = Team.objects.filter(
+        teams = Team.objects.filter(
                 user__id=self.user.id).prefetch_related('roster_entries__player')
-            if len(teams) >=1:
-                team = teams[0]
+        #check if user has a yahoo team in the database
+        if len(teams) >=1:
+            team = teams[0]
             
-            if not team.yahoo_team_key:
+            if not team or not team.yahoo_team_key:
                 team = self.update_team_data(team, forceUpdate=True)
 
-        except ObjectDoesNotExist:
+        else:
             print("can't find team by user id. trying to update by querying yahoo.")
             # try to get it from yahoo
             yqu = self.yahoo_query_utility
@@ -82,6 +101,7 @@ class TeamService():
 
             # udpate team with yahoo data and user in either case
             team.user = self.user
+            team.league = self.league
             team.processYahooData(data['game'].teams["team"])
             team.save()
 
@@ -103,7 +123,7 @@ class TeamService():
 
     def update_league_rosters(self, forceUpdate=False):
 
-        logger.debug("updating league roster for %s",self.manager_profile.yahoo_league_id)
+        logger.debug("updating league roster for %s", self.league.yahoo_id)
         # Get all players from Data base
         
         yqu = self.yahoo_query_utility
@@ -111,7 +131,7 @@ class TeamService():
         teams = []
         teamsFromYahoo = yqu.get_league_teams()
         # teamsFromDB = Team.objects.get(yahoo_team_key=yahoo_team_data.team_key)
-        rawTeamsFromDB = Team.objects.filter(manger_profiles=self.manager_profile)
+        rawTeamsFromDB = Team.objects.filter(league=self.league)
         teamsFromDB = {}
 
         for t in rawTeamsFromDB:
@@ -127,10 +147,9 @@ class TeamService():
                     else:
                         team = Team()
                         team.processYahooData(yahoo_team_data)
-                        team.save()
-
-                    self.manager_profile.teams_in_league.add(team)
-                    self.manager_profile.save()
+                    
+                    team.league = self.league
+                    team.save()
                     teams.append(team)
         
         else:
@@ -140,8 +159,8 @@ class TeamService():
         for team in teams:
             self.update_team_roster(team, playersInDB)
         
-        self.manager_profile.league_updated()
-        self.manager_profile.save()
+        self.league.league_updated()
+        self.league.save()
         
         return True
 

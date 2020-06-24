@@ -30,8 +30,8 @@ def index(request):
 
         team_service = TeamService(request.user)
         manager_profile = team_service.manager_profile
+        league = team_service.league
         team = team_service.get_team()
-        # team_service.update_team_roster(team)
         players = team_service.get_team_roster(team)
 
     else:
@@ -43,9 +43,11 @@ def index(request):
      
     return render(request, 
         'frontoffice/index.html',
-        {'team': team,
+        {
+        'team': team,
         'players' : players,
         'manager_profile': manager_profile,
+        'league': league,
         })
 
 @login_required
