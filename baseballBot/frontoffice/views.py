@@ -78,6 +78,19 @@ def matchup(request):
         })
 
 @login_required
+def best_lineup(request):
+    team_service = TeamService(request.user)
+    user_team = team_service.get_team()
+    available_players = team_service.get_available_players(user_team)
+    return render(request,
+        'frontoffice/displayPlayers.html',
+        {
+        'page_title': 'League Players',
+        'players': available_players ,
+        })
+
+
+@login_required
 def leaguePlayers(request):
     return render(request,
         'frontoffice/displayPlayers.html',

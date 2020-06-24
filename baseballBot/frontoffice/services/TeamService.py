@@ -238,6 +238,27 @@ class TeamService():
         playersOnTeamsInLeague = RosterEntry.objects.filter(team__manger_profiles__user=self.user).values_list('player_id', flat=True)
         return Player.objects.all().exclude(id__in=playersOnTeamsInLeague)
 
+
+    def get_available_players(self, team):
+        team_id = team.id
+        roster_slots={
+                    'P':3,
+                    'C':2,
+                    'OF':3
+                    }    
+
+        available_players_list =[]
+        player_map = {'p_id': 'id', 'full_name': 'full_name', 'primary_position': 'primary_position'}
+
+        for position, slot_count in roster_slots.items():
+            params = {'position': position,'slot_count': slot_count, 'team_id': team_id}
+ 
+            available_players = Player.objects.raw('SELECT player_table.id as p_id, full_name, primary_position FROM baseballbot.frontoffice_player as player_table LEFT JOIN frontoffice_rosterentry ON player_table.id = frontoffice_rosterentry.player_id WHERE (team_id IS NULL or team_id = %(team_id)s) AND (position = %(position)s) ORDER BY estimated_season_points DESC LIMIT %(slot_count)s',params = params, translations=player_map)
+            available_players_list += available_players
+            continue
+
+        return available_players_list
+
     def drop_player(self, player, team):
         return self.yahoo_query_utility.drop_player(player, team)
 
