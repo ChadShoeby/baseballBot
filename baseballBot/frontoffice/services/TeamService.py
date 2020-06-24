@@ -267,6 +267,7 @@ class TeamService():
             roster_entry.team = team
             roster_entry.player = player
             roster_entry.at_position = "BN"
+            roster_entry.save()
 
         return result
 

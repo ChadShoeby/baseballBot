@@ -7,16 +7,33 @@ from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
+
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 
 from frontoffice.models import RosterEntry, Team, ManagerProfile, TeamRecord, YahooQuery, Player
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
 from frontoffice.services.TeamService import TeamService
 from frontoffice.yahooQuery import OauthGetAuthKeyHelper
+from frontoffice.forms import SignUpForm
 
 logger = logging.getLogger(__name__)
 
-# Create your views here.
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('home')
+    else:
+        form = SignUpForm()
+    return render(request, 'registration/registration.html', {'form': form})
+
 @login_required
 def index(request):
     team = "No Team Found"
@@ -76,6 +93,20 @@ def matchup(request):
         'user_team_players': user_team_players,
         'opposing_team_players': opposing_team_players,
         })
+
+@login_required
+def best_lineup(request):
+    team_service = TeamService(request.user)
+    user_team = team_service.get_team()
+    user_team_players = team_service.get_team_roster(user_team)
+    lineup = team_service.get_best_lineup(user_team)
+
+    return render(request, 
+        'frontoffice/best_lineup.html',
+        {'user_team': user_team,
+        'current_team_players': user_team_players,
+        'lineup' : lineup
+         })
 
 @login_required
 def leaguePlayers(request):
@@ -295,7 +326,7 @@ def ajax_add_player(request):
 
         # print(player)
         # print(num_roster_entry)
-
+        
         # return JsonResponse(response)
 
         if team_service.add_player(player, team):
