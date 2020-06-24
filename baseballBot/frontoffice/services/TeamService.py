@@ -1,4 +1,5 @@
 import logging
+import json
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -17,6 +18,7 @@ class TeamService():
         self.league = self.get_league()
         self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id)
         # self.update_league_rosters()
+        # self.update_league_settings()
 
     def get_league(self):
         league = False
@@ -34,6 +36,8 @@ class TeamService():
                 league.yahoo_id = data['league'].league_id
                 league.yahoo_key = data['league'].league_key
                 league.name = data['league'].name
+                league.game_code = data['league'].game_code
+                league.season_year = data['league'].season
                 league.save()
 
             self.manager_profile.league = league
@@ -54,6 +58,29 @@ class TeamService():
             manager_profile.save()
 
         return manager_profile
+
+    def update_league_settings(self):
+        yqu = self.yahoo_query_utility
+        data = yqu.get_league_settings()
+
+        logger.debug(data.roster_positions)
+        # logger.debug(json.dumps(data.roster_positions))
+        
+        roster_slots = []
+        for rs in data.roster_positions:
+            roster_slot_str = '{' \
+            + '"count":"' + str(rs['roster_position'].count) + '",' \
+            + '"position":"' + rs['roster_position'].position + '",' \
+            + '"position_type":"' + rs['roster_position'].position_type + '"' \
+            + '}'
+            roster_slots.append(roster_slot_str)
+
+            logger.debug(roster_slot_str)
+
+        self.league.roster_slots_raw = json.dumps(roster_slots)
+
+        self.league.save()
+        return True
 
     def update_team_data(self, team, forceUpdate=False):
 
