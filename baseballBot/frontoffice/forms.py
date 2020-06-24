@@ -9,3 +9,7 @@ class SignUpForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2', )
+
+
+class VerifierTokenForm(forms.Form):
+    verifier_code = forms.CharField(label='Enter Your Verifier code:', max_length=100)
