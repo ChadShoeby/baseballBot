@@ -24,10 +24,14 @@
 
             {% for field in form %}
 
+            {% for error in field.errors %}
+            <div class="text-wrap input-group-text alert alert-danger">
+                {{ error }}
+            </div>
+            {% endfor %}
+
             <div class="input-group form-group">
-                {% for error in field.errors %}
-                    <div class="input-group-text text-danger">{{ error }}</div>
-                {% endfor %}
+      
 
                 <div class="input-group-prepend">
                     <span class="input-group-text">

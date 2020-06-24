@@ -11,8 +11,9 @@
         <div class="card-body">
         <form method="post">
               {% csrf_token %}
+              
               {% for non_field_error in form.non_field_errors %}
-              <div class="errors input-group-text text-danger text-wrap">
+              <div class="text-wrap input-group-text alert alert-danger">
                   {{ non_field_error }}
               </div>
               {% endfor %}
@@ -21,6 +22,12 @@
                 {{ hidden_field.errors }}
                 {{ hidden_field }}
               {% endfor %}
+
+            {% for error in form.username.errors %}
+            <div class="text-wrap input-group-text alert alert-danger">
+                {{ error }}
+            </div>
+            {% endfor %}
 
             <div class="input-group form-group">
                 <div class="input-group-prepend">
@@ -38,10 +45,12 @@
                     placeholder="username" />
             </div>
 
+            {% for error in form.password.errors %}
+            <div class="text-wrap input-group-text alert alert-danger">
+                {{ error }}
+            </div>
+            {% endfor %}
             <div class="input-group form-group">
-                {% if field.errors %}
-                    <div class="input-group-text text-danger">{{ field.errors }}</div>
-                {% endif %}
                 <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-key"></i></span>
                 </div>
