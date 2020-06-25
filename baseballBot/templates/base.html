@@ -23,16 +23,14 @@
 
     <title>{% block title %}Baseball Bot{% endblock %}</title>
     <style>
-main{
-/*background-image: url({% static "baseballBot/img/feild_main.jpg" %});
-background-repeat: repeat;*/ 
-/*background-image: url({% static "baseballBot/img/stadium_background.png" %});*/
-background-image: url({% static "baseballBot/img/stadium_lights_wind_main.jpg" %});
-background-size: cover;
-background-repeat: no-repeat;
-background-position: center center; 
-height: 100%;
-width:100%;
+main
+{
+  background-image: url({% static "baseballBot/img/stadium_lights_wind_main.jpg" %});
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center; 
+  height: 100%;
+  width:100%;
 }
     </style>
     {% block extra_css %}{% endblock %}

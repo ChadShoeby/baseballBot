@@ -1,29 +1,62 @@
-{% extends 'base.html' %}
+{% extends 'account_base.html' %}
 
-{% block title %}Enter Verifier{% endblock %}
-{% block dashboardTitle %}Enter Verifier{% endblock %}
+{% block title %}Yahoo Verification{% endblock %}
 
-{% block dashboardBody %}
-<div class="card shadow mb-4">
-	  <div class="card-body">
-      <div class="container" style="display: block;">
-          <div class="row mt-2">
-    <!-- Card Header - Dropdown -->	
-    <p>Please click here to get your verification code from Yahoo. Then return to this page to enter the code. (the link will open a new tab)</p>
-    	</div>
-    	<div class="row mt-2">
-    <p>
-        <a href="{{ auth_url }}" target="_blank">{{ auth_url }}</a>
-    </p>
-    	</div>
-    	<div class="row mt-2">
-    <form method="post">
-      {% csrf_token %}
-      {{ form }}
-      <button type="submit">Submit</button>
-    </form>
-    	</div>
-	</div>
-	</div>
+{% block account_body %}
+<div class="d-flex flex-column justify-content-center h-75">
+    <div class="card">
+        <div class="card-header">
+            <h3>Step 1</h3>
+            <div class="font-italic font-weight-light text-white">Get verifier code from Yahoo</div>
+        </div>
+
+        <div class="card-body text-white">
+        <!-- Card Header - Dropdown --> 
+          <span class="d-inline-block" data-toggle="popover" title="Yahoo Authorization Link" data-content='{{ auth_url }}'><a class="btn float-right login_btn" href="{{ auth_url }}" target="_blank">Get Code From Yahoo</a></span>
+          <div class="d-flex justify-content-start"> 
+ <small class="font-italic font-weight-light text-white">this will open a new window</small>
+          </div>
+      	</div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Step 2</h3>
+            <div class="font-italic font-weight-light text-white">Enter your code</div>
+        </div>
+
+        <div class="card-body text-white">
+        <!-- Card Header - Dropdown --> 
+          <form method="post">
+              {% csrf_token %}
+              {# {{ form.verifier_code }} #}
+              <div class="input-group form-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                </div>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="{{ form.verifier_code.id_for_label }}" 
+                    name="{{ form.verifier_code.name }}"
+                    required="required"
+                    placeholder="code from yahoo" />
+            </div>
+            <div class="form-group">
+              <input type="submit" id="_submit" name="_submit" class="btn float-right login_btn" value="Submit">
+            </div>
+          </form>   
+        </div>
+    </div>
 </div>
+
+{% endblock %}
+{% block javascript %}
+<script>
+$(function () {
+  $('[data-toggle="popover"]').popover({
+    container: 'body'
+  })
+})
+</script>
 {% endblock %}
