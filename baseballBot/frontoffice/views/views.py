@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from frontoffice.services.TeamService import TeamService
-from frontoffice.models import Team
+from frontoffice.models import Team, Player
 
 logger = logging.getLogger(__name__)
 
