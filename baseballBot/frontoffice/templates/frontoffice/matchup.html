@@ -4,15 +4,12 @@
 {% block dashboardTitle %}{{ user_team }} vs {{ opposing_team }}{% endblock %}
 
 {% block dashboardBody %}
-	<h2>{{ user_team }}{% if user_team.yahoo_team_logo_url %}
-<img style="height:50px;" src="{{ user_team.yahoo_team_logo_url }}" class="img-thumbnail">
-{% endif %}</h2> 
-	<p>{% include 'frontoffice/playerTable.html' with players=user_team_players team=user_team %}</p>
+<div class="row">
+    {% include 'frontoffice/lineupCard.html' with team=user_team players=user_team_players %}
 
+    {% include 'frontoffice/lineupCard.html' with team=opposing_team players=opposing_team_players %}
 
-    <h2>{{ opposing_team }}{% if opposing_team.yahoo_team_logo_url %}
-    <img style="height:50px;" src="{{ opposing_team.yahoo_team_logo_url }}" class="img-thumbnail">
-    {% endif %}</h2> 
-    <p>{% include 'frontoffice/playerTable.html' with players=opposing_team_players team=opposing_team %}</p>
+</div>
+	
 
 {% endblock %}
