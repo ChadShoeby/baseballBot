@@ -35,7 +35,7 @@ class League(models.Model):
             
             for rs_str in json.loads(self.roster_slots_raw):
                 rs_json_obj = json.loads(rs_str)
-                formatted_roster_slots[rs_json_obj["position"]] = rs_json_obj["count"]
+                formatted_roster_slots[rs_json_obj["position"]] = int(rs_json_obj["count"])
             return formatted_roster_slots
                 
         return formatted_roster_slots

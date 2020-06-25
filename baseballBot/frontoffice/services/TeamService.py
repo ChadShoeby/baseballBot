@@ -283,26 +283,89 @@ class TeamService():
         playersOnTeamsInLeague = RosterEntry.objects.filter(team__manger_profiles__user=self.user).values_list('player_id', flat=True)
         return Player.objects.all().exclude(id__in=playersOnTeamsInLeague)
 
-
-    def get_available_players(self, team):
+    def get_best_lineup(self, team):
         team_id = team.id
-        roster_slots={
-                    'P':3,
-                    'C':2,
-                    'OF':3
-                    }    
+        roster_slots= team.league.roster_slots  
+        logger.debug(roster_slots)
+        best_available_players = {}
+        
+        def get_best_available_for_position(positions, num_slots, team, not_in_players=None):
+            params = {'slot_count': num_slots, 'team_id': team_id}
+            player_map = {
+                'p_id': 'id', 
+                'full_name': 'full_name', 
+                'display_position':'display_position',
+                'estimated_season_points':'estimated_season_points'
+                }
 
-        available_players_list =[]
-        player_map = {'p_id': 'id', 'full_name': 'full_name', 'primary_position': 'primary_position'}
+            query = ("SELECT player_table.id as p_id, full_name, display_position, estimated_season_points \
+                FROM frontoffice_player as player_table \
+                LEFT JOIN frontoffice_rosterentry \
+                ON player_table.id = frontoffice_rosterentry.player_id \
+                WHERE (team_id IS NULL or team_id = %(team_id)s) ")
+
+            if not_in_players:
+                query += ("AND player_table.id not in %(not_in_players)s ")
+                params['not_in_players'] = not_in_players
+
+            if len(positions) == 1:
+                query +="AND display_position LIKE %(position)s "
+                params['position'] = '%'+positions[0]+'%'
+            elif len(positions) >= 1:
+                query +="AND (display_position LIKE %(position)s "
+                params['position'] = '%'+positions[0]+'%'
+
+                for p in range(1,len(positions)):
+                    # alt_position_key = "position_" + positions[p] 
+                    query += "OR display_position LIKE '%%"+positions[p] +"%%' "
+                    # params[alt_position_key] = '%'+positions[p]+'%'
+               
+                # this closes the parans
+                query += ") "
+
+            # if alt_positions:
+            #     for p in range(len(alt_positions)):
+            #         alt_position_key = "position_" + alt_positions[p] 
+            #         query +=("OR display_position LIKE %(alt_position_key)s ") 
+            #         params[alt_position_key] = alt_positions[p]
+
+            query +=("ORDER BY estimated_season_points \
+                DESC LIMIT %(slot_count)s")
+
+            available_players = Player.objects.raw(query, params = params, translations=player_map)
+            logger.debug(available_players.query)
+            logger.debug(available_players)
+            return available_players
 
         for position, slot_count in roster_slots.items():
-            params = {'position': position,'slot_count': slot_count, 'team_id': team_id}
- 
-            available_players = Player.objects.raw('SELECT player_table.id as p_id, full_name, primary_position FROM baseballbot.frontoffice_player as player_table LEFT JOIN frontoffice_rosterentry ON player_table.id = frontoffice_rosterentry.player_id WHERE (team_id IS NULL or team_id = %(team_id)s) AND (position = %(position)s) ORDER BY estimated_season_points DESC LIMIT %(slot_count)s',params = params, translations=player_map)
-            available_players_list += available_players
-            continue
+            # skip bench position
+            if position == "BN":
+                continue
 
-        return available_players_list
+            spots_needed_for_position = 0
+
+            # params = {'position': '%'+position+'%','slot_count': slot_count, 'team_id': team_id}
+            best_available_for_position = get_best_available_for_position([position], slot_count, team)
+            logger.debug(best_available_for_position)
+            for player in best_available_for_position:
+                if player.id in best_available_players:
+                    spots_needed_for_position += 1
+                else:
+                    best_available_players[player.id] = player
+
+            if spots_needed_for_position >= 1:
+                logger.debug("still need" + str(spots_needed_for_position)+" for position "+position)
+                new_players = get_best_available_for_position(["P","SP"], spots_needed_for_position, team, not_in_players=tuple(best_available_players.keys()))
+                # logger.debug(new_players.query)
+                # logger.debug(new_players)
+                for player in new_players:
+                    logger.debug(player)
+                    best_available_players[player.id] = player
+
+            logger.debug(best_available_players)
+            # best_available_players += available_players
+
+        return best_available_players.values()
 
     def drop_player(self, player, team):
         try:
