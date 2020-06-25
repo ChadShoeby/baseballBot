@@ -1,16 +1,29 @@
 {% extends 'base.html' %}
 
 {% block title %}Enter Verifier{% endblock %}
+{% block dashboardTitle %}Enter Verifier{% endblock %}
 
 {% block dashboardBody %}
+<div class="card shadow mb-4">
+	  <div class="card-body">
+      <div class="container" style="display: block;">
+          <div class="row mt-2">
+    <!-- Card Header - Dropdown -->	
     <p>Please click here to get your verification code from Yahoo. Then return to this page to enter the code. (the link will open a new tab)</p>
+    	</div>
+    	<div class="row mt-2">
     <p>
         <a href="{{ auth_url }}" target="_blank">{{ auth_url }}</a>
     </p>
-
+    	</div>
+    	<div class="row mt-2">
     <form method="post">
       {% csrf_token %}
       {{ form }}
       <button type="submit">Submit</button>
     </form>
+    	</div>
+	</div>
+	</div>
+</div>
 {% endblock %}
