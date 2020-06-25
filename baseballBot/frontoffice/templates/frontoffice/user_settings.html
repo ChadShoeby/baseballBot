@@ -1,8 +1,20 @@
 {% extends "../base.html" %}
 
 {% block title %}{{ user_team }} Settings{% endblock %}
+{% block dashboardTitle %}{{ user_team }} Settings{% endblock %}
+
 
 {% block dashboardBody %}
-    <h2>Auto Manager</h2> 
+  <!-- Settings Info Card -->
+  <div class="card shadow mb-4">
+    <!-- Card Header - Dropdown -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+    <h6 class="m-0 font-weight-bold text-primary">Auto Manager</h6> 
+    </div>
+    <div class="card-body">
+        <div class="float-left">
     <p>{{auto_manager}}</p>
+    	</div>
+    </div>
+  </div>
 {% endblock %}
