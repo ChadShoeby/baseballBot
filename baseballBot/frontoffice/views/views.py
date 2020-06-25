@@ -18,8 +18,8 @@ def matchup(request):
     user_team_players = team_service.get_team_roster(user_team)
 
     # go to yahoo and get next opponent
-    opposing_team_yahoo_team_key = "398.l.156718.t.2"
-    opposing_team = Team.objects.get(yahoo_team_key=opposing_team_yahoo_team_key)
+    matchup = team_service.get_team_matchup_for_week(user_team, week=1)
+    opposing_team = matchup.opposing_team
     opposing_team_players = team_service.get_team_roster(opposing_team)
     
     return render(request, 
@@ -28,6 +28,7 @@ def matchup(request):
         'opposing_team' : opposing_team,
         'user_team_players': user_team_players,
         'opposing_team_players': opposing_team_players,
+        'matchup': matchup
         })
 
 @login_required

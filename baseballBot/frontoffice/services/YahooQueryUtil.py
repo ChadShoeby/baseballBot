@@ -128,3 +128,6 @@ class YahooQueryUtil():
     def get_league_settings(self):
         return self.yahoo_query.get_league_settings()
 
+    def get_team_matchups(self, team):
+        return self.yahoo_query.get_team_matchups(team.yahoo_team_id)
+

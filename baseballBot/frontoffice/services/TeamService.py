@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
-from frontoffice.models import RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry
+from frontoffice.models import Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry
 
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ class TeamService():
         self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id)
         # self.update_league_rosters()
         # self.update_league_settings()
+        # self.update_team_matchups(self.get_team())
 
     def get_league(self):
         league = False
@@ -58,6 +59,46 @@ class TeamService():
             manager_profile.save()
 
         return manager_profile
+
+    def update_team_matchups(self, team):
+        yqu = self.yahoo_query_utility
+        data = yqu.get_team_matchups(team)
+
+        #get teams by yahoo key
+        teams_by_yahoo_key = {}
+        for team_in_league in self.league.teams_in_league.all():
+            teams_by_yahoo_key[team_in_league.yahoo_team_key] = team_in_league
+
+        #get team matchups by week
+        matchups_by_week = {}
+        for m in Matchup.objects.filter(user_team=team).all():
+            matchups_by_week[str(m.week)] = m
+
+        for d in data:
+            yahoo_matchup = d['matchup']
+            if str(yahoo_matchup.week) in matchups_by_week:
+                matchup = matchups_by_week[str(yahoo_matchup.week)]
+            else:
+                matchup = Matchup()
+                matchup.week = yahoo_matchup.week
+                matchup.user_team = team
+
+            matchup.week_start = yahoo_matchup.week_start
+            matchup.week_end = yahoo_matchup.week_end
+            matchup.status = yahoo_matchup.status
+            matchup.is_consolation = yahoo_matchup.is_consolation
+            matchup.is_playoffs = yahoo_matchup.is_playoffs
+
+            for t in yahoo_matchup.teams:
+                if t['team'].team_key != team.yahoo_team_key:
+                    if t['team'].team_key in teams_by_yahoo_key:
+                        matchup.opposing_team = teams_by_yahoo_key[t['team'].team_key]
+                    # pass
+
+            matchup.save()
+
+        logger.debug(data)
+        return data
 
     def update_league_settings(self):
         yqu = self.yahoo_query_utility
@@ -323,11 +364,6 @@ class TeamService():
                 # this closes the parans
                 query += ") "
 
-            # if alt_positions:
-            #     for p in range(len(alt_positions)):
-            #         alt_position_key = "position_" + alt_positions[p] 
-            #         query +=("OR display_position LIKE %(alt_position_key)s ") 
-            #         params[alt_position_key] = alt_positions[p]
 
             query +=("ORDER BY estimated_season_points \
                 DESC LIMIT %(slot_count)s")
@@ -401,4 +437,11 @@ class TeamService():
 
         return result
 
-
+    def get_team_matchup_for_week(self, team, week=1):
+        try:
+            matchup = Matchup.objects.get(user_team=team,week=week)
+        except ObjectDoesNotExist:
+            self.update_team_matchups(self.get_team())
+            matchup = Matchup.objects.get(user_team=team,week=week)
+            
+        return matchup
