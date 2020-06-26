@@ -13,10 +13,7 @@
 
 {% block dashboardBody %}
 <div class="row">
-
-  {% include 'frontoffice/lineupCard.html' with team=team players=players editableRoster=True %}
-
-<div class="col-s-4 col-lg-5">
+ <div class="col-s-4 col-lg-5">
 
   <!-- Team Info Card -->
   <div class="card shadow mb-4">
@@ -36,7 +33,8 @@
             </div>
           </div>
           <div class="row mt-2">
-            <div class="col-6"><span class="small font-weight-bold">Next Matchup</span><br> </div>
+            <div class="col-6"><span class="small font-weight-bold">Next Matchup</span><br>
+            {{ matchup.opposing_team }}</div>
             <div class="col-6"><span class="small font-weight-bold">Total Estimated Points</span><br>{{ team.total_est_points }} </div>
           </div>
           <div class="row mt-2">
@@ -87,42 +85,41 @@
   </div>
 </div> <!-- end team info card-->
 
-</div> <!-- end row-->
-
-
-  
-
+{% include 'frontoffice/lineupCard.html' with team=team players=players editableRoster=True %} 
+</div>
 {% endblock %}
+
 {% block javascript %}
   <script>
-    $("#update_team_roster").click(function () {
-      $.ajax({
-        url: '{% url "ajax_update_team_roster" %}',
+    $('#dashboard_row').on('click', "#update_team_roster",function () {
+  // $("#update_team_roster").click(function () {
+    $.ajax({
+      url: '{% url "ajax_update_team_roster" %}',
 
-        dataType: 'json',
-        success: function (data) {
-          if (data) {
-            console.log("response is "+data.data);
-            location.reload();
-          }
+      dataType: 'json',
+      success: function (data) {
+        if (data) {
+          console.log("response is "+data.data);
+          location.reload();
         }
-      });
-
+      }
     });
 
-    $("#update_league_info").click(function () {
-      $.ajax({
-        url: '{% url "ajax_update_league" %}',
+  });
 
-        dataType: 'json',
-        success: function (data) {
-          if (data) {
-            console.log("response is "+data.data);
-            location.reload();
-          }
+  $('#dashboard_row').on('click', "#update_league_info",function () {
+    $.ajax({
+      url: '{% url "ajax_update_league" %}',
+
+      dataType: 'json',
+      success: function (data) {
+        if (data) {
+          console.log("response is "+data.data);
+          location.reload();
         }
-      });
-
+      }
     });
-  </script>
+
+  });
+</script>
 {% endblock %}

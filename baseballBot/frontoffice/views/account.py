@@ -2,6 +2,7 @@ import logging
 
 from django.shortcuts import render, redirect
 
+from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 
@@ -39,8 +40,10 @@ def get_verifier_token(request):
 
             yqu = YahooQueryUtil(request.user.id, league_id=None, verifier_code=verifier_code)
 
+            messages.add_message(request, messages.SUCCESS, 'Yahoo account linked successfully.')
+            messages.add_message(request, messages.INFO, 'Loading yahoo data. This might take a minute.')
             # redirect to a new URL:
-            return redirect('home')
+            return redirect('yahoo_account_linked_success')
     else:
         form = VerifierTokenForm()   
 
@@ -48,4 +51,11 @@ def get_verifier_token(request):
         'frontoffice/enterVerifierToken.html',
         {'form': form ,
         'auth_url' : auth_url
+        })
+
+@login_required
+def yahoo_account_linked_success(request):
+    return render(request,
+        'frontoffice/account_linked_success.html',
+        {
         })

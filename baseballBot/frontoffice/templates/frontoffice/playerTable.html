@@ -71,7 +71,6 @@ $(document).ready(function() {
 
     {% if editableRoster %}
     $('#'+playerTableId).on('click', ".drop_player_roster",function () {
-    // $(".drop_player_roster").click(function () {
       $.ajax({
         url: '{% url "ajax_drop_player" %}',
         data: {
@@ -89,7 +88,6 @@ $(document).ready(function() {
 
     {% if canAddPlayers %}
     $('#'+playerTableId).on('click', ".add_player",function () {
-    // $(".add_player").click(function () {
       $.ajax({
         url: '{% url "ajax_add_player" %}',
         data: {

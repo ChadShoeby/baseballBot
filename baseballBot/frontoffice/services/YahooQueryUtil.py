@@ -6,7 +6,7 @@ from frontoffice.yahooQuery.query import YahooFantasySportsQuery
 from frontoffice.yahooQuery.OauthGetAuthKeyHelper import OauthGetAuthKeyHelper
 
 class YahooQueryUtil():
-    def __init__(self, user_id, league_id=None, verifier_code=None ):
+    def __init__(self, user_id, league_id=None, league_key=None, verifier_code=None ):
         self.oauth_helper = OauthGetAuthKeyHelper(user_id)
         auth_dir = self.oauth_helper.auth_dir
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_output")
@@ -22,7 +22,7 @@ class YahooQueryUtil():
         self.get_verifier_code = False
 
         # self.yahoo_data = Data(self.data_dir)
-        self.yahoo_query = YahooFantasySportsQuery(auth_dir, self.league_id, self.oauth_helper.token_file_dir, verifier_code=verifier_code, game_id=self.game_id,
+        self.yahoo_query = YahooFantasySportsQuery(auth_dir, self.league_id, self.oauth_helper.token_file_dir, league_key=league_key,verifier_code=verifier_code, game_id=self.game_id,
                                                    game_code=self.game_code, offline=False, all_output_as_json=False)
 
     def update_verifier_code (self, verifier_code):

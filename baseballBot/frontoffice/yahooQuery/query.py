@@ -24,7 +24,7 @@ class YahooFantasySportsQuery(object):
     """Yahoo fantasy sports query to retrieve all types of fantasy sports data
     """
 
-    def __init__(self, auth_dir, league_id, token_file_dir, verifier_code=None, game_id=None, game_code="nfl", offline=False, all_output_as_json=False,
+    def __init__(self, auth_dir, league_id, token_file_dir, league_key=None, verifier_code=None, game_id=None, game_code="nfl", offline=False, all_output_as_json=False,
                  consumer_key=None, consumer_secret=None):
         """Instantiate a Yahoo query object for running queries against the Yahoo fantasy REST API.
 
@@ -50,7 +50,7 @@ class YahooFantasySportsQuery(object):
         self.offline = offline
         self.all_output_as_json = all_output_as_json
 
-        self.league_key = None
+        self.league_key = league_key
         self.executed_queries = []
 
         if not self.offline:

@@ -17,7 +17,7 @@ class League(models.Model):
     
     roster_slots_raw = models.CharField(max_length=5000,null=True)
 
-    updated_at = models.DateTimeField('league last updated',auto_now_add=True)
+    updated_at = models.DateTimeField('league last updated',null=True)
 
     def league_updated(self):
         self.updated_at = datetime.now()

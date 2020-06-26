@@ -7,7 +7,6 @@ from django.db import transaction
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
 from frontoffice.models import Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry
 
-
 logger = logging.getLogger(__name__)
 
 class TeamService():
@@ -16,10 +15,30 @@ class TeamService():
         self.user = user
         self.manager_profile = self.get_manager_profile()
         self.league = self.get_league()
-        self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id)
-        # self.update_league_rosters()
-        # self.update_league_settings()
-        # self.update_team_matchups(self.get_team())
+        self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id, league_key=self.league.yahoo_key)
+
+        if not self.league.updated_at:
+            self.initialize_data_from_yahoo()
+
+    def initialize_data_from_yahoo(self):
+        team = self.get_team()
+        self.update_league_rosters(forceUpdate=True)
+        self.update_league_settings()
+        self.update_team_matchups(team)
+
+    # for testing and development
+    def delete_yahoo_data(self):
+        team = self.get_team()
+        #delete matchups
+        Matchup.objects.filter(user_team=team).delete()
+        #delete all roster entries
+        teams = self.league.teams_in_league.all()
+        RosterEntry.objects.filter(team__in=teams).delete()
+
+        #delete teams, manager_profile, and league
+        teams.delete()
+        self.manager_profile.delete()
+        self.league.delete()
 
     def get_league(self):
         league = False
@@ -321,7 +340,7 @@ class TeamService():
         return roster
 
     def get_free_agents_in_league(self):
-        playersOnTeamsInLeague = RosterEntry.objects.filter(team__manger_profiles__user=self.user).values_list('player_id', flat=True)
+        playersOnTeamsInLeague = RosterEntry.objects.filter(team__league__manger_profiles__user=self.user).values_list('player_id', flat=True)
         return Player.objects.all().exclude(id__in=playersOnTeamsInLeague)
 
     def get_best_lineup(self, team):

@@ -3,9 +3,12 @@ import logging
 from django.conf import settings
 from django.utils import timezone
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
+
 from django.core.exceptions import ObjectDoesNotExist
+from django.template.response import TemplateResponse
+from django.template.loader import render_to_string
 
 from django.contrib.auth.decorators import login_required
 
@@ -17,37 +20,34 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def index(request):
-    team = "No Team Found"
-    players = []
-    manager_profile = None
 
-    if settings.USEREALQUERY:
+    #check if user needs to get a verifier code from yahoo
+    oauth_helper = OauthGetAuthKeyHelper(request.user.id)
+    if oauth_helper.need_verifier_code():
+        return redirect('enterVerifierTokenForm')
+    
+    team_service = TeamService(request.user)
+    manager_profile = team_service.manager_profile
+    league = team_service.league
+    team = team_service.get_team()
+    players = team_service.get_team_roster(team)
 
-        #check if user needs to get a verifier code from yahoo
-        oauth_helper = OauthGetAuthKeyHelper(request.user.id)
-        if oauth_helper.need_verifier_code():
-            return redirect('enterVerifierTokenForm')
-
-        team_service = TeamService(request.user)
-        manager_profile = team_service.manager_profile
-        league = team_service.league
-        team = team_service.get_team()
-        players = team_service.get_team_roster(team)
-
-    else:
-        try:
-            team = Team.objects.get(user__username=request.user)
-            players = Player.objects.filter(team = team.id)
-        except ObjectDoesNotExist:
-            team = "No Team Found"
-     
     return render(request, 
-        'frontoffice/index.html',
+        'frontoffice/dashboard.html',
         {
         'team': team,
         'players' : players,
         'manager_profile': manager_profile,
         'league': league,
+        'matchup': team_service.get_team_matchup_for_week(team),
+        })
+
+@login_required
+def ajax_initialize_league(request):
+    team_service = TeamService(request.user)
+    return JsonResponse({
+        'data': 'success',
+        'status': 'success'
         })
 
 @login_required
@@ -82,7 +82,7 @@ def ajax_update_league(request):
 
         team_service = TeamService(request.user)
         manager_profile = team_service.manager_profile
-        if manager_profile.can_update_leauge():
+        if team_service.league.can_update_leauge():
             team_service.update_league_rosters(forceUpdate=True)
             messages.add_message(request, messages.SUCCESS, 'League updated successfully.')
             response['data'] = 'Success. League Updated.'

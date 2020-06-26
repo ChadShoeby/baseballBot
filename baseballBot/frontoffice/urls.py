@@ -7,6 +7,7 @@ urlpatterns = [
     path('', include('django.contrib.auth.urls')),
 
     path('', dashboard.index, name='home'),
+    url(r'^ajax/initialize_league/$', dashboard.ajax_initialize_league, name='ajax_initialize_league'),
     url(r'^ajax/update_team_roster/$', dashboard.ajax_update_team_roster, name='ajax_update_team_roster'),
     url(r'^ajax/update_league/$', dashboard.ajax_update_league, name='ajax_update_league'),
     url(r'^ajax/drop_player/$', dashboard.ajax_drop_player, name='ajax_drop_player'),
@@ -18,6 +19,7 @@ urlpatterns = [
     path('matchup', views.matchup, name='matchup'),
     path('user-settings', views.user_settings, name='user_settings'),
 
-    path('enter-verifier-token', account.get_verifier_token, name='enterVerifierTokenForm'),
     path('signup/', account.signup, name='signup'),
+    path('enter-verifier-token', account.get_verifier_token, name='enterVerifierTokenForm'),
+    path('account-linked-successfully', account.yahoo_account_linked_success, name='yahoo_account_linked_success'),
 ]

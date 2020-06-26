@@ -4,6 +4,11 @@
 
 {% block account_body %}
 <div class="d-flex flex-column justify-content-center h-75">
+  <div class="card">
+        <div class="card-header">
+            <h3>Link Yahoo Account</h3>
+        </div>
+  </div>
     <div class="card">
         <div class="card-header">
             <h3>Step 1</h3>
@@ -14,7 +19,7 @@
         <!-- Card Header - Dropdown --> 
           <span class="d-inline-block" data-toggle="popover" title="Yahoo Authorization Link" data-content='{{ auth_url }}'><a class="btn float-right login_btn" href="{{ auth_url }}" target="_blank">Get Code From Yahoo</a></span>
           <div class="d-flex justify-content-start"> 
- <small class="font-italic font-weight-light text-white">this will open a new window</small>
+           <small class="font-italic font-weight-light text-white">this will open a new window</small>
           </div>
       	</div>
     </div>

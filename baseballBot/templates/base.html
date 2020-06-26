@@ -77,18 +77,7 @@ main
                 {# put side navbar here #}
                 {# {% include "sideNav.html" %}    #}
 
-                {% if messages %}
-                <div id="messages">
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                      <strong>{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Error{% else %}{{ message.tags|title }}{% endif %}</strong> {{ message }}
-                      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                    </div>      
-                    {% endfor %}
-                </div>
-                {% endif %}
+                {% include "messages.html" %} 
 
                 <main role="main" class="ml-sm-auto pt-3 px-4">
                   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
