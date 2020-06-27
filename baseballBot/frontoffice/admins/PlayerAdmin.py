@@ -85,16 +85,16 @@ class PlayerAdmin(admin.ModelAdmin):
                     player.position_type = "B"
                 
                 if row[5] == "N/A":
-                    player.active_mlb_player = 'inactive'
+                    player.active_mlb_player = False
                 else:
-                    player.active_mlb_player = 'active'
+                    player.active_mlb_player = True
 
                 newPlayerCounter +=1
             
             if len(newPlayers) > 0:
                 Player.objects.bulk_create(newPlayers)
             if len(updatedPlayers) > 0:
-                Player.objects.bulk_update(updatedPlayers, ['estimated_season_points','mlb_team_abbr','display_position','primary_position','eligibile_positions_raw','espn_id','fangraphs_id','league_name','position_type'])
+                Player.objects.bulk_update(updatedPlayers, ['estimated_season_points','mlb_team_abbr','display_position','primary_position','eligibile_positions_raw','espn_id','fangraphs_id','league_name','position_type','active_mlb_player'])
 
             self.message_user(request, "Success: "+str(newPlayerCounter)+" players have been added.")
             return redirect("..")
