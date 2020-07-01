@@ -6,10 +6,12 @@ class AbstractPlayerRecord(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     season_year = models.IntegerField(default=2020)
     game_week = models.IntegerField(default=1)
+    fangraphs_id = models.IntegerField(default=0)
 
     #offensive scoring fields
     hits = models.IntegerField(default=0)
     atbats = models.IntegerField(default=0)
+    singles = models.IntegerField(default=0)
     doubles = models.IntegerField(default=0)
     triples = models.IntegerField(default=0)
     homeruns = models.IntegerField(default=0)
