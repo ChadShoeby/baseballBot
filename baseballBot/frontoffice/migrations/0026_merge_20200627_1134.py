@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('frontoffice', '0025_auto_20200625_1700'),
-        ('frontoffice', '0024_auto_20200626_0723'),
+        ('frontoffice', '0024_auto_20200625_1213'),
     ]
 
     operations = [
