@@ -1,10 +1,10 @@
 {% extends 'admin/base.html' %}
 
 {% block content %}
-<h2>Bulk Import Players</h2>
+<h2>{{ header }}</h2>
 <div>
     <p>
-        Import a csv of players. CSV expects column 2 to be in the format Player (MLB Team Abbreviation - Position) for example "Mike Trout (LAA - CF)". Multiple positions are also acceptable in this format "Ronald Acuna Jr. (ATL - LF,CF,RF)"
+        {{ description }}
     </p>
     <form action="." method="POST" enctype="multipart/form-data">
         {{ form.as_p }}

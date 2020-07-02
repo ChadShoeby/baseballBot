@@ -13,7 +13,7 @@ class Player(models.Model):
     status = models.CharField(max_length=200,default="active")
     yahoo_id = models.IntegerField(null=True)
     espn_id = models.CharField(max_length=200,null=True)
-    fangraphs_id = models.CharField(max_length=200,null=True)
+    fangraphs_id = models.CharField(max_length=200,null=True,unique=True)
     yahoo_key = models.CharField(max_length=200,null=True)
     display_position = models.CharField(max_length=10,null=True)
     eligibile_positions_raw = models.CharField(max_length=200,null=True)

@@ -3,7 +3,7 @@ from django.utils import timezone
 from frontoffice.models import Player
 
 class AbstractPlayerRecord(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
     season_year = models.IntegerField(default=2020)
     game_week = models.IntegerField(default=1)
     fangraphs_id = models.IntegerField(default=0)
