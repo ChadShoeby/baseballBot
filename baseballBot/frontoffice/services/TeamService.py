@@ -129,7 +129,7 @@ class TeamService():
         roster_slots = []
         for rs in data.roster_positions:
             roster_slot_str = '{' \
-            + '"count":"' + str(rs['roster_position'].count) + '",' \
+            + '"count":"' + str(rs['roster_position'].count  ) + '",' \
             + '"position":"' + rs['roster_position'].position + '",' \
             + '"position_type":"' + rs['roster_position'].position_type + '"' \
             + '}'

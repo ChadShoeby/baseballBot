@@ -21,15 +21,13 @@
 {% endblock %}
 {% block javascript %}
 <script>
-$( document ).ready(function() {
-    $.ajax({
-      url: '{% url "ajax_initialize_league" %}',
-      success: function (data) {
-        if (data) {
-          window.location.href = '{% url "home" %}'
-        }
+  $.ajax({
+    url: '{% url "ajax_initialize_league" %}',
+    success: function (data) {
+      if (data) {
+        window.location.href = '{% url "home" %}'
       }
-    });
+    }
   });
 </script>
 {% endblock %}
