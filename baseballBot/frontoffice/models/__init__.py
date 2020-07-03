@@ -10,3 +10,4 @@ from frontoffice.models.YahooSettings import *
 from frontoffice.models.YahooQuery import *
 from frontoffice.models.ManagerProfile import *
 from frontoffice.models.RosterEntry import *
+from frontoffice.models.StatCategory import *

@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
-from frontoffice.models import Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry
+from frontoffice.models import Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry, StatCategory
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ class TeamService():
     def update_league_settings(self):
         yqu = self.yahoo_query_utility
         data = yqu.get_league_settings()
-
+        logger.debug(data.stat_categories)
         logger.debug(data.roster_positions)
         # logger.debug(json.dumps(data.roster_positions))
         
@@ -140,6 +140,45 @@ class TeamService():
         self.league.roster_slots_raw = json.dumps(roster_slots)
 
         self.league.save()
+
+        # get stat categories for league in database
+        stat_categories_in_db = StatCategory.objects.filter(league=self.league)
+        stat_categories_in_db_by_yahoo_id = {}
+
+        for scdb in stat_categories_in_db:
+            stat_categories_in_db_by_yahoo_id[str(scdb.yahoo_id)] = scdb
+
+        # process stat modifiers from yahoo
+        stat_modifiers = {}
+        logger.debug(data.stat_modifiers.stats)
+        for sm in data.stat_modifiers.stats:
+            stat_modifiers[str(sm['stat'].stat_id)] = sm['stat'].value
+
+        # update or create new stat categories
+        logger.debug(data.stat_categories.stats)
+        for sc in data.stat_categories.stats:
+
+            if str(sc['stat'].stat_id) in stat_categories_in_db_by_yahoo_id: 
+                stat_category = stat_categories_in_db_by_yahoo_id[str(sc['stat'].stat_id)]
+            else:
+                stat_category = StatCategory()
+
+            stat_category.display_name = sc['stat'].display_name
+            stat_category.name = sc['stat'].name
+            stat_category.position_type = sc['stat'].position_type
+            stat_category.yahoo_id = sc['stat'].stat_id
+
+            if sc['stat'].enabled == "1":
+                stat_category.enabled = True
+            else: 
+                stat_category.enabled = False
+
+            if str(sc['stat'].stat_id) in stat_modifiers:
+                stat_category.stat_modifier = stat_modifiers[str(sc['stat'].stat_id)]
+            
+            stat_category.league = self.league
+            stat_category.save()
+
         return True
 
     def update_team_data(self, team, forceUpdate=False):
