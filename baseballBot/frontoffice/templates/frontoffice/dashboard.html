@@ -82,8 +82,41 @@
 
         </div>
     </div>
-  </div>
-</div> <!-- end team info card-->
+  </div> <!-- end league info card--> 
+
+  <!-- League stats Info Card -->
+  <div class="card shadow mb-4">
+    <!-- Card Header - Dropdown -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold text-primary">{{ league.name }} Stats
+      </h6>
+    </div>
+    <!-- Card Body -->
+    <div class="card-body">
+        <div class="container" style="display: block;">
+          <div class="row mt-2">
+            <div class="col-6"><span class="small font-weight-bold">Stat</span><br></div>
+            <div class="col-6"><span class="small font-weight-bold">Value</span>
+            </div>
+          </div>
+
+          {% for stat in league.stat_categories.all %}
+          <div class="row mt-2">
+            <div class="col-6">
+              {{ stat.name }} <small class="font-italic font-weight-light text-muted">{{ stat.position_type }}</small>
+            </div>
+
+            <div class="col-6">
+              {{ stat.stat_modifier }}
+            </div>
+          </div>
+          {% endfor %}
+
+        </div>
+    </div>
+  </div> <!-- end league stats info card-->
+
+</div> 
 
 {% include 'frontoffice/lineupCard.html' with team=team players=players editableRoster=True %} 
 </div>
