@@ -6,7 +6,7 @@ class AbstractPlayerRecord(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
     season_year = models.IntegerField(default=2020)
     game_week = models.IntegerField(default=1)
-    fangraphs_id = models.IntegerField(default=0)
+    fangraphs_id = models.CharField(max_length=20,default="NA")
 
     #offensive scoring fields
     hits = models.IntegerField(default=0)
@@ -34,6 +34,9 @@ class AbstractPlayerRecord(models.Model):
         abstract = True
 
 class PlayerRecord(AbstractPlayerRecord):
+    pass
+
+class PlayerProjections(AbstractPlayerRecord):
     pass
 
 class EstimatedPlayerRecord(AbstractPlayerRecord):

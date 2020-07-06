@@ -7,6 +7,7 @@ from frontoffice.models import ScoringCriteria, League
 class Team(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
     league = models.ForeignKey(League, related_name="teams_in_league",on_delete=models.CASCADE,null=True)
+    auto_manager = models.BooleanField(default=False)
 
     yahoo_team_key = models.CharField(max_length=200,null=True)
     yahoo_team_logo_url = models.CharField(max_length=200,null=True)

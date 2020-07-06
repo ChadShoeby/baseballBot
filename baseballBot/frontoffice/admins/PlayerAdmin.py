@@ -7,12 +7,12 @@ from django.urls import path
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from frontoffice.models import Player, PlayerRecord
+from frontoffice.models import Player, PlayerRecord , PlayerProjections
 
 logger = logging.getLogger(__name__)
 
 class PlayerAdmin(admin.ModelAdmin):
-    actions = ["import_bulk_players_csv", "import_bulk_players_fangraph_csv"]
+    actions = ["import_bulk_players_csv", "import_bulk_players_fangraph_csv", "import_bulk_player_projections_fangraph_csv"]
     list_display = ('full_name', 'position')
     change_list_template = "admin/players_changelist.html"
 
@@ -20,7 +20,8 @@ class PlayerAdmin(admin.ModelAdmin):
         urls = super().get_urls()
         my_urls = [
             path('import-csv/', self.import_csv, name="import_bulk_players_csv"),
-            path('import-fangraph-csv/', self.import_fangraph_csv)
+            path('import-fangraph-csv/', self.import_fangraph_csv),
+            path('import-projections-csv/', self.import_projections_csv)
         ]
         return my_urls + urls
 
@@ -142,12 +143,12 @@ class PlayerAdmin(admin.ModelAdmin):
                     # full_name = 1
                     print(row[0])
                     print(row[22])
-                    if str(row[24]) == "playerid":
-                        is_pitcher_import = True
-                        player_id_col = 24
-                    else:
+                    if str(row[22]) == "playerid":
                         is_pitcher_import = False
                         player_id_col = 22
+                    else:
+                        is_pitcher_import = True
+                        player_id_col = 24
 
                     header = False
                     continue
@@ -193,7 +194,7 @@ class PlayerAdmin(admin.ModelAdmin):
                 #    player_record.SH = int(row[17]) #Sack Bunt
                 #    player_record.GDP = int(row[18]) #Grounded into Double Play
                     player_record.stolen_bases = int(row[19]) #Stolen Base
-                    player_record.caught_stealing = int(row[20]) #Caught Stealing
+                    player_record.caught_stealings = int(row[20]) #Caught Stealing
                 #    player_record.AVG = float(row[21]) #Batting Avg
 
                 else:
@@ -226,7 +227,7 @@ class PlayerAdmin(admin.ModelAdmin):
             if len(newPlayers) > 0:
                 PlayerRecord.objects.bulk_create(newPlayers)
             if len(updatedPlayers) > 0:
-                PlayerRecord.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','stolen_bases','caught_stealing','saves','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','hbps_pitcher','strikeouts','fangraphs_id'])
+                PlayerRecord.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','stolen_bases','caught_stealings','saves','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','hbps_pitcher','strikeouts','fangraphs_id'])
 
             self.message_user(request, "Success: "+str(newPlayerCounter)+" players have been added.")
             return redirect("..")
@@ -236,7 +237,133 @@ class PlayerAdmin(admin.ModelAdmin):
             request, "admin/csv_form.html", 
             {"form": form,
             "header": "Bulk Import Player Records",
-            "description": "Import a csv of players records from frangraph data."
+            "description": "Import a csv of players records from fangraph data."
+            }
+        )
+
+    def import_projections_csv(self, request):
+        ###make changes for ZIPS files
+        if request.method == "POST":
+            csv_file = request.FILES["csv_file"]
+            csvf = StringIO(csv_file.read().decode())
+            reader = csv.reader(csvf, delimiter=',')
+            
+            header = True
+            newPlayerCounter = 0 
+            rowCount = 0
+            is_pitcher_import = True
+            player_id_col = 25
+
+            playerProjectionsInDB = PlayerProjections.objects.all()
+            playerProjectionsByFangraphId = {}
+            for pp in playerProjectionsInDB:
+                playerProjectionsByFangraphId[str(pp.fangraphs_id)] = pp
+
+            playerInDB = Player.objects.all()
+            playersByFangraphId = {}
+            for p in playerInDB:
+                playersByFangraphId[str(p.fangraphs_id)] = p
+
+            newPlayers = []
+            updatedPlayers = []
+            for row in reader:
+                rowCount += 1
+               
+                if header:
+                    # yahoo id = 23
+                    # estimated points = 42
+                    # full_name = 1
+                    print(row[0])
+                    if str(row[19]) == "playerid":
+                        is_pitcher_import = True
+                        player_id_col = 19
+                    else:
+                        is_pitcher_import = True
+                        player_id_col = 25
+
+                    header = False
+                    continue
+
+                if len(row) <= 0:
+                    continue
+                    return HttpResponse("error on row:"+str(rowCount)+". player "+str(newPlayerCounter))
+
+                # skip rows without playerid
+                if row[player_id_col] == "":
+                    continue
+
+                # if player record is in database, update that player record,
+                # else create a new player
+                if row[player_id_col] in playerProjectionsByFangraphId:
+                    player_projection = playerProjectionsByFangraphId[row[player_id_col]]
+                    updatedPlayers.append(player_projection)
+                else:
+                    player_projection = PlayerProjections()
+                    player_projection.fangraphs_id = row[player_id_col]
+                    newPlayers.append(player_projection)
+
+                if str(row[player_id_col]) in playersByFangraphId:
+                    player_projection.player = playersByFangraphId[str(row[player_id_col])]
+
+                if not is_pitcher_import:
+                ########Offensive Categories - Standard is 23 Columns#######
+                #    player_record.G = int(row[]) #Games Played
+                    player_projection.atbats = int(row[4]) #At Bats
+                #    player_record.PA = int(row[]) #Plate Apperances
+                    player_projection.hits = int(row[5]) #Hits
+                    player_projection.doubles = int(row[6]) #Doubles
+                    player_projection.triples = int(row[7]) #Triples
+                    player_projection.homeruns = int(row[8]) #Homeruns
+                #    player_record.R = int(row[]) #Runs
+                #    player_record.RBI = int(row[]) #Runs Batted In
+                    player_projection.walks = int(row[11]) #Walks
+                #    player_record.IBB = int(row[]) #Intentional Walks
+                #    player_record.SO = int(row[]) #Strike Outs
+                    player_projection.hbps = int(row[13]) #Hit By Pitch
+                #    player_record.SF = int(row[]) #Sack Fly
+                #    player_record.SH = int(row[]) #Sack Bunt
+                #    player_record.GDP = int(row[]) #Grounded into Double Play
+                #    player_record.AVG = float(row[]) #Batting Avg
+
+                else:
+                ######Defensive Catergories - Standard is 25 Columns#######
+                #    player_record.W = int(row[]) #Wins
+                #    player_record.L = int(row[]) #Losses
+                #    player_record.ERA = int(row[]) #Earned Run Average
+                #    player_record.G = int(row[]) #Games Played
+                #    player_record.GS = int(row[]) #Games Started
+                #    player_record.CG = int(row[]) #Complete Games
+                #    player_record.ShO = int(row[]) #Shut Outs
+                    player_projection.holds = int(row[8]) #Hold
+                #    player_record.BS = int(row[]) #Blown Saves
+                    player_projection.innings_pitched = float(row[7]) #Innings Pitched
+                #    player_record.TBF = int(row[]) #Total Batters Faced
+                    player_projection.hits_pitcher = int(row[8]) #Hits
+                #    player_record.R = int(row[]) #Runs
+                #    player_record.ER = int(row[]) #Earned Runs
+                    player_projection.homeruns_pitcher = int(row[10]) #Homerun
+                    player_projection.walks_pitcher = int(row[12]) #Walk
+                #    player_record.IBB = int(row[]) #Intentional Walk
+                #    player_record.WP = int(row[]) #Wild Pitch
+                #    player_record.BK = int(row[]) #Balks
+                    player_projection.strikeouts = int(row[11]) #Strikeouts
+
+                newPlayerCounter +=1
+            
+            if len(newPlayers) > 0:
+                PlayerProjections.objects.bulk_create(newPlayers)
+            if len(updatedPlayers) > 0:
+                PlayerProjections.objects.bulk_update(updatedPlayers, ['player','atbats','hits','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id'])
+
+            self.message_user(request, "Success: "+str(newPlayerCounter)+" players have been added.")
+            return redirect("..")
+        form = CsvImportForm()
+        
+        return render(
+            request, "admin/csv_form.html", 
+            {"form": form,
+            "header": "Bulk Import Player Projections",
+            "description": "Import a csv of players Projections from fangraph data."
             }
         )
 

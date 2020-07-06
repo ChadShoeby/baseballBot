@@ -13,3 +13,6 @@ class SignUpForm(UserCreationForm):
 
 class VerifierTokenForm(forms.Form):
     verifier_code = forms.CharField(label='Enter Your Verifier code:', max_length=100)
+
+class UserSettingsForm(forms.Form):
+    auto_manager = forms.BooleanField()
