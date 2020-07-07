@@ -278,7 +278,7 @@ class PlayerAdmin(admin.ModelAdmin):
                         is_pitcher_import = True
                         player_id_col = 19
                     else:
-                        is_pitcher_import = True
+                        is_pitcher_import = False
                         player_id_col = 25
 
                     header = False
