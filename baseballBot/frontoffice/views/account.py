@@ -6,9 +6,10 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 
-from frontoffice.forms import SignUpForm, VerifierTokenForm
+from frontoffice.forms import SignUpForm, VerifierTokenForm, UserSettingsForm
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
 from frontoffice.yahooQuery import OauthGetAuthKeyHelper
+from frontoffice.services.TeamService import TeamService
 
 logger = logging.getLogger(__name__)
 
@@ -58,4 +59,31 @@ def yahoo_account_linked_success(request):
     return render(request,
         'frontoffice/account_linked_success.html',
         {
+        })
+
+@login_required
+def user_settings(request):
+    team_service = TeamService(request.user)
+    user_team = team_service.get_team()
+
+    form = UserSettingsForm()
+    form.fields['auto_manager'].initial = user_team.auto_manager
+
+    if request.method == "POST":
+
+        form = UserSettingsForm(request.POST)
+
+        if form.is_valid():
+            user_team.auto_manager = form.cleaned_data['auto_manager']
+            user_team.save()
+            messages.add_message(request, messages.SUCCESS, 'Settings updated.')
+
+        else:
+            messages.add_message(request, messages.ERROR, 'Something wrong.')
+            logger.debug("something went wrong. form invalid")
+
+    return render(request, 
+        'frontoffice/user_settings.html',
+        {'user_team': user_team,
+        'form': form
         })

@@ -14,13 +14,10 @@
     <div class="card-body">
         <div class="float-left">
 
-<form action="." method="POST">
+<form method="POST">
   {% csrf_token %}
+    {{ form.as_p }}
 
-  <input type="radio" id="True" name="auto_manager" value=True>
-  <label for="True">On</label>
-  <input type="radio" id="False" name="auto_manager" value=False>
-  <label for="False">Off</label><br>
   <input type="submit" value="Submit">
 </form> 
 

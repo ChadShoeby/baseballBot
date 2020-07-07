@@ -17,7 +17,7 @@ urlpatterns = [
     path('best-lineup', views.best_lineup, name='best_lineup'),
     path('free-agents', views.freeAgents, name='free_agents'),
     path('matchup', views.matchup, name='matchup'),
-    path('user-settings', views.user_settings, name='user_settings'),
+    path('user-settings', account.user_settings, name='user_settings'),
 
     path('signup/', account.signup, name='signup'),
     path('enter-verifier-token', account.get_verifier_token, name='enterVerifierTokenForm'),

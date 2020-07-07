@@ -9,8 +9,6 @@ from django.contrib.auth.decorators import login_required
 from frontoffice.services.TeamService import TeamService
 from frontoffice.models import Team, Player
 
-from frontoffice.forms import UserSettingsForm
-
 logger = logging.getLogger(__name__)
 
 @login_required
@@ -31,26 +29,7 @@ def matchup(request):
         'user_team_players': user_team_players,
         'opposing_team_players': opposing_team_players,
         'matchup': matchup
-        })
-
-@login_required
-def user_settings(request):
-    team_service = TeamService(request.user)
-    user_team = team_service.get_team()
-    team = Team()
-    form = UserSettingsForm()
-    auto_manager_input = Team.objects.get(name=user_team)
-    if request.method == "POST":
-        auto_manager_input=request.form["auto_manager"]
-        
-        return auto_manager_input
-    return render(request, 
-        'frontoffice/user_settings.html',
-        {'user_team': user_team,
-        'auto_manager_input': auto_manager_input
-        })
-
-    Team.auto_manager.update('auto_manager_input')
+        })    
 
 @login_required
 def best_lineup(request):
