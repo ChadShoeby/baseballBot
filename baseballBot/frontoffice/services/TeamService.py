@@ -379,7 +379,7 @@ class TeamService():
         return roster
 
     def get_free_agents_in_league(self):
-        playersOnTeamsInLeague = RosterEntry.objects.filter(team__league__manger_profiles__user=self.user).values_list('player_id', flat=True)
+        playersOnTeamsInLeague = RosterEntry.objects.filter(team__league__manager_profile__user=self.user.id).values_list('player_id', flat=True)
         return Player.objects.all().exclude(id__in=playersOnTeamsInLeague)
 
     def get_best_lineup(self, team):
