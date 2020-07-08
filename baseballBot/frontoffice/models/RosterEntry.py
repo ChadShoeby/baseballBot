@@ -8,6 +8,7 @@ class RosterEntry(models.Model):
     player = models.ForeignKey(Player, on_delete=models.DO_NOTHING)
 
     at_position = models.CharField(max_length=10,default="P")
+    is_undroppable = models.CharField(max_length=1,default="0")
 
     def bench_player(self):
         self.at_position = "BN"
