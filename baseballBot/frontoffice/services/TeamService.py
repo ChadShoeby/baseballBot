@@ -14,9 +14,9 @@ class TeamService():
     def __init__(self, user, initial_setup=False):
         self.user = user
         self.manager_profile = self.get_manager_profile()
+        self.league = self.get_league()
 
-        if not initial_setup:
-            self.league = self.get_league()
+        if not initial_setup and self.league:
             self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id, league_key=self.league.yahoo_key)
 
             if not self.league.updated_at:
@@ -36,9 +36,13 @@ class TeamService():
         yqu = YahooQueryUtil(self.user.id)
         leagues_from_yahoo = yqu.get_user_leagues_by_game_key()
         yahoo_league_data = False
-        for ld in leagues_from_yahoo:
-            if str(ld['league'].league_id) == str(yahoo_league_id):
-                yahoo_league_data = ld['league']
+
+        if len(leagues_from_yahoo) == 1:
+            yahoo_league_data = leagues_from_yahoo['league']
+        else:
+            for ld in leagues_from_yahoo:
+                if str(ld['league'].league_id) == str(yahoo_league_id):
+                    yahoo_league_data = ld['league']
 
         if not yahoo_league_data:
             logger.debug('Something went wrong. League not found in yahoo')
@@ -541,8 +545,10 @@ class TeamService():
             matchup = Matchup.objects.get(user_team=team,week=week)
         except ObjectDoesNotExist:
             self.update_team_matchups(self.get_team())
-            matchup = Matchup.objects.get(user_team=team,week=week)
-            
+            try:
+                matchup = Matchup.objects.get(user_team=team,week=week)
+            except ObjectDoesNotExist:
+                return []
         return matchup
 
         

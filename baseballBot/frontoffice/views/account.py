@@ -68,7 +68,7 @@ def choose_league(request):
 
     # if 1 league found, redirect to account linked page
     if len(leagues) == 1 :
-        return yahoo_account_linked_success(request, leagues)
+        return yahoo_account_linked_success(request, leagues['league'])
 
     elif len(leagues) < 1:
         logger.debug('no leagues found')

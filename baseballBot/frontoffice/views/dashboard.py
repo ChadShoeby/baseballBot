@@ -45,6 +45,12 @@ def index(request):
     team_service = TeamService(request.user)
     manager_profile = team_service.manager_profile
     league = team_service.league
+
+    # no league found, choose league 
+    if not league:
+        messages.add_message(request, messages.ERROR, 'League not found. Re-initializing league.')
+        return redirect('choose_league')
+
     team = team_service.get_team()
     players = team_service.get_team_roster(team)
 
