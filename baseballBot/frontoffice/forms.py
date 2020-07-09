@@ -16,3 +16,6 @@ class VerifierTokenForm(forms.Form):
 
 class UserSettingsForm(forms.Form):
     auto_manager = forms.BooleanField(label='Auto manage?', required=False)
+
+class ConfirmLeagueForm(forms.Form):
+    league = forms.ChoiceField(label='Which league would you like the app to manage?', widget=forms.RadioSelect)

@@ -13,10 +13,8 @@ class League(models.Model):
     name = models.CharField(max_length=200,null=True)
     season_year = models.CharField(max_length=200,null=True)
     game_code = models.CharField(max_length=200,null=True)
-    game_id = models.CharField(max_length=200,null=True)
-    
+    scoring_type = models.CharField(max_length=200,null=True)
     roster_slots_raw = models.CharField(max_length=5000,null=True)
-
     updated_at = models.DateTimeField('league last updated',null=True)
 
     def league_updated(self):
@@ -26,6 +24,16 @@ class League(models.Model):
     def can_update_leauge(self):
         diff = (timezone.now() - self.updated_at ).total_seconds()
         return not diff < (60*60)
+
+    @property  
+    def yahoo_game_id(self):
+        # example of team key 398.l.156718
+        if self.yahoo_key:
+            result = self.yahoo_key.split(".l.")
+            if len(result) == 2:
+                return result[0]
+                
+        return False
 
     @property  
     def roster_slots(self):

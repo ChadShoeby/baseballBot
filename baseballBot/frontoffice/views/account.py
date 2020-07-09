@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 
-from frontoffice.forms import SignUpForm, VerifierTokenForm, UserSettingsForm
+from frontoffice.forms import SignUpForm, VerifierTokenForm, UserSettingsForm, ConfirmLeagueForm
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
 from frontoffice.yahooQuery import OauthGetAuthKeyHelper
 from frontoffice.services.TeamService import TeamService
@@ -44,7 +44,7 @@ def get_verifier_token(request):
             messages.add_message(request, messages.SUCCESS, 'Yahoo account linked successfully.')
             messages.add_message(request, messages.INFO, 'Loading yahoo data. This might take a minute.')
             # redirect to a new URL:
-            return redirect('yahoo_account_linked_success')
+            return redirect('choose_league')
     else:
         form = VerifierTokenForm()   
 
@@ -55,10 +55,53 @@ def get_verifier_token(request):
         })
 
 @login_required
-def yahoo_account_linked_success(request):
+def yahoo_account_linked_success(request, league):
     return render(request,
         'frontoffice/account_linked_success.html',
+        {'league_id': league.league_id
+        })
+
+@login_required
+def choose_league(request):
+    team_service = TeamService(request.user, initial_setup=True)
+    leagues = team_service.get_leagues_from_yahoo()
+
+    # if 1 league found, redirect to account linked page
+    if len(leagues) == 1 :
+        return yahoo_account_linked_success(request, leagues)
+
+    elif len(leagues) < 1:
+        logger.debug('no leagues found')
+
+    # prompt user for which league
+    league_choices = []
+
+    for ld in leagues:
+        league_choices.append((str(ld['league'].league_id), ld['league'].name))
+
+    form = ConfirmLeagueForm()
+    logger.debug(leagues)
+    form.fields['league'].choices = league_choices
+
+    if request.method == "POST":
+
+        form = ConfirmLeagueForm(request.POST)
+        form.fields['league'].choices = league_choices
+
+        if form.is_valid():
+            league_id = str(form.cleaned_data['league'])
+
+            for ld in leagues:
+                if league_id == str(ld['league'].league_id):
+                    return yahoo_account_linked_success(request, ld['league'])
+
+            #if got here, error something went wrong. 
+            logger.debug("Something went wrong. Chosen league not found.")
+
+    return render(request,
+        'frontoffice/choose_league.html',
         {
+        'form': form
         })
 
 @login_required

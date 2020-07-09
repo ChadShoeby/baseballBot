@@ -2,7 +2,7 @@ from django.db import models
 from datetime import datetime   
 from django.utils import timezone
 from django.contrib.auth.models import User
-from frontoffice.models import ScoringCriteria, League
+from frontoffice.models import League
 
 class Team(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
@@ -14,13 +14,6 @@ class Team(models.Model):
     name = models.CharField(max_length=200)
     created_at = models.DateTimeField('date created',auto_now_add=True)
     roster_last_updated_at = models.DateTimeField('roster last updated',auto_now_add=True)
-    scoring_criteria = models.OneToOneField(
-        ScoringCriteria,
-        on_delete=models.CASCADE,
-        verbose_name="scoring criteria",
-        null=True,
-        blank=True
-        )
 
     def roster_updated(self):
         self.roster_last_updated_at = datetime.now()
@@ -57,3 +50,7 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
+
+    def set_projected_player_points(self):
+        for player in roster:
+            player.set_project_points(team.league)

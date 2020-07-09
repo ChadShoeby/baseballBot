@@ -23,6 +23,10 @@
 <script>
   $.ajax({
     url: '{% url "ajax_initialize_league" %}',
+    data: {
+          'yahoo_league_id': '{{ league_id }}'
+        },
+    dataType: 'json',
     success: function (data) {
       if (data) {
         window.location.href = '{% url "home" %}'

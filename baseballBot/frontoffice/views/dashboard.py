@@ -19,6 +19,22 @@ from frontoffice.yahooQuery import OauthGetAuthKeyHelper
 logger = logging.getLogger(__name__)
 
 @login_required
+def testing_delete_data(request):
+    if request.user.is_staff:
+
+        team_service = TeamService(request.user)
+        team_service.delete_yahoo_data()
+        return JsonResponse({
+            'data': 'success',
+            'status': 'success'
+            })
+
+    return JsonResponse({
+        'data': 'error',
+        'status': 'not authorized'
+        })
+
+@login_required
 def index(request):
 
     #check if user needs to get a verifier code from yahoo
@@ -44,7 +60,23 @@ def index(request):
 
 @login_required
 def ajax_initialize_league(request):
-    team_service = TeamService(request.user)
+    response = {
+        'data': 'Something went wrong!',
+        'status': 'error'
+    }
+    yahoo_league_id = request.GET.get('yahoo_league_id', None)
+
+    try:
+        yahoo_league_id = int(yahoo_league_id)
+    except ValueError:
+        return JsonResponse(response)
+
+    if not isinstance(yahoo_league_id, int):
+        return JsonResponse(response)
+
+    team_service = TeamService(request.user, initial_setup=True)
+    team_service.initialize_league_data_from_yahoo(yahoo_league_id)
+
     return JsonResponse({
         'data': 'success',
         'status': 'success'

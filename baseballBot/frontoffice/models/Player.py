@@ -6,9 +6,6 @@ class Player(models.Model):
         return self.full_name
 
     full_name = models.CharField(max_length=200,null=True)
-    position = models.CharField(max_length=200,null=True)
-    # points_per_week = models.IntegerField(default=0)
-    mlb_team = models.CharField(max_length=200,null=True)
     #active, injured, probable
     status = models.CharField(max_length=200,default="active")
     yahoo_id = models.IntegerField(null=True)
@@ -22,8 +19,25 @@ class Player(models.Model):
     position_type = models.CharField(max_length=10,null=True)
     headshot_url = models.CharField(max_length=500,null=True)
     primary_position = models.CharField(max_length=10,null=True)
-    estimated_season_points = models.FloatField(null=True)
     active_mlb_player = models.BooleanField(null=False,default=False)
+    estimated_season_points = models.FloatField(null=True)
+
+    @property  
+    def projection(self):
+        projections = self.playerprojections_set.all()
+        if len(projections) >= 1:
+            projection = projections[0]
+
+        return projection
+
+    @property  
+    def projected_season_points(self):
+        total_points = 0
+        # projection = self.projection()
+
+        # total_points = projection.hits
+
+        return total_points
 
     def processYahooData(self, pfy):
         self.full_name = pfy.full_name

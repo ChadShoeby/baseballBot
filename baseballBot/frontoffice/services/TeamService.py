@@ -11,20 +11,61 @@ logger = logging.getLogger(__name__)
 
 class TeamService():
 
-    def __init__(self, user):
+    def __init__(self, user, initial_setup=False):
         self.user = user
         self.manager_profile = self.get_manager_profile()
-        self.league = self.get_league()
-        self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id, league_key=self.league.yahoo_key)
 
-        if not self.league.updated_at:
-            self.initialize_data_from_yahoo()
+        if not initial_setup:
+            self.league = self.get_league()
+            self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id, league_key=self.league.yahoo_key)
 
-    def initialize_data_from_yahoo(self):
+            if not self.league.updated_at:
+                self.initialize_data_from_yahoo()
+
+    def initialize_data_from_yahoo(self, yahoo_league_id = None):
+
+        if yahoo_league_id:
+            self.league = self.initialize_league_data_from_yahoo(self, yahoo_league_id)
+        
         team = self.get_team()
         self.update_league_rosters(forceUpdate=True)
         self.update_league_settings()
         self.update_team_matchups(team)
+
+    def initialize_league_data_from_yahoo(self, yahoo_league_id):
+        yqu = YahooQueryUtil(self.user.id)
+        leagues_from_yahoo = yqu.get_user_leagues_by_game_key()
+        yahoo_league_data = False
+        for ld in leagues_from_yahoo:
+            if str(ld['league'].league_id) == str(yahoo_league_id):
+                yahoo_league_data = ld['league']
+
+        if not yahoo_league_data:
+            logger.debug('Something went wrong. League not found in yahoo')
+
+        # try to find an existing league by yahoo id
+        try:
+            league = League.objects.get(yahoo_id=yahoo_league_data.league_id)
+        except ObjectDoesNotExist:
+            league = League()
+            league.yahoo_id = yahoo_league_data.league_id
+            league.yahoo_key = yahoo_league_data.league_key
+            league.name = yahoo_league_data.name
+            league.game_code = yahoo_league_data.game_code
+            league.season_year = yahoo_league_data.season
+            league.scoring_type = yahoo_league_data.scoring_type
+            league.save()
+
+        self.manager_profile.league = league
+        self.manager_profile.save()
+
+        return league
+
+
+    def get_leagues_from_yahoo(self):
+        yqu = YahooQueryUtil(self.user.id)
+        leagues_from_yahoo = yqu.get_user_leagues_by_game_key()
+        return leagues_from_yahoo
 
     # for testing and development
     def delete_yahoo_data(self):
@@ -41,38 +82,19 @@ class TeamService():
         self.league.delete()
 
     def get_league(self):
-        league = False
         try:
             league = League.objects.get(manager_profile=self.manager_profile)
         except ObjectDoesNotExist:
-            yqu = YahooQueryUtil(self.user.id)
-            data = yqu.get_user_leagues_by_game_key()
-
-            # try to find an existing league by yahoo id
-            try:
-                league = League.objects.get(yahoo_id=data['league'].league_id)
-            except ObjectDoesNotExist:
-                league = League()
-                league.yahoo_id = data['league'].league_id
-                league.yahoo_key = data['league'].league_key
-                league.name = data['league'].name
-                league.game_code = data['league'].game_code
-                league.season_year = data['league'].season
-                league.save()
-
-            self.manager_profile.league = league
-            self.manager_profile.save()
+            return False
 
         return league
 
     def get_manager_profile(self):
         manager_profile = False
-        #check if user has league ID in database.
+        #check if user has manager profile ID in database.
         try:
             manager_profile = ManagerProfile.objects.get(user__id=self.user.id)
-        except ObjectDoesNotExist:
-            print("can't find profile. trying to update by querying yahoo.")
-            
+        except ObjectDoesNotExist:            
             manager_profile = ManagerProfile()
             manager_profile.user = self.user
             manager_profile.save()
@@ -217,18 +239,36 @@ class TeamService():
             print("can't find team by user id. trying to update by querying yahoo.")
             # try to get it from yahoo
             yqu = self.yahoo_query_utility
-            data = yqu.get_user_teams()
+            yahoo_data = yqu.get_user_teams()
+
+            # find correct game, e.g. football 2020, baseball 2020
+            if len(yahoo_data) == 1:
+                yahoo_game_data = yahoo_data['game']
+            elif len(yahoo_data) > 1:
+                for ygd in yahoo_data:
+                    if str(ygd['game'].game_id) == self.league.yahoo_game_id:
+                        yahoo_game_data = ygd
+
+            # find correct team in league
+            if len(yahoo_game_data.teams) == 1:
+                yahoo_team_data = yahoo_game_data.teams["team"]
+            elif len(yahoo_game_data.teams) > 1:
+                for ytd in yahoo_game_data.teams:
+                    #get league key from team key
+                    if str(self.league.yahoo_key) in str(ytd['team'].team_key):
+                        yahoo_team_data = ytd['team']
+
             # try to get it from database by yahoo_id and then update user
             try:
                 team = Team.objects.get(
-                    yahoo_team_key=data['game'].teams["team"].team_key)
+                    yahoo_team_key=yahoo_team_data.team_key)
             except ObjectDoesNotExist:
                 team = Team()
 
             # udpate team with yahoo data and user in either case
             team.user = self.user
             team.league = self.league
-            team.processYahooData(data['game'].teams["team"])
+            team.processYahooData(yahoo_team_data)
             team.save()
 
         return team
@@ -245,6 +285,7 @@ class TeamService():
             yqu = self.yahoo_query_utility
             players = self.update_team_roster(team)
 
+        # team.set_projected_player_points()
         return players
 
     def update_league_rosters(self, forceUpdate=False):
@@ -359,7 +400,6 @@ class TeamService():
                 newRosterEntries.append(roster_entry)
 
             roster_entry.at_position = processed_team_roster_from_yahoo[player.yahoo_id].selected_position_value
-
             roster.append(roster_entry)
 
         if len(newRosterEntries) > 0:

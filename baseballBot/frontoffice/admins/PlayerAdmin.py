@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class PlayerAdmin(admin.ModelAdmin):
     actions = ["import_bulk_players_csv", "import_bulk_players_fangraph_csv", "import_bulk_player_projections_fangraph_csv"]
-    list_display = ('full_name', 'position')
+    list_display = ('full_name', 'display_position')
     change_list_template = "admin/players_changelist.html"
 
     def get_urls(self):
