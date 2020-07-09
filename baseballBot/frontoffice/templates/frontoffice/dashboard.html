@@ -124,7 +124,7 @@
 
 {% block javascript %}
   <script>
-    $('#dashboard_row').on('click', "#update_team_roster",function () {
+    $(document).on('click', "#update_team_roster",function () {
   // $("#update_team_roster").click(function () {
     $.ajax({
       url: '{% url "ajax_update_team_roster" %}',
@@ -140,7 +140,7 @@
 
   });
 
-  $('#dashboard_row').on('click', "#update_league_info",function () {
+  $(document).on('click', "#update_league_info",function () {
     $.ajax({
       url: '{% url "ajax_update_league" %}',
 
