@@ -400,12 +400,13 @@ class TeamService():
                 newRosterEntries.append(roster_entry)
 
             roster_entry.at_position = processed_team_roster_from_yahoo[player.yahoo_id].selected_position_value
+            roster_entry.is_undroppable = processed_team_roster_from_yahoo[player.yahoo_id].is_undroppable
             roster.append(roster_entry)
 
         if len(newRosterEntries) > 0:
             RosterEntry.objects.bulk_create(newRosterEntries)
         if len(updatedRosterEntries) > 0:
-            RosterEntry.objects.bulk_update(updatedRosterEntries, ['at_position'])
+            RosterEntry.objects.bulk_update(updatedRosterEntries, ['at_position','is_undroppable'])
 
         # remove any roster entries that are no longer on team
         for re_id in teamRosterInDB:
