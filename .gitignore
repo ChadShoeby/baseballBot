@@ -10,3 +10,7 @@ dist/
 venv/
 baseballBot/frontoffice/test_output/
 debug.log
+passenger_wsgi.py
+passenger_wsgi.pyc
+tmp/
+public/
