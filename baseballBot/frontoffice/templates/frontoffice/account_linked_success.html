@@ -29,7 +29,8 @@
     dataType: 'json',
     success: function (data) {
       if (data) {
-        window.location.href = '{% url "home" %}'
+        console.log(data)
+        // window.location.href = '{% url "home" %}'
       }
     }
   });
