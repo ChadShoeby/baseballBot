@@ -38,7 +38,7 @@ class Team(models.Model):
         total = 0
         for re in self.roster_entries.all():
             if re.at_position != 'BN': 
-                total +=re.player.estimated_season_points
+                total +=re.player.projected_season_points
 
         return total
     

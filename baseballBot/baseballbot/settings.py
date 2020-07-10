@@ -25,15 +25,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ['BBB_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-DEBUG = os.environ['BBB_DEBUG']
+DEBUG = os.environ['BBB_DEBUG'] == 'True'
 USEREALQUERY = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-# ALLOWED_HOSTS = ['*']
-INTERNAL_IPS = ['127.0.0.1',]
-# Application definition
+ALLOWED_HOSTS = [os.environ['BBB_domain1'], os.environ['BBB_domain2']]
+if DEBUG:
+    INTERNAL_IPS = ['127.0.0.1',]
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -127,8 +126,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 # STATIC_URL = '/static/'
-STATIC_URL = os.path.join(BASE_DIR, "static/")
-STATIC_ROOT = os.path.join(BASE_DIR, 'root')
+ROOT = os.environ['BBB_STATIC_ROOT']
+STATIC_URL = os.path.join(BASE_DIR, "/static/")
+STATIC_ROOT = os.path.join(BASE_DIR, ROOT)
 STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'static'),
 ]
