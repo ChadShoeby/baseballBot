@@ -1,5 +1,6 @@
 import logging
 import json
+from datetime import date 
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -290,6 +291,11 @@ class TeamService():
             players = self.update_team_roster(team)
 
         # team.set_projected_player_points()
+
+        #Is this the right place for the SQL Statement
+            players = players.raw("SELECT * FROM frontoffice_rosterentry \
+            ORDER BY FIELD(at_position, '1B', '2B', '3B', 'C', 'OF', 'P', 'RP', 'SP', 'SS', 'Util', 'BN')")
+            print(players)
         return players
 
     def update_league_rosters(self, forceUpdate=False):
@@ -550,5 +556,15 @@ class TeamService():
             except ObjectDoesNotExist:
                 return []
         return matchup
+
+    def get_current_week(self, team):
+        today = date.today()
+        game_week = GameWeek.objects.get(user_team=team)
+        if today >= game_week.week_start and today >= game_week.week_end:
+            current_week = game_week.week
+        else:
+            current_week = 0
+            print("No Matchups for this Week")
+
 
         
