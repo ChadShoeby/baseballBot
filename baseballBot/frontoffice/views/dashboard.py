@@ -75,9 +75,11 @@ def ajax_initialize_league(request):
     try:
         yahoo_league_id = int(yahoo_league_id)
     except ValueError:
+        logger.debug('something went wrong converting league to int')
         return JsonResponse(response)
 
     if not isinstance(yahoo_league_id, int):
+        logger.debug('something went wrong initializing league')
         return JsonResponse(response)
 
     team_service = TeamService(request.user, initial_setup=True)
