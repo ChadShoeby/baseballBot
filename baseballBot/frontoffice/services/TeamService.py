@@ -251,7 +251,7 @@ class TeamService():
             elif len(yahoo_data) > 1:
                 for ygd in yahoo_data:
                     if str(ygd['game'].game_id) == self.league.yahoo_game_id:
-                        yahoo_game_data = ygd
+                        yahoo_game_data = ygd['game']
 
             # find correct team in league
             if len(yahoo_game_data.teams) == 1:
