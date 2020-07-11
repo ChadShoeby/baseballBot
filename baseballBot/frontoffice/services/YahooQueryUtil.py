@@ -131,3 +131,5 @@ class YahooQueryUtil():
     def get_team_matchups(self, team):
         return self.yahoo_query.get_team_matchups(team.yahoo_team_id)
 
+    def get_game_weeks_by_game_id(self):
+        return self.yahoo_query.get_game_weeks_by_game_id(self.game_id)

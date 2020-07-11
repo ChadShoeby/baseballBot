@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
-from frontoffice.models import Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry, StatCategory
+from frontoffice.models import GameWeek, Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry, StatCategory
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +16,11 @@ class TeamService():
         self.user = user
         self.manager_profile = self.get_manager_profile()
         self.league = self.get_league()
+        
 
         if not initial_setup and self.league:
             self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id, league_key=self.league.yahoo_key)
+            self.initialize_game_weeks()
 
             if not self.league.updated_at:
                 self.initialize_data_from_yahoo()
@@ -32,6 +34,33 @@ class TeamService():
         self.update_league_rosters(forceUpdate=True)
         self.update_league_settings()
         self.update_team_matchups(team)
+
+    def initialize_game_weeks(self):
+        yqu = self.yahoo_query_utility
+        game_weeks_data = yqu.get_game_weeks_by_game_id()
+
+        #get weeks by league
+        league_weeks = {}
+        for gw_from_db in self.league.game_weeks.all():
+            league_weeks[gw_from_db.display_name] = gw_from_db
+
+        for d in game_weeks_data:
+            if str(d['game_week'].display_name) in league_weeks:
+                gw = league_weeks[str(d['game_week'].display_name)]
+            else:
+                gw = GameWeek()
+
+            gw.display_name = d['game_week'].display_name
+            gw.end = d['game_week'].end
+            gw.start = d['game_week'].start
+            gw.week_number = d['game_week'].week
+            gw.league = self.league
+
+            gw.save()
+
+        # logger.debug(game_weeks)
+        return
+
 
     def initialize_league_data_from_yahoo(self, yahoo_league_id):
         yqu = YahooQueryUtil(self.user.id)
