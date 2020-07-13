@@ -1,6 +1,6 @@
 import logging
 import json
-from datetime import date 
+from datetime import date, datetime
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -51,8 +51,8 @@ class TeamService():
                 gw = GameWeek()
 
             gw.display_name = d['game_week'].display_name
-            gw.end = d['game_week'].end
-            gw.start = d['game_week'].start
+            gw.end = datetime.strptime(d['game_week'].end, '%Y-%m-%d')
+            gw.start = datetime.strptime(d['game_week'].start, '%Y-%m-%d')
             gw.week_number = d['game_week'].week
             gw.league = self.league
 
@@ -320,11 +320,10 @@ class TeamService():
             players = self.update_team_roster(team)
 
         # team.set_projected_player_points()
-
-        #Is this the right place for the SQL Statement
-            players = players.raw("SELECT * FROM frontoffice_rosterentry \
-            ORDER BY FIELD(at_position, '1B', '2B', '3B', 'C', 'OF', 'P', 'RP', 'SP', 'SS', 'Util', 'BN')")
-            print(players)
+        players = players.order_by('-at_position')
+        #players = players.raw('SELECT * FROM frontoffice_rosterentry \
+        #ORDER BY FIELD(at_position, '1B', '2B', '3B', 'C', 'OF', 'P', 'RP', 'SP', 'SS', 'Util', 'BN')')
+        logger.debug(players)
         return players
 
     def update_league_rosters(self, forceUpdate=False):
@@ -586,14 +585,26 @@ class TeamService():
                 return []
         return matchup
 
-    def get_current_week(self, team):
+    def get_current_week(self, league):
         today = date.today()
-        game_week = GameWeek.objects.get(user_team=team)
-        if today >= game_week.week_start and today >= game_week.week_end:
-            current_week = game_week.week
-        else:
-            current_week = 0
-            print("No Matchups for this Week")
+        game_weeks = GameWeek.objects.filter(league=league).all()        
+        current_week = "End of Season"
+        logger.debug(current_week)
+        for gw in game_weeks:
+            s_date = gw.start
+            e_date = gw.end
+
+            if GameWeek.objects.filter(start__gt=today, end__lt=today):
+                current_week = gw.week_number
+                break
+            elif today < s_date and gw.week_number == 1:
+                current_week = 0
+                break
+            else:
+                current_week = "End of Season"
+                print("End of Season")
+        logger.debug(current_week)
+
 
 
         
