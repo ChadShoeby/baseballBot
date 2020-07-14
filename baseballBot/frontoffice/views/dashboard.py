@@ -11,7 +11,6 @@ from django.template.response import TemplateResponse
 from django.template.loader import render_to_string
 
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import never_cache
 
 from frontoffice.models import Team, Player, RosterEntry
 from frontoffice.services.TeamService import TeamService
@@ -20,7 +19,6 @@ from frontoffice.yahooQuery import OauthGetAuthKeyHelper
 logger = logging.getLogger(__name__)
 
 @login_required
-@never_cache
 def testing_delete_data(request):
     if request.user.is_staff:
 
@@ -37,7 +35,6 @@ def testing_delete_data(request):
         })
 
 @login_required
-@never_cache
 def index(request):
 
     #check if user needs to get a verifier code from yahoo
@@ -57,6 +54,10 @@ def index(request):
     team = team_service.get_team()
     players = team_service.get_team_roster(team)
 
+    #current week function test site
+    logger.debug(league)
+    logger.debug(team_service.get_current_week(league))
+
     return render(request, 
         'frontoffice/dashboard.html',
         {
@@ -68,7 +69,6 @@ def index(request):
         })
 
 @login_required
-@never_cache
 def ajax_initialize_league(request):
     response = {
         'data': 'Something went wrong!',
@@ -79,11 +79,9 @@ def ajax_initialize_league(request):
     try:
         yahoo_league_id = int(yahoo_league_id)
     except ValueError:
-        logger.debug('something went wrong converting league to int')
         return JsonResponse(response)
 
     if not isinstance(yahoo_league_id, int):
-        logger.debug('something went wrong initializing league')
         return JsonResponse(response)
 
     team_service = TeamService(request.user, initial_setup=True)
@@ -95,7 +93,6 @@ def ajax_initialize_league(request):
         })
 
 @login_required
-@never_cache
 def ajax_update_team_roster(request):
     response = {
         'data': 'Team Roster Updated too recently. Please wait 5 minutes before updating again.',
@@ -116,7 +113,6 @@ def ajax_update_team_roster(request):
     return JsonResponse(response)
 
 @login_required
-@never_cache
 def ajax_update_league(request):
 
     response = {
@@ -139,7 +135,6 @@ def ajax_update_league(request):
     return JsonResponse(response)
 
 @login_required
-@never_cache
 def ajax_drop_player(request):
 
     response = {
@@ -188,7 +183,6 @@ def ajax_drop_player(request):
 
 
 @login_required
-@never_cache
 def ajax_add_player(request):
 
     response = {
