@@ -587,23 +587,17 @@ class TeamService():
 
     def get_current_week(self, league):
         today = date.today()
-        game_weeks = GameWeek.objects.filter(league=league).all()        
-        current_week = "End of Season"
-        logger.debug(current_week)
-        for gw in game_weeks:
-            s_date = gw.start
-            e_date = gw.end
+        # logger.debug(today)
+        # today = datetime.strptime("2020-07-28", '%Y-%m-%d').date()
+        # logger.debug(today)
+        results = GameWeek.objects.filter(league=league, start__lt=today, end__gt=today).all()
 
-            if GameWeek.objects.filter(start__gt=today, end__lt=today):
-                current_week = gw.week_number
-                break
-            elif today < s_date and gw.week_number == 1:
-                current_week = 0
-                break
-            else:
-                current_week = "End of Season"
-                print("End of Season")
-        logger.debug(current_week)
+        if len(results) == 0:
+            # to do figure out pre and post season
+            # GameWeek.objects.filter(league=league, max(end) ).all()
+            return "No week"
+        else:
+            return results[0]
 
 
 
