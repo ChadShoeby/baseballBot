@@ -20,10 +20,10 @@ class TeamService():
 
         if not initial_setup and self.league:
             self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id, league_key=self.league.yahoo_key)
-            self.initialize_game_weeks()
-
+            
             if not self.league.updated_at:
                 self.initialize_data_from_yahoo()
+                self.initialize_game_weeks()
 
     def initialize_data_from_yahoo(self, yahoo_league_id = None):
 
