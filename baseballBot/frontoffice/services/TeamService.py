@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
-from frontoffice.models import GameWeek, Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry, StatCategory
+from frontoffice.models import GameWeek, Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry, StatCategory, PlayerProjection
 
 logger = logging.getLogger(__name__)
 
@@ -460,6 +460,42 @@ class TeamService():
     def get_free_agents_in_league(self):
         playersOnTeamsInLeague = RosterEntry.objects.filter(team__league__manager_profile__user=self.user.id).values_list('player_id', flat=True)
         return Player.objects.all().exclude(id__in=playersOnTeamsInLeague)
+
+    def get_proj_player_points_by_league(self, league):
+        projs_as_points = self.get_queryset_proj_player_points_by_league(league)
+        return projs_as_points
+
+    def get_queryset_proj_player_points_by_league(self, league):
+
+        params = {
+            'league_id': league.id
+            }
+
+        # get statCategories by league that translate to points
+        stat_modifiers = league.stat_categories_with_modfiers_batting
+        logger.debug(stat_modifiers)
+        
+        # build a projection table according to points
+        query = "SELECT pj.id, pj.fangraphs_id, pj.player_id, "
+        total_points_subquery = " SUM(0"
+
+        for sm in stat_modifiers:
+            query +=  "pj."+sm+" * "+ str(stat_modifiers[sm]) +" AS "+sm+", "
+            total_points_subquery += " + (pj."+sm+" * "+ str(stat_modifiers[sm])+")"
+        
+        total_points_subquery += ") AS total_points "
+        
+        #add in the total_points_subquery
+        query += total_points_subquery
+
+        query += " FROM frontoffice_playerprojection as pj \
+                WHERE player_id is not null \
+                GROUP BY pj.id"
+
+        projs_as_points = PlayerProjection.objects.raw(query, params = params).prefetch_related('player')
+       
+        return projs_as_points
+
 
     def get_best_lineup(self, team):
         team_id = team.id

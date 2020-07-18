@@ -1,0 +1,116 @@
+{% load points_by_stat %}
+
+<table id="playerTable{% if team %}_team_{{ team.id }}{% endif %}" class="table table-striped table-dark table-hover" style="width:100%">
+    <thead>
+        <tr>
+            <th>Player</th>
+            <th>Position</th>
+            <th>Total Points</th>
+            <th>Fangrpahs Id</th>
+            <th>Yahoo Id</th>
+
+            {# Put point fields here #}
+            <th>At Bats</th>
+
+            {% if editableRoster or canAddPlayers %}
+            <th>Actions</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in players  %}
+            <tr {% if editableRoster and data.class_name == "RosterEntry"%}
+            id="roster_entry_row_{{ data.id }}"
+            {% elif canAdd %}
+            id="player_row_{{ data.player.id }}"
+            {% endif %}
+            >
+                <td>
+                    {% if data.player.headshot_url %}<img src="{{ data.player.headshot_url }}">{% endif %}
+                    {{ data.player.full_name }}
+                </td>
+
+                <td>{% if data.at_position|length %}
+                        {{ data.at_position }}
+                    {% else %}
+                        {{ data.player.display_position }}
+                    {% endif %}
+                    {% if data.player.eligible_positions|length %}
+                        ({% for pos in data.player.eligible_positions %}
+                        {{ pos.position }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %})
+                    {% endif %}
+                    {% if data.player.position_type %}
+                    <small class="font-italic font-weight-light text-muted">
+                    {{ data.player.position_type }}
+                    </small>
+                    {% endif %}
+                </td>
+
+                <td>{{ data.total_points }}</td>
+                <td>{{ data.fangraphs_id }}</td>
+                <td>{{ data.player.yahoo_id }}</td>
+
+                {# Put point totals here #}
+                <td>{{ data.atbats }}</td>
+
+
+                {% if editableRoster or canAddPlayers %}
+                <td>
+                    {% if canAddPlayers %}
+                    <button id="add_player_{{ data.player.id }}" type="button" class="add_player btn btn-info btn-sm" data-player="{{ data.player.id }}">Add</button>
+                    {% endif %}
+
+                    {% if data.class_name == "RosterEntry" and data.at_position == "BN" %}
+                    <button id="drop_player_roster_{{ data.id }}" type="button" class="drop_player_roster btn btn-info btn-sm" data-roster="{{ data.id }}">Drop</button>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% block javascript %}
+<script>
+$(document).ready(function() {
+    playerTableId = "playerTable{% if team %}_team_{{ team.id }}{% endif %}"
+    playerTable = $('#'+playerTableId).DataTable();
+
+
+    {% if editableRoster %}
+    $('#'+playerTableId).on('click', ".drop_player_roster",function () {
+      $.ajax({
+        url: '{% url "ajax_drop_player" %}',
+        data: {
+          'roster': $(this).data("roster")
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.status == 'Success') {
+            playerTable.row("#roster_entry_row_"+data.roster_entry_id).remove().draw();
+          }
+        }
+      });
+    });
+    {% endif %}
+
+    {% if canAddPlayers %}
+    $('#'+playerTableId).on('click', ".add_player",function () {
+      $.ajax({
+        url: '{% url "ajax_add_player" %}',
+        data: {
+          'player': $(this).data("player")
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.status == 'Success') {
+            playerTable.row("#player_row_"+data.player_id).remove().draw();
+          }
+        }
+      });
+    });
+    {% endif %}
+});
+</script>
+{% endblock %}

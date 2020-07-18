@@ -4,6 +4,16 @@
 {% block dashboardTitle %}{{ user_team }} Optimized Line Up{% endblock %}
 
 {% block dashboardBody %}
-    <h2>Best Lineup</h2> 
-    <p>{% include 'frontoffice/playerTable.html' with players=lineup %}</p>
+<div class="row">
+  <div class="col">
+    <div class="card shadow mb-4">
+      <div class="card-body">
+        <div style="display: block;">
+        {% include 'frontoffice/playerTable.html' with players=lineup %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

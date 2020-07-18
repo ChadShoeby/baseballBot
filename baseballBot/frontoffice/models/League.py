@@ -47,3 +47,36 @@ class League(models.Model):
             return formatted_roster_slots
                 
         return formatted_roster_slots
+
+    @property
+    def stat_categories_with_modfiers_batting(self):
+        return self.stat_categories_with_modfiers(position_type='B')
+
+    @property
+    def stat_categories_with_modfiers_pitching(self):
+        return self.stat_categories_with_modfiers(position_type='P')
+
+    def stat_categories_with_modfiers(self, position_type):
+        #map any yahoo stat category to the appropriate field in the player table
+        translateStatCategoryToStat = {
+            'At Bats' : 'atbats',
+            'Runs': 'runs',
+            'Hits': 'hits',
+            'Singles': 'singles',
+            'Doubles': 'doubles',
+            'Triples': 'triples',
+            'Home Runs':'homeruns',
+            'Runs Batted In': 'rbis',
+            'Stolen Base':'stolen_bases',
+            'Walks':'walks',
+            'Hit By Pitch':'hbps',
+            }
+
+        # build value dictionary
+        result = {}
+        for sc in self.stat_categories.all():
+            if sc.name in translateStatCategoryToStat and sc.position_type == position_type:
+                result[translateStatCategoryToStat[ sc.name ] ] = sc.stat_modifier
+
+        return result
+    

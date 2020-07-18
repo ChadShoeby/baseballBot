@@ -7,7 +7,7 @@ from django.urls import path
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from frontoffice.models import Player, PlayerRecord , PlayerProjections
+from frontoffice.models import Player, PlayerRecord , PlayerProjection
 
 logger = logging.getLogger(__name__)
 
@@ -184,8 +184,8 @@ class PlayerAdmin(admin.ModelAdmin):
                     player_record.doubles = int(row[7]) #Doubles
                     player_record.triples = int(row[8]) #Triples
                     player_record.homeruns = int(row[9]) #Homeruns
-                #    player_record.R = int(row[10]) #Runs
-                #    player_record.RBI = int(row[11]) #Runs Batted In
+                    player_record.runs = int(row[10]) #Runs
+                    player_record.rbis = int(row[11]) #Runs Batted In
                     player_record.walks = int(row[12]) #Walks
                 #    player_record.IBB = int(row[13]) #Intentional Walks
                 #    player_record.SO = int(row[14]) #Strike Outs
@@ -254,7 +254,7 @@ class PlayerAdmin(admin.ModelAdmin):
             is_pitcher_import = True
             player_id_col = 25
 
-            playerProjectionsInDB = PlayerProjections.objects.all()
+            playerProjectionsInDB = PlayerProjection.objects.all()
             playerProjectionsByFangraphId = {}
             for pp in playerProjectionsInDB:
                 playerProjectionsByFangraphId[str(pp.fangraphs_id)] = pp
@@ -298,7 +298,7 @@ class PlayerAdmin(admin.ModelAdmin):
                     player_projection = playerProjectionsByFangraphId[row[player_id_col]]
                     updatedPlayers.append(player_projection)
                 else:
-                    player_projection = PlayerProjections()
+                    player_projection = PlayerProjection()
                     player_projection.fangraphs_id = row[player_id_col]
                     newPlayers.append(player_projection)
 
@@ -311,11 +311,14 @@ class PlayerAdmin(admin.ModelAdmin):
                     player_projection.atbats = int(row[4]) #At Bats
                 #    player_record.PA = int(row[]) #Plate Apperances
                     player_projection.hits = int(row[5]) #Hits
+                    #Singles is computed
+                    player_projection.singles = int(row[5]) - (int(row[6]) + int(row[7]) +int(row[8])) 
+                    
                     player_projection.doubles = int(row[6]) #Doubles
                     player_projection.triples = int(row[7]) #Triples
                     player_projection.homeruns = int(row[8]) #Homeruns
-                #    player_record.R = int(row[]) #Runs
-                #    player_record.RBI = int(row[]) #Runs Batted In
+                    player_projection.runs = int(row[9]) #Runs
+                    player_projection.rbis = int(row[10]) #Runs Batted In
                     player_projection.walks = int(row[11]) #Walks
                 #    player_record.IBB = int(row[]) #Intentional Walks
                 #    player_record.SO = int(row[]) #Strike Outs
@@ -351,9 +354,9 @@ class PlayerAdmin(admin.ModelAdmin):
                 newPlayerCounter +=1
             
             if len(newPlayers) > 0:
-                PlayerProjections.objects.bulk_create(newPlayers)
+                PlayerProjection.objects.bulk_create(newPlayers)
             if len(updatedPlayers) > 0:
-                PlayerProjections.objects.bulk_update(updatedPlayers, ['player','atbats','hits','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id'])
+                PlayerProjection.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis'])
 
             self.message_user(request, "Success: "+str(newPlayerCounter)+" players have been added.")
             return redirect("..")

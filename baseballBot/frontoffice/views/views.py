@@ -29,23 +29,20 @@ def matchup(request):
         'user_team_players': user_team_players,
         'opposing_team_players': opposing_team_players,
         'matchup': matchup
-        })    
+        })
 
 @login_required
-def best_lineup(request):
+def estimated_points_by_league(request):
     team_service = TeamService(request.user)
     user_team = team_service.get_team()
-    logger.debug(user_team)
-    user_team_players = team_service.get_team_roster(user_team)
-    logger.debug(user_team_players)
-    lineup = team_service.get_best_lineup(user_team)
-    logger.debug(lineup)
-    return render(request, 
-        'frontoffice/best_lineup.html',
-        {'user_team': user_team,
-        'current_team_players': user_team_players,
-        'lineup' : lineup
-         })
+
+    return render(request,
+        'frontoffice/league_projections.html',
+        {
+        'page_title': 'League Projections',
+        'players': team_service.get_proj_player_points_by_league(user_team.league),
+        'league' : team_service.league
+        })
 
 @login_required
 def leaguePlayers(request):

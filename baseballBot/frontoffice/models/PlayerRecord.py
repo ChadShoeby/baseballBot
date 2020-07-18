@@ -19,6 +19,8 @@ class AbstractPlayerRecord(models.Model):
     hbps = models.IntegerField(default=0)
     stolen_bases = models.IntegerField(default=0)
     caught_stealings = models.IntegerField(default=0)
+    rbis = models.IntegerField(default=0)
+    runs = models.IntegerField(default=0)
 
     #pitcher scoring fields
     innings_pitched = models.FloatField(default=0)
@@ -36,5 +38,5 @@ class AbstractPlayerRecord(models.Model):
 class PlayerRecord(AbstractPlayerRecord):
     pass
 
-class PlayerProjections(AbstractPlayerRecord):
+class PlayerProjection(AbstractPlayerRecord):
     pass

@@ -72,6 +72,20 @@ def index(request):
         })
 
 @login_required
+def best_lineup(request):
+    team_service = TeamService(request.user)
+    user_team = team_service.get_team()
+    user_team_players = team_service.get_team_roster(user_team)
+    lineup = team_service.get_best_lineup(user_team)
+
+    return render(request, 
+        'frontoffice/best_lineup.html',
+        {'user_team': user_team,
+        'current_team_players': user_team_players,
+        'lineup' : lineup
+         })
+
+@login_required
 @never_cache
 def ajax_initialize_league(request):
     response = {
