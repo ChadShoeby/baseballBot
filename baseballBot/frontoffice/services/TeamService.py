@@ -473,7 +473,6 @@ class TeamService():
 
         # get statCategories by league that translate to points
         stat_modifiers = league.stat_categories_with_modfiers_batting
-        logger.debug(stat_modifiers)
         
         # build a projection table according to points
         query = "SELECT pj.id, pj.fangraphs_id, pj.player_id, "
@@ -496,6 +495,28 @@ class TeamService():
        
         return projs_as_points
 
+    # returns a query set object for players on team and free agent
+    def get_available_players_query(self, team, position_type='B', for_position=False):
+        params = {
+            'team_id': team.id,
+            'position_type': position_type,
+            }
+        
+        # build a projection table according to points
+        query = "SELECT p.* \
+                FROM frontoffice_player as p \
+                LEFT JOIN frontoffice_rosterentry as re \
+                ON p.id = re.player_id \
+                WHERE (team_id IS NULL or team_id = %(team_id)s) \
+                AND position_type = %(position_type)s "
+        
+        if for_position:
+            query += "AND display_position LIKE %(position)s "
+            params['position'] = "%"+for_position+"%"
+
+        available_players = Player.objects.raw(query, params = params)
+       
+        return available_players
 
     def get_best_lineup(self, team):
         team_id = team.id
