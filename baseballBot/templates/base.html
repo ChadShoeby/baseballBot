@@ -16,10 +16,11 @@
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
 
-    <link href="{% static "baseballBot/css/base.css" %}" rel="stylesheet">
+    
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.21/datatables.min.css"/>
 {#     <link href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet"> #}
+    <link href="{% static "baseballBot/css/base.css" %}" rel="stylesheet">
 
     <title>{% block title %}Baseball Bot{% endblock %}</title>
     <style>
@@ -83,8 +84,8 @@ main
                   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
 
                   <div class="card">
-                    <div class="card-header" style="background-color: #fff;">
-                      <h3 class="m-0 font-weight-bold text-primary">
+                    <div class="card-header">
+                      <h3>
                         {% block dashboardTitle %}{% endblock %}
                       </h3>
                     </div>

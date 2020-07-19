@@ -4,3 +4,8 @@
     z-index: 1;
     width: 40%;
 }
+
+.card{
+background-color: rgba(0,0,0,0.85) !important;
+color: white;
+}

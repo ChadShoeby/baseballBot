@@ -19,8 +19,8 @@
   <div class="card shadow mb-4">
     <!-- Card Header - Dropdown -->
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-      <h6 class="m-0 font-weight-bold text-primary">{{ team }}
-      </h6>{% if team.yahoo_team_logo_url %}
+      <h5>{{ team }}</h5>
+      {% if team.yahoo_team_logo_url %}
         <img style="height:50px;" src="{{ team.yahoo_team_logo_url }}" class="img-thumbnail">
         {% endif %}
     </div>
@@ -48,8 +48,7 @@
   <div class="card shadow mb-4">
     <!-- Card Header - Dropdown -->
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-      <h6 class="m-0 font-weight-bold text-primary">{{ league.name }}
-      </h6>
+      <h5>{{ league.name }}</h5>
       <small class="font-italic font-weight-light text-muted">last updated: {{ league.updated_at|date:"SHORT_DATETIME_FORMAT" }}</small>
     </div>
     <!-- Card Body -->
@@ -88,8 +87,8 @@
   <div class="card shadow mb-4">
     <!-- Card Header - Dropdown -->
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-      <h6 class="m-0 font-weight-bold text-primary">{{ league.name }} Stats
-      </h6>
+      <h5>{{ league.name }} Stats
+      </h5>
     </div>
     <!-- Card Body -->
     <div class="card-body">
