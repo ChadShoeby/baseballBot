@@ -465,7 +465,7 @@ class TeamService():
         projs_as_points = self.get_queryset_proj_player_points_by_league(league)
         return projs_as_points
 
-    def get_queryset_proj_player_points_by_league(self, league):
+    def get_queryset_proj_player_points_by_league(self, league, for_players_sub_query=False, limit=False):
 
         params = {
             'league_id': league.id
@@ -487,113 +487,102 @@ class TeamService():
         #add in the total_points_subquery
         query += total_points_subquery
 
-        query += " FROM frontoffice_playerprojection as pj \
-                WHERE player_id is not null \
-                GROUP BY pj.id"
+        query += " FROM frontoffice_playerprojection as pj "
+
+        if for_players_sub_query:
+            query += " RIGHT JOIN ("+for_players_sub_query+") as  p_sub on p_sub.id = pj.player_id "
+
+        query += " WHERE player_id is not null \
+                GROUP BY pj.id \
+                ORDER BY total_points DESC "
+
+        if limit:
+            query += " LIMIT "+str(limit)
 
         projs_as_points = PlayerProjection.objects.raw(query, params = params).prefetch_related('player')
-       
         return projs_as_points
 
     # returns a query set object for players on team and free agent
-    def get_available_players_query(self, team, position_type='B', for_position=False):
-        params = {
-            'team_id': team.id,
-            'position_type': position_type,
-            }
-        
+    def get_available_players_query(self, team, position_type='B', for_position=False, as_sql=False, exclude_these=False):  
         # build a projection table according to points
-        query = "SELECT p.* \
-                FROM frontoffice_player as p \
-                LEFT JOIN frontoffice_rosterentry as re \
-                ON p.id = re.player_id \
-                WHERE (team_id IS NULL or team_id = %(team_id)s) \
-                AND position_type = %(position_type)s "
+        query = "SELECT p1.id \
+            FROM frontoffice_player as p1 \
+            LEFT JOIN frontoffice_rosterentry as re \
+            ON p1.id = re.player_id \
+            WHERE (team_id IS NULL or team_id = '"+str(team.id)+"') \
+            AND position_type = '"+str(position_type)+"' "
         
-        if for_position:
-            query += "AND display_position LIKE %(position)s "
-            params['position'] = "%"+for_position+"%"
+        if exclude_these:
+            if len(exclude_these) == 1:
+                exclude_these = list(exclude_these)
+                query += " AND p1.id != "+str(exclude_these[0])+" "
+            else:
+                query += " AND p1.id not in {} ".format(tuple(exclude_these))
+            logger.debug(query)
 
-        available_players = Player.objects.raw(query, params = params)
+        if for_position:
+            # if as_sql:
+            #     query += "AND display_position LIKE '%"+str(for_position)+"%' "
+            # else:
+                # django tries to escape the string on execute so extra % is needed
+            query += " AND display_position LIKE '%%"+str(for_position)+"%%' "
+
+        if as_sql:
+            return query
+
+        available_players = Player.objects.raw(query)
        
         return available_players
 
+    """
+    pseudo code:
+    Select proj_stats_as_points query
+    RIGHT JOIN available players by position
+    
+    This is an example of the sql the below code generates for each category
+
+    SELECT p.*, pj.id, pj.fangraphs_id, pj.player_id, pj.atbats * 0.5 AS atbats, pj.runs * 1.9 AS runs, pj.hits * 1.0 AS hits, pj.singles * 2.6 AS singles, pj.doubles * 5.2 AS doubles, pj.triples * 7.8 AS triples, pj.homeruns * 10.4 AS homeruns, pj.rbis * 1.9 AS rbis, pj.walks * 2.6 AS walks, pj.hbps * 2.6 AS hbps, SUM(0 + (pj.atbats * 0.5) + (pj.runs * 1.9) + (pj.hits * 1.0) + (pj.singles * 2.6) + (pj.doubles * 5.2) + (pj.triples * 7.8) + (pj.homeruns * 10.4) + (pj.rbis * 1.9) + (pj.walks * 2.6) + (pj.hbps * 2.6)) AS total_points 
+    FROM frontoffice_playerprojection as pj 
+    RIGHT JOIN (SELECT p1.id FROM frontoffice_player as p1 LEFT JOIN frontoffice_rosterentry as re ON p1.id = re.player_id WHERE (team_id IS NULL or team_id = '86') AND position_type = 'B' AND display_position LIKE '%1B%')
+    as p_sub on p_sub.id = pj.player_id
+    JOIN frontoffice_player as p on p.id = pj.player_id 
+    WHERE player_id is not null GROUP BY pj.id ORDER BY total_points DESC
+    """
     def get_best_lineup(self, team):
         team_id = team.id
-        roster_slots= team.league.roster_slots  
-        logger.debug(roster_slots)
+        roster_slots= team.league.roster_slots
+        league = team.league
+
         best_available_players = {}
-        
-        def get_best_available_for_position(positions, num_slots, team, not_in_players=None):
-            params = {'slot_count': num_slots, 'team_id': team_id}
-            player_map = {
-                'p_id': 'id', 
-                'full_name': 'full_name', 
-                'display_position':'display_position',
-                'estimated_season_points':'estimated_season_points'
-                }
-
-            query = ("SELECT player_table.id as p_id, full_name, display_position, estimated_season_points \
-                FROM frontoffice_player as player_table \
-                LEFT JOIN frontoffice_rosterentry \
-                ON player_table.id = frontoffice_rosterentry.player_id \
-                WHERE (team_id IS NULL or team_id = %(team_id)s) ")
-
-            if not_in_players:
-                query += ("AND player_table.id not in %(not_in_players)s ")
-                params['not_in_players'] = not_in_players
-
-            if len(positions) == 1:
-                query +="AND display_position LIKE %(position)s "
-                params['position'] = '%'+positions[0]+'%'
-            elif len(positions) >= 1:
-                query +="AND (display_position LIKE %(position)s "
-                params['position'] = '%'+positions[0]+'%'
-
-                for p in range(1,len(positions)):
-                    # alt_position_key = "position_" + positions[p] 
-                    query += "OR display_position LIKE '%%"+positions[p] +"%%' "
-                    # params[alt_position_key] = '%'+positions[p]+'%'
-               
-                # this closes the parans
-                query += ") "
-
-
-            query +=("ORDER BY estimated_season_points \
-                DESC LIMIT %(slot_count)s")
-
-            available_players = Player.objects.raw(query, params = params, translations=player_map)
-            logger.debug(available_players.query)
-            logger.debug(available_players)
-            return available_players
+        best_roster_to_field = {}
 
         for position, slot_count in roster_slots.items():
             # skip bench position
             if position == "BN":
                 continue
 
-            spots_needed_for_position = 0
+            if position == "Util":
+                availabe_player_query_sql = self.get_available_players_query(team, as_sql=True, exclude_these=best_available_players.keys())
+            else:
+                availabe_player_query_sql = self.get_available_players_query(team, for_position=position, as_sql=True, exclude_these=best_available_players.keys())
 
-            # params = {'position': '%'+position+'%','slot_count': slot_count, 'team_id': team_id}
-            best_available_for_position = get_best_available_for_position([position], slot_count, team)
-            logger.debug(best_available_for_position)
-            for player in best_available_for_position:
-                if player.id in best_available_players:
+
+            proj_points_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=availabe_player_query_sql, limit=slot_count)
+
+            best_available_for_position = list(proj_points_query)
+
+            spots_needed_for_position = 0
+            best_roster_to_field[position] = []
+
+            for player_proj in best_available_for_position:
+                if player_proj.player.id in best_available_players:
                     spots_needed_for_position += 1
                 else:
-                    best_available_players[player.id] = player
+                    best_available_players[player_proj.player.id] = player_proj.player
+                    best_roster_to_field[position].append(player_proj.player)
 
-            if spots_needed_for_position >= 1:
-                logger.debug("still need" + str(spots_needed_for_position)+" for position "+position)
-                new_players = get_best_available_for_position(["P","SP"], spots_needed_for_position, team, not_in_players=tuple(best_available_players.keys()))
-                # logger.debug(new_players.query)
-                # logger.debug(new_players)
-                for player in new_players:
-                    logger.debug(player)
-                    best_available_players[player.id] = player
-
-            logger.debug(best_available_players)
-            # best_available_players += available_players
+        logger.debug(best_available_players)
+        logger.debug(best_roster_to_field)
 
         return best_available_players.values()
 
