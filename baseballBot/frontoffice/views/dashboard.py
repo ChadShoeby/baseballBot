@@ -55,7 +55,7 @@ def index(request):
         return redirect('choose_league')
 
     user_team = team_service.get_team()
-    current_roster = team_service.get_team_roster(user_team,by_position=True)
+    current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
 
     # logger.debug(league)
     # logger.debug(team_service.get_current_week(league))
@@ -74,7 +74,7 @@ def index(request):
 def best_lineup(request):
     team_service = TeamService(request.user)
     user_team = team_service.get_team()
-    current_roster = team_service.get_team_roster(user_team,by_position=True)
+    current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
     best_lineup = team_service.get_best_lineup(user_team)
 
     return render(request, 

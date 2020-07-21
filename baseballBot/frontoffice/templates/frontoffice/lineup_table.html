@@ -1,17 +1,22 @@
-{% load static %}
+{% load static define_action %}
 
 {% for position, players in roster.items  %}
 
 <table class="roster_table_{{ position }} table table-striped table-dark table-hover">
     <thead>
         <tr>
-            <th colspan="2">Position:  {{ position }}</th>
+            <th colspan="2" class="w-100">Position:  {{ position }}</th>
         </tr>
     </thead>
     <tbody>
-        {% for player in players %}
+        {% for data in players %}
+            {% if data.class_name == "PlayerProjection" %}
+                {% define data.player as player %}
+            {% else %}
+                {% define data as player %}
+            {% endif %}
         <tr>
-            <td>
+            <td class="w-75">
                 {% if player.headshot_url %}
                     <img src="{{ player.headshot_url }}">
                 {% else %}
@@ -19,8 +24,12 @@
                 {% endif %}
                 {{ player.full_name }} ({{ player.display_position }})
             </td>
-            <td>points here</td>
-            </tr>
+            <td class="w-25" >
+                {% if data.class_name == "PlayerProjection" %}
+                    {{ data.total_points }}
+                {% endif %}
+            </td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
