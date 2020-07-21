@@ -54,35 +54,35 @@ def index(request):
         messages.add_message(request, messages.ERROR, 'League not found. Re-initializing league.')
         return redirect('choose_league')
 
-    team = team_service.get_team()
-    players = team_service.get_team_roster(team)
+    user_team = team_service.get_team()
+    current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
 
-    #current week function test site
-    logger.debug(league)
-    logger.debug(team_service.get_current_week(league))
+    # logger.debug(league)
+    # logger.debug(team_service.get_current_week(league))
 
     return render(request, 
         'frontoffice/dashboard.html',
         {
-        'team': team,
-        'players' : players,
+        'team': user_team,
+        'current_roster' : current_roster,
         'manager_profile': manager_profile,
         'league': league,
-        'matchup': team_service.get_team_matchup_for_week(team),
+        'matchup': team_service.get_team_matchup_for_week(user_team),
         })
 
 @login_required
 def best_lineup(request):
     team_service = TeamService(request.user)
     user_team = team_service.get_team()
-    user_team_players = team_service.get_team_roster(user_team)
-    lineup = team_service.get_best_lineup(user_team)
+    current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
+    best_lineup = team_service.get_best_lineup(user_team)
 
     return render(request, 
         'frontoffice/best_lineup.html',
-        {'user_team': user_team,
-        'current_team_players': user_team_players,
-        'lineup' : lineup
+        {
+        'user_team': user_team,
+        'current_roster': current_roster,
+        'best_lineup' : best_lineup
          })
 
 @login_required

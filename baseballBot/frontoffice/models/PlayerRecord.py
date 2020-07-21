@@ -39,4 +39,5 @@ class PlayerRecord(AbstractPlayerRecord):
     pass
 
 class PlayerProjection(AbstractPlayerRecord):
-    pass
+    def class_name(self):
+        return "PlayerProjection"

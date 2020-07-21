@@ -5,15 +5,10 @@
 
 {% block dashboardBody %}
 <div class="row">
-  <div class="col">
-    <div class="card shadow mb-4">
-      <div class="card-body">
-        <div style="display: block;">
-        {% include 'frontoffice/playerTable.html' with players=lineup %}
-        </div>
-      </div>
-    </div>
-  </div>
+{% include 'frontoffice/lineup_card.html' with roster=current_roster card_title="Current Lineup" %}
+
+{% include 'frontoffice/lineup_card.html' with roster=best_lineup card_title="Best Lineup" %}
+
 </div>
 
 {% endblock %}

@@ -4,6 +4,7 @@ from datetime import date, datetime
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from django.db.models import F
 
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
 from frontoffice.models import GameWeek, Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry, StatCategory, PlayerProjection
@@ -307,7 +308,7 @@ class TeamService():
 
         return team
 
-    def get_team_roster(self, team, forceUpdate=False):
+    def get_team_roster(self, team, by_position=False, with_proj_points=False, forceUpdate=False):
 
         #check if user has a yahoo team in the database
         players = team.roster_entries.all()
@@ -319,11 +320,35 @@ class TeamService():
             yqu = self.yahoo_query_utility
             players = self.update_team_roster(team)
 
-        # team.set_projected_player_points()
-        players = players.order_by('-at_position')
-        #players = players.raw('SELECT * FROM frontoffice_rosterentry \
-        #ORDER BY FIELD(at_position, '1B', '2B', '3B', 'C', 'OF', 'P', 'RP', 'SP', 'SS', 'Util', 'BN')')
         logger.debug(players)
+
+        if with_proj_points:
+            # get projected points for these players
+            team_roster_subquery = str(team.roster_entries.values('player_id').annotate(id=F('player_id')).query)
+            logger.debug(team_roster_subquery)
+            proj_points_query = self.get_queryset_proj_player_points_by_league(team.league, for_players_sub_query=team_roster_subquery)
+            proj_players = list(proj_points_query)
+
+        if by_position:
+            roster = {}
+            roster_slots = team.league.roster_slots
+
+            for position, slot_count in roster_slots.items():
+                roster[position] = []
+
+            if with_proj_points:
+                for re in players:
+                    for proj in proj_players:
+                        if re.player.id == proj.player.id:
+                            if re.at_position in roster:
+                                roster[re.at_position].append(proj)
+                            break
+            else:
+                for re in players:
+                    if re.at_position in roster:
+                        roster[re.at_position].append(re.player)
+            return roster
+
         return players
 
     def update_league_rosters(self, forceUpdate=False):
@@ -492,7 +517,7 @@ class TeamService():
         if for_players_sub_query:
             query += " RIGHT JOIN ("+for_players_sub_query+") as  p_sub on p_sub.id = pj.player_id "
 
-        query += " WHERE player_id is not null \
+        query += " WHERE pj.player_id is not null \
                 GROUP BY pj.id \
                 ORDER BY total_points DESC "
 
@@ -504,6 +529,9 @@ class TeamService():
 
     # returns a query set object for players on team and free agent
     def get_available_players_query(self, team, position_type='B', for_position=False, as_sql=False, exclude_these=False):  
+        if for_position in ("P","SP","RP"):
+            position_type = "P"
+
         # build a projection table according to points
         query = "SELECT p1.id \
             FROM frontoffice_player as p1 \
@@ -551,6 +579,7 @@ class TeamService():
     def get_best_lineup(self, team):
         team_id = team.id
         roster_slots= team.league.roster_slots
+        logger.debug(roster_slots)
         league = team.league
 
         best_available_players = {}
@@ -558,7 +587,7 @@ class TeamService():
 
         for position, slot_count in roster_slots.items():
             # skip bench position
-            if position == "BN":
+            if position in ("BN","IL"):
                 continue
 
             if position == "Util":
@@ -566,7 +595,7 @@ class TeamService():
             else:
                 availabe_player_query_sql = self.get_available_players_query(team, for_position=position, as_sql=True, exclude_these=best_available_players.keys())
 
-
+            logger.debug(availabe_player_query_sql)
             proj_points_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=availabe_player_query_sql, limit=slot_count)
 
             best_available_for_position = list(proj_points_query)
@@ -579,12 +608,9 @@ class TeamService():
                     spots_needed_for_position += 1
                 else:
                     best_available_players[player_proj.player.id] = player_proj.player
-                    best_roster_to_field[position].append(player_proj.player)
+                    best_roster_to_field[position].append(player_proj)
 
-        logger.debug(best_available_players)
-        logger.debug(best_roster_to_field)
-
-        return best_available_players.values()
+        return best_roster_to_field
 
     def drop_player(self, player, team):
         try:
