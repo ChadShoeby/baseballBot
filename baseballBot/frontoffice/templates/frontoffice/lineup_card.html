@@ -12,7 +12,7 @@
       <!-- Card Body -->
       <div class="card-body">
         
-        {% include 'frontoffice/lineup_table.html' with roster_by_position=roster editableRoster=editableRoster %}
+        {% include 'frontoffice/lineup_table.html' with roster=roster editableRoster=editableRoster %}
 
         {% if editableRoster %}
         <div class="float-right">
