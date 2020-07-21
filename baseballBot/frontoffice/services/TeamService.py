@@ -307,7 +307,7 @@ class TeamService():
 
         return team
 
-    def get_team_roster(self, team, forceUpdate=False):
+    def get_team_roster(self, team, by_position=False, forceUpdate=False):
 
         #check if user has a yahoo team in the database
         players = team.roster_entries.all()
@@ -324,6 +324,19 @@ class TeamService():
         #players = players.raw('SELECT * FROM frontoffice_rosterentry \
         #ORDER BY FIELD(at_position, '1B', '2B', '3B', 'C', 'OF', 'P', 'RP', 'SP', 'SS', 'Util', 'BN')')
         logger.debug(players)
+
+        if by_position:
+            roster = {}
+            roster_slots = team.league.roster_slots
+
+            for position, slot_count in roster_slots.items():
+                roster[position] = []
+
+            for re in players:
+                if re.at_position in roster:
+                    roster[re.at_position].append(re.player)
+            return roster
+
         return players
 
     def update_league_rosters(self, forceUpdate=False):
@@ -504,6 +517,9 @@ class TeamService():
 
     # returns a query set object for players on team and free agent
     def get_available_players_query(self, team, position_type='B', for_position=False, as_sql=False, exclude_these=False):  
+        if for_position in ("P","SP","RP"):
+            position_type = "P"
+
         # build a projection table according to points
         query = "SELECT p1.id \
             FROM frontoffice_player as p1 \
@@ -551,6 +567,7 @@ class TeamService():
     def get_best_lineup(self, team):
         team_id = team.id
         roster_slots= team.league.roster_slots
+        logger.debug(roster_slots)
         league = team.league
 
         best_available_players = {}
@@ -558,7 +575,7 @@ class TeamService():
 
         for position, slot_count in roster_slots.items():
             # skip bench position
-            if position == "BN":
+            if position in ("BN","IL"):
                 continue
 
             if position == "Util":
@@ -581,10 +598,7 @@ class TeamService():
                     best_available_players[player_proj.player.id] = player_proj.player
                     best_roster_to_field[position].append(player_proj.player)
 
-        logger.debug(best_available_players)
-        logger.debug(best_roster_to_field)
-
-        return best_available_players.values()
+        return best_roster_to_field
 
     def drop_player(self, player, team):
         try:

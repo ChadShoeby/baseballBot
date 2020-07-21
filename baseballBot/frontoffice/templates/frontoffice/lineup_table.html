@@ -1,0 +1,40 @@
+{% load static %}
+
+{% for position, players in roster_by_position.items  %}
+
+<table class="roster_table_{{ position }} table table-striped table-dark table-hover">
+    <thead>
+        <tr>
+            <th colspan="2">Position:  {{ position }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for player in players %}
+        <tr>
+            <td>
+                {% if player.headshot_url %}
+                    <img src="{{ player.headshot_url }}">
+                {% else %}
+                    <img src="{% static "baseballBot/img/wiz_player_profile.png" %}">
+                {% endif %}
+                {{ player.full_name }} ({{ player.display_position }})
+            </td>
+            <td>points here</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+
+{% block javascript %}
+<script>
+// $(document).ready(function() {
+//     playerTableId = "playerTable{% if team %}_team_{{ team.id }}{% endif %}"
+//     playerTable = $('#'+playerTableId).DataTable({
+//         "paging": false,
+//         "searching": false]
+//         });
+
+// });
+</script>
+{% endblock %}

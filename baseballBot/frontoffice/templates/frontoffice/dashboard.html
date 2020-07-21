@@ -117,7 +117,10 @@
 
 </div> 
 
-{% include 'frontoffice/lineupcard.html' with team=team players=players editableRoster=True %} 
+
+
+{% include 'frontoffice/lineup_card.html' with team=team roster=current_roster card_title="Current Lineup" %} 
+
 </div>
 {% endblock %}
 

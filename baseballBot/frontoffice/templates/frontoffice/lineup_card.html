@@ -3,13 +3,16 @@
     <div class="card shadow mb-4">
       <!-- Card Header - Dropdown -->
       <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h5>{{team }} Lineup</h5><small class="font-italic font-weight-light text-muted">last updated: {{ team.roster_last_updated_at|date:"SHORT_DATETIME_FORMAT" }}</small>
+        <h5>{% if card_title %}{{ card_title }}{% else %}{{ team }} Lineup{% endif %}</h5>
+        {% if team %}
+        <small class="font-italic font-weight-light text-muted">last updated: {{ team.roster_last_updated_at|date:"SHORT_DATETIME_FORMAT" }}</small>
+        {% endif %}
       </div>
           
       <!-- Card Body -->
       <div class="card-body">
         
-        {% include 'frontoffice/rosterTable.html' with players=players editableRoster=editableRoster %}
+        {% include 'frontoffice/lineup_table.html' with roster_by_position=roster editableRoster=editableRoster %}
 
         {% if editableRoster %}
         <div class="float-right">
