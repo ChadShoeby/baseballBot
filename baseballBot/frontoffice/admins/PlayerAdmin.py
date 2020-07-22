@@ -152,9 +152,6 @@ class PlayerAdmin(admin.ModelAdmin):
 
         if csv_type =="P":
             #P == Projected Fangraphs data (use ZIPS fangraph data) 
-
-            player_id_col = 19
-
             playerRecordsInDB = PlayerProjection.objects.all()
 
         else:
@@ -193,7 +190,7 @@ class PlayerAdmin(admin.ModelAdmin):
                     stat_list = {"innings_pitched":"IP", "hits_pitcher":"H","homeruns_pitcher":"HR","strikeouts":"SO", "walks_pitcher":"BB", "holds":"HLD", "saves":"SV", "hbps_pitcher":"HBP"}
                 else:
                     is_pitcher_import = False
-                    stat_list = {"atbats":"AB", "hits":"H", "doubles":"2B", "triple":"3B", "homeruns":"HR", "runs":"R", "rbis":"RBI", "walks":"BB", "hbps":"HBP", "caught_stealings":"CS", "stolen_bases":"SB"}
+                    stat_list = {"atbats":"AB", "hits":"H", "doubles":"2B", "triples":"3B", "homeruns":"HR", "runs":"R", "rbis":"RBI", "walks":"BB", "hbps":"HBP", "caught_stealings":"CS", "stolen_bases":"SB"}
                 header = False
                 continue
 
@@ -220,26 +217,28 @@ class PlayerAdmin(admin.ModelAdmin):
                     player_record.fangraphs_id = row[stat_col[ "playerid"]]
                     newPlayers.append(player_record)
 
-                if str(row[stat_col[ "playerid"]]) in playersByFangraphId:
-                    player_record.player = playersByFangraphId[str(row[stat_col[ "playerid"]])]
+            if str(row[stat_col[ "playerid"]]) in playersByFangraphId:
+                player_record.player = playersByFangraphId[str(row[stat_col[ "playerid"]])]
                 
-                for stat in stat_list:                
-                    setattr(player_record, stat, int(row[ stat_col[ stat_list[ stat ] ] ]))
+            for stat in stat_list:                
+                setattr(player_record, stat, int(row[ stat_col[ stat_list[ stat ] ] ]))
 
-                if not is_pitcher_import:
-                    #Singles is computed
-                    player_record.singles = int(row[stat_col[ stat_list["H"]]]) - (int(row[stat_col[ stat_list["2B"]]]) + int(row[stat_col[ stat_list["3B"]]]) +int(row[stat_col[ stat_list["HR"]]]))                
+            if not is_pitcher_import:
+                #Singles is computed
+                player_record.singles = int(row[stat_col[ stat_list["H"]]]) - (int(row[stat_col[ stat_list["2B"]]]) + int(row[stat_col[ stat_list["3B"]]]) +int(row[stat_col[ stat_list["HR"]]]))                
 
             newPlayerCounter +=1
         
-        if len(newPlayers) > 0 and csv_type == "PR":
-            PlayerRecord.objects.bulk_create(newPlayers)
-        if len(updatedPlayers) > 0 and csv_type == "PR":
-            PlayerRecord.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis','caught_stealings','stolen_bases'])
-        if len(newPlayers) > 0 and csv_type == "P":
-            PlayerProjection.objects.bulk_create(newPlayers)
-        if len(updatedPlayers) > 0 and csv_type == "P":
-            PlayerProjection.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis', 'caught_stealings', 'stolen_bases'])
+        if csv_type == "PR":
+            if len(newPlayers) > 0:
+                PlayerRecord.objects.bulk_create(newPlayers):
+            if len(updatedPlayers) > 0:
+                PlayerRecord.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis','caught_stealings','stolen_bases'])
+        elif csv_type == "P":
+            if len(newPlayers) > 0:
+                PlayerProjection.objects.bulk_create(newPlayers)
+            if len(updatedPlayers) > 0:
+                PlayerProjection.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis', 'caught_stealings', 'stolen_bases'])
 
         self.message_user(request, "Success: "+str(newPlayerCounter)+" players have been added.")
         return True
