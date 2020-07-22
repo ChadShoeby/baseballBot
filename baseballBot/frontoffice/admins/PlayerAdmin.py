@@ -140,7 +140,6 @@ class PlayerAdmin(admin.ModelAdmin):
         )
 
     def process_fangraphs_data(self, request, csv_type):
-        ###Condense
         form = CsvImportForm()
         csv_file = request.FILES["csv_file"]
         csvf = StringIO(csv_file.read().decode())
@@ -152,16 +151,14 @@ class PlayerAdmin(admin.ModelAdmin):
         is_pitcher_import = True   
 
         if csv_type =="P":
-            #Projected Fangraphs data use ZIPS 
+            #P == Projected Fangraphs data (use ZIPS fangraph data) 
 
             player_id_col = 19
 
             playerRecordsInDB = PlayerProjection.objects.all()
 
         else:
-            #PlayerRecord Fangraphs data 
-            player_id_col = 24
-
+            #use PlayerRecord Fangraphs data
             playerRecordsInDB = PlayerRecord.objects.all()
 
         playerRecordsByFangraphId = {}
@@ -193,10 +190,10 @@ class PlayerAdmin(admin.ModelAdmin):
 
                 if str(row[6]) == "ERA":
                     is_pitcher_import = True
-                    stat_list = {}
+                    stat_list = {"innings_pitched":"IP", "hits_pitcher":"H","homeruns_pitcher":"HR","strikeouts":"SO", "walks_pitcher":"BB", "holds":"HLD", "saves":"SV", "hbps_pitcher":"HBP"}
                 else:
                     is_pitcher_import = False
-                    stat_list = {"atbats":"AB", "hits":"H", "doubles":"2B", "triple":"3B", "homeruns":"HR", "runs":"R", "rbis":"RBI", "walks":"BB", "hbps":"HBP"}
+                    stat_list = {"atbats":"AB", "hits":"H", "doubles":"2B", "triple":"3B", "homeruns":"HR", "runs":"R", "rbis":"RBI", "walks":"BB", "hbps":"HBP", "caught_stealings":"CS", "stolen_bases":"SB"}
                 header = False
                 continue
 
@@ -227,47 +224,22 @@ class PlayerAdmin(admin.ModelAdmin):
                     player_record.player = playersByFangraphId[str(row[stat_col[ "playerid"]])]
                 
                 for stat in stat_list:                
-                    #player_record.atbats = int(row[stat_col["AB"]]) #At Bats
                     setattr(player_record, stat, int(row[ stat_col[ stat_list[ stat ] ] ]))
 
                 if not is_pitcher_import:
                     #Singles is computed
                     player_record.singles = int(row[stat_col[ stat_list["H"]]]) - (int(row[stat_col[ stat_list["2B"]]]) + int(row[stat_col[ stat_list["3B"]]]) +int(row[stat_col[ stat_list["HR"]]]))                
-                else:
-                ######Delete Else######
-                #    player_record.W = int(row[]) #Wins
-                #    player_record.L = int(row[]) #Losses
-             #    player_record.ERA = int(row[]) #Earned Run Average
-             #    player_record.G = int(row[]) #Games Played
-             #    player_record.GS = int(row[]) #Games Started
-             #    player_record.CG = int(row[]) #Complete Games
-              #    player_record.ShO = int(row[]) #Shut Outs
-                    player_record.holds = int(row[8]) #Hold
-                #    player_record.BS = int(row[]) #Blown Saves
-                    player_record.innings_pitched = float(row[7]) #Innings Pitched
-             #    player_record.TBF = int(row[]) #Total Batters Faced
-                    player_record.hits_pitcher = int(row[8]) #Hits
-             #    player_record.R = int(row[]) #Runs
-             #    player_record.ER = int(row[]) #Earned Runs
-                    player_record.homeruns_pitcher = int(row[10]) #Homerun
-                    player_record.walks_pitcher = int(row[12]) #Walk
-             #    player_record.IBB = int(row[]) #Intentional Walk
-             #    player_record.WP = int(row[]) #Wild Pitch
-             #    player_record.BK = int(row[]) #Balks
-                    player_record.strikeouts = int(row[11]) #Strikeouts
-
-
 
             newPlayerCounter +=1
         
         if len(newPlayers) > 0 and csv_type == "PR":
             PlayerRecord.objects.bulk_create(newPlayers)
         if len(updatedPlayers) > 0 and csv_type == "PR":
-            PlayerRecord.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis'])
+            PlayerRecord.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis','caught_stealings','stolen_bases'])
         if len(newPlayers) > 0 and csv_type == "P":
             PlayerProjection.objects.bulk_create(newPlayers)
         if len(updatedPlayers) > 0 and csv_type == "P":
-            PlayerProjection.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis'])
+            PlayerProjection.objects.bulk_update(updatedPlayers, ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis', 'caught_stealings', 'stolen_bases'])
 
         self.message_user(request, "Success: "+str(newPlayerCounter)+" players have been added.")
         return True
