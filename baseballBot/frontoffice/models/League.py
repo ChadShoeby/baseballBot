@@ -50,15 +50,8 @@ class League(models.Model):
 
     @property
     def stat_categories_with_modfiers_batting(self):
-        return self.stat_categories_with_modfiers(position_type='B')
-
-    @property
-    def stat_categories_with_modfiers_pitching(self):
-        return self.stat_categories_with_modfiers(position_type='P')
-
-    def stat_categories_with_modfiers(self, position_type):
         #map any yahoo stat category to the appropriate field in the player table
-        translateStatCategoryToStat = {
+        mapStatCategoryToRecordColumn = {
             'At Bats' : 'atbats',
             'Runs': 'runs',
             'Hits': 'hits',
@@ -72,11 +65,30 @@ class League(models.Model):
             'Hit By Pitch':'hbps',
             }
 
+        return self.stat_categories_with_modfiers(position_type='B', mapStatCat=mapStatCategoryToRecordColumn)
+
+    @property
+    def stat_categories_with_modfiers_pitching(self):
+        #map any yahoo stat category to the appropriate field in the player table
+        mapStatCategoryToRecordColumn = {
+            # 'Wins' : '',
+            'Saves': 'saves',
+            # 'Outs': '',
+            'Hits': 'hits_pitcher',
+            # 'Earned Runs': '',
+            'Walks': 'walks_pitcher',
+            'Hit Batters':'homeruns',
+            'Strikeouts': 'strikeouts',
+            }
+        return self.stat_categories_with_modfiers(position_type='P', mapStatCat=mapStatCategoryToRecordColumn)
+
+    def stat_categories_with_modfiers(self, position_type, mapStatCat):
+
         # build value dictionary
         result = {}
         for sc in self.stat_categories.all():
-            if sc.name in translateStatCategoryToStat and sc.position_type == position_type:
-                result[translateStatCategoryToStat[ sc.name ] ] = sc.stat_modifier
+            if sc.name in mapStatCat and sc.position_type == position_type:
+                result[mapStatCat[ sc.name ] ] = sc.stat_modifier
 
         return result
     
