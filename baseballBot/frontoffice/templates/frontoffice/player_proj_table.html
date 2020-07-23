@@ -5,7 +5,9 @@
         <tr>
             <th>Player</th>
             <th>Position</th>
+            {% if team_service.league.scoring_type == "headpoint" %}
             <th>Total Points</th>
+            {% endif %}
             <th>Fangrpahs Id</th>
             <th>Yahoo Id</th>
 
@@ -51,7 +53,10 @@
                     {% endif %}
                 </td>
 
+                {% if team_service.league.scoring_type == "headpoint" %}
                 <td>{{ data.total_points }}</td>
+                {% endif %}
+                
                 <td>{{ data.fangraphs_id }}</td>
                 <td>{{ data.player.yahoo_id }}</td>
 

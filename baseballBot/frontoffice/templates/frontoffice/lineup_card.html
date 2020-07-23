@@ -6,6 +6,8 @@
         <h5>{% if card_title %}{{ card_title }}{% else %}{{ team }} Lineup{% endif %}</h5>
         {% if total_points %}
           <h7 class="font-italic font-weight-light">Projected Total Points: {{ total_points }}</h7>
+        {% elif team.total_projected_points %}
+          <h7 class="font-italic font-weight-light">Projected Total Points: {{ team.total_projected_points }}</h7>
         {% endif %}
 
         {% if team %}

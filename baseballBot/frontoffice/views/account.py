@@ -49,7 +49,7 @@ def get_verifier_token(request):
         form = VerifierTokenForm()   
 
     return render(request,
-        'frontoffice/enterVerifierToken.html',
+        'frontoffice/enter_verifier_token.html',
         {'form': form ,
         'auth_url' : auth_url
         })

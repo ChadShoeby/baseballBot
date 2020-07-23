@@ -196,6 +196,7 @@ class TeamService():
 
         self.league.roster_slots_raw = json.dumps(roster_slots)
 
+        self.league.scoring_type = data.scoring_type
         self.league.save()
 
         # get stat categories for league in database
@@ -232,7 +233,9 @@ class TeamService():
 
             if str(sc['stat'].stat_id) in stat_modifiers:
                 stat_category.stat_modifier = stat_modifiers[str(sc['stat'].stat_id)]
-            
+            else:
+                stat_category.stat_modifier = None
+
             stat_category.league = self.league
             stat_category.save()
 

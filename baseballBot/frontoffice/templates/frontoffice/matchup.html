@@ -5,9 +5,9 @@
 
 {% block dashboardBody %}
 <div class="row">
-    {% include 'frontoffice/lineupcard.html' with team=user_team players=user_team_players %}
+    {% include 'frontoffice/lineup_card.html' with roster=user_team_roster team=user_team %}
 
-    {% include 'frontoffice/lineupcard.html' with team=opposing_team players=opposing_team_players %}
+    {% include 'frontoffice/lineup_card.html' with roster=opposing_team_roster team=opposing_team %}
 
 </div>
 	

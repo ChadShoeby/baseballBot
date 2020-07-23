@@ -35,7 +35,9 @@
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Next Matchup</span><br>
             {{ matchup.opposing_team }}</div>
-            <div class="col-6"><span class="small font-weight-bold">Projected Total Points</span><br>{{ team.total_projected_points }} </div>
+            {% if league.scoring_type == "headpoint" %}
+              <div class="col-6"><span class="small font-weight-bold">Projected Total Points</span><br>{{ team.total_projected_points }} </div>
+            {% endif %}
           </div>
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Joined on:</span><br> {{ team.created_at|date:"SHORT_DATETIME_FORMAT" }}</div>
@@ -56,8 +58,9 @@
         <div class="container" style="display: block;">
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Team</span><br></div>
-            <div class="col-6"><span class="small font-weight-bold">Project Points</span>
-            </div>
+            {% if league.scoring_type == "headpoint" %}
+            <div class="col-6"><span class="small font-weight-bold">Project Points</span></div>
+            {% endif %}
           </div>
 
           {% for otherTeam in other_league_teams %}
@@ -67,9 +70,10 @@
             <img style="height:50px;" src="{{ otherTeam.yahoo_team_logo_url }}" class="img-thumbnail">
             {% endif %}
             {{ otherTeam }}</div>
-
+            {% if league.scoring_type == "headpoint" %}
             <div class="col-6">{{ otherTeam.total_projected_points }}
             </div>
+            {% endif %}
           </div>
           {% endfor %}
 
@@ -85,7 +89,7 @@
   <div class="card shadow mb-4">
     <!-- Card Header - Dropdown -->
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-      <h5>{{ league.name }} Stats
+      <h5>Scoring Categories for {{ league.name }}
       </h5>
     </div>
     <!-- Card Body -->
@@ -93,8 +97,10 @@
         <div class="container" style="display: block;">
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Stat</span><br></div>
+            {% if league.scoring_type == "headpoint" %}
             <div class="col-6"><span class="small font-weight-bold">Value</span>
             </div>
+            {% endif %}
           </div>
 
           {% for stat in league.stat_categories.all %}
@@ -102,10 +108,11 @@
             <div class="col-6">
               {{ stat.name }} <small class="font-italic font-weight-light text-muted">{{ stat.position_type }}</small>
             </div>
-
+            {% if league.scoring_type == "headpoint" %}
             <div class="col-6">
               {{ stat.stat_modifier }}
             </div>
+            {% endif %}
           </div>
           {% endfor %}
 

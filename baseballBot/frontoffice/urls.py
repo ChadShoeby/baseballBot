@@ -8,18 +8,15 @@ urlpatterns = [
 
     path('', dashboard.index, name='home'),
     path('best-lineup', dashboard.best_lineup, name='best_lineup'),
+    path('matchup', dashboard.current_matchup, name='matchup'),
     url(r'^ajax/initialize_league/$', dashboard.ajax_initialize_league, name='ajax_initialize_league'),
     url(r'^ajax/update_team_roster/$', dashboard.ajax_update_team_roster, name='ajax_update_team_roster'),
     url(r'^ajax/update_league/$', dashboard.ajax_update_league, name='ajax_update_league'),
     url(r'^ajax/drop_player/$', dashboard.ajax_drop_player, name='ajax_drop_player'),
     url(r'^ajax/add_player/$', dashboard.ajax_add_player, name='ajax_add_player'),
 
-    path('league-players', views.leaguePlayers, name='league_players'),
-    path('projections', views.player_projections, name='player_projections'),
-    path('projections/free-agents', views.free_agent_projections, name='free_agent_projections'),
-    path('free-agents', views.freeAgents, name='free_agents'),
-    path('matchup', views.matchup, name='matchup'),
-
+    path('players', views.players_all, name='players_all'),
+    path('free-agents', views.free_agents, name='free_agents'),
 
     path('signup/', account.signup, name='signup'),
     path('enter-verifier-token', account.get_verifier_token, name='enterVerifierTokenForm'),

@@ -13,7 +13,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 
-from frontoffice.models import Team, Player, RosterEntry
+from frontoffice.models import Team, Player, RosterEntry, Matchup
 from frontoffice.services.TeamService import TeamService
 from frontoffice.yahooQuery import OauthGetAuthKeyHelper
 
@@ -55,15 +55,19 @@ def index(request):
         return redirect('choose_league')
 
     user_team = team_service.get_team()
-    current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
-
-    user_team.total_projected_points = get_total_points_by_roster(current_roster)
-
+    
     other_league_teams = league.teams_in_league.exclude(id=user_team.id)
-    for team in other_league_teams:
-        team_roster = team_service.get_team_roster(team,by_position=True, with_proj_points=True)
-        team.total_projected_points = get_total_points_by_roster(team_roster)
-        logger.debug(team.total_projected_points)
+
+    if league.scoring_type == "headpoint":
+        current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
+        user_team.total_projected_points = get_total_points_by_roster(current_roster)
+
+        for team in other_league_teams:
+            team_roster = team_service.get_team_roster(team,by_position=True, with_proj_points=True)
+            team.total_projected_points = get_total_points_by_roster(team_roster)
+    else:
+        current_roster = team_service.get_team_roster(user_team,by_position=True)
+
 
     return render(request, 
         'frontoffice/dashboard.html',
@@ -89,17 +93,58 @@ def get_total_points_by_roster(roster):
 def best_lineup(request):
     team_service = TeamService(request.user)
     user_team = team_service.get_team()
-    current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
     best_lineup = team_service.get_best_lineup(user_team)
+
+    if team_service.league.scoring_type == "headpoint":
+        current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
+        current_roster_total_points = get_total_points_by_roster(current_roster)
+        best_lineup_total_points = get_total_points_by_roster(best_lineup)
+    else:
+        current_roster = team_service.get_team_roster(user_team,by_position=True)
+        best_lineup_total_points = 0
+        current_roster_total_points = 0
 
     return render(request, 
         'frontoffice/best_lineup.html',
         {
         'user_team': user_team,
         'current_roster': current_roster,
-        'current_roster_total_points': get_total_points_by_roster(current_roster),
+        'current_roster_total_points': current_roster_total_points,
         'best_lineup' : best_lineup,
-        'best_lineup_total_points': get_total_points_by_roster(best_lineup),
+        'best_lineup_total_points': best_lineup_total_points,
+         })
+
+@login_required
+def current_matchup(request):
+    team_service = TeamService(request.user)
+    user_team = team_service.get_team()
+
+    current_week = team_service.get_current_week(user_team.league)
+    if current_week == 0 or not isinstance(current_week,int):
+        current_week = 1
+
+    matchup = team_service.get_team_matchup_for_week(user_team, week=current_week)
+    opposing_team = matchup.opposing_team
+
+    if team_service.league.scoring_type == "headpoint":
+        current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
+        user_team.total_projected_points = get_total_points_by_roster(current_roster)
+        opposing_team_roster = team_service.get_team_roster(opposing_team,by_position=True, with_proj_points=True)
+        opposing_team.total_projected_points = get_total_points_by_roster(opposing_team_roster)
+    else:
+        current_roster = team_service.get_team_roster(user_team,by_position=True)
+        user_team.total_projected_points = 0
+        opposing_team_roster = team_service.get_team_roster(opposing_team,by_position=True)
+        opposing_team.total_projected_points = 0
+
+
+    return render(request, 
+        'frontoffice/matchup.html',
+        {
+        'user_team': user_team,
+        'user_team_roster': current_roster,
+        'opposing_team' : opposing_team,
+        'opposing_team_roster' : opposing_team_roster,
          })
 
 @login_required
