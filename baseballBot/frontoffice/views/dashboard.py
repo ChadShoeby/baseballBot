@@ -57,21 +57,12 @@ def index(request):
     user_team = team_service.get_team()
     current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
 
-    # total points for team
-    def get_total_points_by_team(roster):
-        total_points = 0
-        for position in roster:
-            if position not in ["BN","IL"]:
-                for proj in roster[position]:
-                    total_points += proj.total_points
-        return total_points
-
-    user_team_total_points = get_total_points_by_team(current_roster)
+    user_team.total_projected_points = get_total_points_by_roster(current_roster)
 
     other_league_teams = league.teams_in_league.exclude(id=user_team.id)
     for team in other_league_teams:
         team_roster = team_service.get_team_roster(team,by_position=True, with_proj_points=True)
-        team.total_projected_points = get_total_points_by_team(team_roster)
+        team.total_projected_points = get_total_points_by_roster(team_roster)
         logger.debug(team.total_projected_points)
 
     return render(request, 
@@ -79,12 +70,20 @@ def index(request):
         {
         'team': user_team,
         'current_roster' : current_roster,
-        'user_team_total_points' : user_team_total_points,
         'manager_profile': manager_profile,
         'league': league,
         'other_league_teams': other_league_teams,
         'matchup': team_service.get_team_matchup_for_week(user_team),
         })
+
+# total points for a given roster
+def get_total_points_by_roster(roster):
+    total_points = 0
+    for position in roster:
+        if position not in ["BN","IL"]:
+            for proj in roster[position]:
+                total_points += proj.total_points
+    return total_points
 
 @login_required
 def best_lineup(request):
@@ -98,7 +97,9 @@ def best_lineup(request):
         {
         'user_team': user_team,
         'current_roster': current_roster,
-        'best_lineup' : best_lineup
+        'current_roster_total_points': get_total_points_by_roster(current_roster),
+        'best_lineup' : best_lineup,
+        'best_lineup_total_points': get_total_points_by_roster(best_lineup),
          })
 
 @login_required

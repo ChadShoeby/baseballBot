@@ -5,9 +5,9 @@
 
 {% block dashboardBody %}
 <div class="row">
-{% include 'frontoffice/lineup_card.html' with roster=current_roster card_title="Current Lineup" %}
+{% include 'frontoffice/lineup_card.html' with roster=current_roster card_title="Current Lineup" total_points=current_roster_total_points %}
 
-{% include 'frontoffice/lineup_card.html' with roster=best_lineup card_title="Best Lineup" %}
+{% include 'frontoffice/lineup_card.html' with roster=best_lineup card_title="Best Lineup" total_points=best_lineup_total_points %}
 
 </div>
 

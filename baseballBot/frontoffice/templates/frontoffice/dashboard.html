@@ -35,7 +35,7 @@
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Next Matchup</span><br>
             {{ matchup.opposing_team }}</div>
-            <div class="col-6"><span class="small font-weight-bold">Total Estimated Points</span><br>{{ user_team_total_points }} </div>
+            <div class="col-6"><span class="small font-weight-bold">Projected Total Points</span><br>{{ team.total_projected_points }} </div>
           </div>
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Joined on:</span><br> {{ team.created_at|date:"SHORT_DATETIME_FORMAT" }}</div>
@@ -56,7 +56,7 @@
         <div class="container" style="display: block;">
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Team</span><br></div>
-            <div class="col-6"><span class="small font-weight-bold">Points estimate</span>
+            <div class="col-6"><span class="small font-weight-bold">Project Points</span>
             </div>
           </div>
 
@@ -115,7 +115,7 @@
 
 </div> 
 
-{% include 'frontoffice/lineup_card.html' with team=team roster=current_roster card_title="Current Lineup" %} 
+{% include 'frontoffice/lineup_card.html' with team=team roster=current_roster card_title="Current Lineup" total_points=team.total_projected_points %} 
 
 </div>
 {% endblock %}
