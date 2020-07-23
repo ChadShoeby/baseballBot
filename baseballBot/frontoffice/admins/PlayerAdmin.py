@@ -74,14 +74,16 @@ class PlayerAdmin(admin.ModelAdmin):
 
                 player.estimated_season_points = int(row[42])
                 player.mlb_team_abbr = str(row[5])
-                player.display_position = str(row[7])
                 player.primary_position = str(row[7])
                 player.eligibile_positions_raw = str(row[40])
                 player.espn_id = str(row[18])
                 player.fangraphs_id = str(row[8])
                 player.league_name = str(row[6])
 
-                if row[7] == "P":
+                # adjusting for multiple positions
+                player.display_position = str(row[40]).replace("/",",")
+
+                if row[7] in ("P","SP","RP"):
                     player.position_type = "P"
                 else:
                     player.position_type = "B"
@@ -176,11 +178,10 @@ class PlayerAdmin(admin.ModelAdmin):
             if header:
                 stat_col = {}
                 for col_num, header_name in enumerate(row):
-                    print(col_num)
                     stat_col[header_name]=col_num
 
-
-                if str(row[4]) == "ERA":
+                # since ERA is a pitcher only stat we know this is pitcher
+                if "ERA" in row:
                     is_pitcher_import = True
                     stat_list = {"innings_pitched":"IP", "hits_pitcher":"H","homeruns_pitcher":"HR","strikeouts":"SO", "walks_pitcher":"BB", "holds":"HLD", "saves":"SV", "hbps_pitcher":"HBP"}
                 else:
@@ -194,12 +195,12 @@ class PlayerAdmin(admin.ModelAdmin):
                 continue
                 return HttpResponse("error on row:"+str(rowCount)+". player "+str(newPlayerCounter))
 
-              # skip rows without playerid
+            # skip rows without playerid
             if row[stat_col["playerid"]] == "":
                 continue
 
-                # if player record is in database, update that player record,
-               # else create a new player
+            # if player record is in database, update that player record,
+            # else create a new player
             if row[stat_col[ "playerid"]] in playerRecordsByFangraphId:
                 player_record = playerRecordsByFangraphId[row[stat_col[ "playerid"]]]
                 updatedPlayers.append(player_record)
@@ -219,8 +220,6 @@ class PlayerAdmin(admin.ModelAdmin):
                 #fix HLD error
                 if stat_list[stat] in stat_col:
                     setattr(player_record, stat, float(row[ stat_col[ stat_list[ stat ] ] ]))
-                #else:
-                #    setattr(player_record, stat, 0)
             if not is_pitcher_import:
                 #Singles is computed
                 player_record.singles = int(row[stat_col[ stat_list["hits"]]]) - (int(row[stat_col[ stat_list["doubles"]]]) + int(row[stat_col[ stat_list["triples"]]]) +int(row[stat_col[ stat_list["homeruns"]]]))                

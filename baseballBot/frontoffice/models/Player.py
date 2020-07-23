@@ -12,7 +12,7 @@ class Player(models.Model):
     espn_id = models.CharField(max_length=200,null=True)
     fangraphs_id = models.CharField(max_length=200,null=True,unique=True)
     yahoo_key = models.CharField(max_length=200,null=True)
-    display_position = models.CharField(max_length=10,null=True)
+    display_position = models.CharField(max_length=40,null=True)
     eligibile_positions_raw = models.CharField(max_length=200,null=True)
     mlb_team_abbr = models.CharField(max_length=200,null=True)
     league_name = models.CharField(max_length=200,null=True)
