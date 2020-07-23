@@ -57,16 +57,32 @@ def index(request):
     user_team = team_service.get_team()
     current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
 
-    # logger.debug(league)
-    # logger.debug(team_service.get_current_week(league))
+    # total points for team
+    def get_total_points_by_team(roster):
+        total_points = 0
+        for position in roster:
+            if position not in ["BN","IL"]:
+                for proj in roster[position]:
+                    total_points += proj.total_points
+        return total_points
+
+    user_team_total_points = get_total_points_by_team(current_roster)
+
+    other_league_teams = league.teams_in_league.exclude(id=user_team.id)
+    for team in other_league_teams:
+        team_roster = team_service.get_team_roster(team,by_position=True, with_proj_points=True)
+        team.total_projected_points = get_total_points_by_team(team_roster)
+        logger.debug(team.total_projected_points)
 
     return render(request, 
         'frontoffice/dashboard.html',
         {
         'team': user_team,
         'current_roster' : current_roster,
+        'user_team_total_points' : user_team_total_points,
         'manager_profile': manager_profile,
         'league': league,
+        'other_league_teams': other_league_teams,
         'matchup': team_service.get_team_matchup_for_week(user_team),
         })
 

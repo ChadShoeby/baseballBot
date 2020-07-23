@@ -487,10 +487,10 @@ class TeamService():
 
     def get_proj_player_points_by_league(self, league):
 
-        team_roster_batters_subquery = str(Player.objects.filter(position_type="'B'").values('id').query)
-        team_roster_pitchers_subquery = str(Player.objects.filter(position_type="'P'").values('id').query)
-        proj_points_batters_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=team_roster_batters_subquery, position_type="B")
-        proj_points_pitchers_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=team_roster_pitchers_subquery, position_type="P")
+        league_batters_subquery = str(Player.objects.filter(position_type="'B'").values('id').query)
+        league_pitchers_subquery = str(Player.objects.filter(position_type="'P'").values('id').query)
+        proj_points_batters_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=league_batters_subquery, position_type="B")
+        proj_points_pitchers_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=league_pitchers_subquery, position_type="P")
         return list(proj_points_batters_query) + list(proj_points_pitchers_query)
     
     def get_proj_player_points_for_free_agents(self, league):

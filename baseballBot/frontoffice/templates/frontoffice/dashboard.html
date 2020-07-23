@@ -35,7 +35,7 @@
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Next Matchup</span><br>
             {{ matchup.opposing_team }}</div>
-            <div class="col-6"><span class="small font-weight-bold">Total Estimated Points</span><br>{{ team.total_est_points }} </div>
+            <div class="col-6"><span class="small font-weight-bold">Total Estimated Points</span><br>{{ user_team_total_points }} </div>
           </div>
           <div class="row mt-2">
             <div class="col-6"><span class="small font-weight-bold">Joined on:</span><br> {{ team.created_at|date:"SHORT_DATETIME_FORMAT" }}</div>
@@ -60,8 +60,7 @@
             </div>
           </div>
 
-          {% for otherTeam in league.teams_in_league.all %}
-            {% if otherTeam.id != team.id %}
+          {% for otherTeam in other_league_teams %}
           <div class="row mt-2">
             <div class="col-6">
             {% if otherTeam.yahoo_team_logo_url %}
@@ -69,10 +68,9 @@
             {% endif %}
             {{ otherTeam }}</div>
 
-            <div class="col-6">{{ otherTeam.total_est_points }}
+            <div class="col-6">{{ otherTeam.total_projected_points }}
             </div>
           </div>
-            {% endif %}
           {% endfor %}
 
           <div class="float-right">
