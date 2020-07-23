@@ -1,4 +1,4 @@
-{% load points_by_stat %}
+{% load static points_by_stat %}
 
 <table id="playerTable{% if team %}_team_{{ team.id }}{% endif %}" class="table table-striped table-dark table-hover" style="width:100%">
     <thead>
@@ -26,7 +26,11 @@
             {% endif %}
             >
                 <td>
-                    {% if data.player.headshot_url %}<img src="{{ data.player.headshot_url }}">{% endif %}
+                    {% if data.player.headshot_url %}
+                        <img src="{{ data.player.headshot_url }}" onerror="this.onerror=null;this.src='{% static "baseballBot/img/wiz_player_profile.png" %}';">
+                    {% else %}
+                        <img src="{% static "baseballBot/img/wiz_player_profile.png" %}">
+                    {% endif %}
                     {{ data.player.full_name }}
                 </td>
 

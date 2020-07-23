@@ -18,7 +18,7 @@
         <tr>
             <td class="w-75">
                 {% if player.headshot_url %}
-                    <img src="{{ player.headshot_url }}">
+                    <img src="{{ player.headshot_url }}" onerror="this.onerror=null;this.src='{% static "baseballBot/img/wiz_player_profile.png" %}';">
                 {% else %}
                     <img src="{% static "baseballBot/img/wiz_player_profile.png" %}">
                 {% endif %}
