@@ -49,7 +49,7 @@ class League(models.Model):
         return formatted_roster_slots
 
     @property
-    def stat_categories_with_modfiers_batting(self):
+    def stat_categories_with_modifiers_batting(self):
         #map any yahoo stat category to the appropriate field in the player table
         mapStatCategoryToRecordColumn = {
             'At Bats' : 'atbats',
@@ -65,10 +65,10 @@ class League(models.Model):
             'Hit By Pitch':'hbps',
             }
 
-        return self.stat_categories_with_modfiers(position_type='B', mapStatCat=mapStatCategoryToRecordColumn)
+        return self.stat_categories_with_modifiers(position_type='B', mapStatCat=mapStatCategoryToRecordColumn)
 
     @property
-    def stat_categories_with_modfiers_pitching(self):
+    def stat_categories_with_modifiers_pitching(self):
         #map any yahoo stat category to the appropriate field in the player table
         mapStatCategoryToRecordColumn = {
             # 'Wins' : '',
@@ -80,9 +80,9 @@ class League(models.Model):
             'Hit Batters':'homeruns',
             'Strikeouts': 'strikeouts',
             }
-        return self.stat_categories_with_modfiers(position_type='P', mapStatCat=mapStatCategoryToRecordColumn)
+        return self.stat_categories_with_modifiers(position_type='P', mapStatCat=mapStatCategoryToRecordColumn)
 
-    def stat_categories_with_modfiers(self, position_type, mapStatCat):
+    def stat_categories_with_modifiers(self, position_type, mapStatCat):
 
         # build value dictionary
         result = {}

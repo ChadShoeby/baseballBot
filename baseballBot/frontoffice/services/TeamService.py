@@ -324,10 +324,11 @@ class TeamService():
 
         if with_proj_points:
             # get projected points for these players
-            team_roster_subquery = str(team.roster_entries.values('player_id').annotate(id=F('player_id')).query)
-            logger.debug(team_roster_subquery)
-            proj_points_query = self.get_queryset_proj_player_points_by_league(team.league, for_players_sub_query=team_roster_subquery)
-            proj_players = list(proj_points_query)
+            team_roster_batters_subquery = str(team.roster_entries.filter(player__position_type="'B'").values('player_id').annotate(id=F('player_id')).query)
+            team_roster_pitchers_subquery = str(team.roster_entries.filter(player__position_type="'P'").values('player_id').annotate(id=F('player_id')).query)
+            proj_points_batters_query = self.get_queryset_proj_player_points_by_league(team.league, for_players_sub_query=team_roster_batters_subquery, position_type="B")
+            proj_points_pitchers_query = self.get_queryset_proj_player_points_by_league(team.league, for_players_sub_query=team_roster_pitchers_subquery, position_type="P")
+            proj_players = list(proj_points_batters_query) + list(proj_points_pitchers_query)
 
         if by_position:
             roster = {}
@@ -498,9 +499,9 @@ class TeamService():
 
         # get statCategories by league that translate to points
         if position_type == "B":
-            stat_modifiers = league.stat_categories_with_modfiers_batting
+            stat_modifiers = league.stat_categories_with_modifiers_batting
         else:
-            stat_modifiers = league.stat_categories_with_modfiers_pitching
+            stat_modifiers = league.stat_categories_with_modifiers_pitching
 
         # build a projection table according to points
         query = "SELECT pj.id, pj.fangraphs_id, pj.player_id, "
