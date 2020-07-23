@@ -320,8 +320,6 @@ class TeamService():
             yqu = self.yahoo_query_utility
             players = self.update_team_roster(team)
 
-        logger.debug(players)
-
         if with_proj_points:
             # get projected points for these players
             team_roster_batters_subquery = str(team.roster_entries.filter(player__position_type="'B'").values('player_id').annotate(id=F('player_id')).query)
@@ -488,8 +486,19 @@ class TeamService():
         return Player.objects.all().exclude(id__in=playersOnTeamsInLeague)
 
     def get_proj_player_points_by_league(self, league):
-        projs_as_points = self.get_queryset_proj_player_points_by_league(league)
-        return projs_as_points
+
+        team_roster_batters_subquery = str(Player.objects.filter(position_type="'B'").values('id').query)
+        team_roster_pitchers_subquery = str(Player.objects.filter(position_type="'P'").values('id').query)
+        proj_points_batters_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=team_roster_batters_subquery, position_type="B")
+        proj_points_pitchers_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=team_roster_pitchers_subquery, position_type="P")
+        return list(proj_points_batters_query) + list(proj_points_pitchers_query)
+    
+    def get_proj_player_points_for_free_agents(self, league):
+        free_agent_batters_query = str(self.get_free_agents_in_league().values('id').filter(position_type="'B'").query)
+        free_agent_pitchers_query = str(self.get_free_agents_in_league().values('id').filter(position_type="'P'").query)
+        proj_points_batters_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=free_agent_batters_query, position_type="B")
+        proj_points_pitchers_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=free_agent_pitchers_query, position_type="P")
+        return list(proj_points_batters_query) + list(proj_points_pitchers_query)
 
     def get_queryset_proj_player_points_by_league(self, league, for_players_sub_query=False, position_type="B", limit=False):
 

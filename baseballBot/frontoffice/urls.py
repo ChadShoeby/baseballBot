@@ -15,7 +15,8 @@ urlpatterns = [
     url(r'^ajax/add_player/$', dashboard.ajax_add_player, name='ajax_add_player'),
 
     path('league-players', views.leaguePlayers, name='league_players'),
-    path('league-projections', views.estimated_points_by_league, name='estimated_points_by_league'),
+    path('projections', views.player_projections, name='player_projections'),
+    path('projections/free-agents', views.free_agent_projections, name='free_agent_projections'),
     path('free-agents', views.freeAgents, name='free_agents'),
     path('matchup', views.matchup, name='matchup'),
 

@@ -32,7 +32,7 @@ def matchup(request):
         })
 
 @login_required
-def estimated_points_by_league(request):
+def player_projections(request):
     team_service = TeamService(request.user)
     user_team = team_service.get_team()
 
@@ -41,7 +41,20 @@ def estimated_points_by_league(request):
         {
         'page_title': 'League Projections',
         'players': team_service.get_proj_player_points_by_league(user_team.league),
-        'league' : team_service.league
+        'league' : user_team.league
+        })
+
+@login_required
+def free_agent_projections(request):
+    team_service = TeamService(request.user)
+    user_team = team_service.get_team()
+
+    return render(request,
+        'frontoffice/league_projections.html',
+        {
+        'page_title': 'Free Agent Projections',
+        'players':  team_service.get_proj_player_points_for_free_agents(user_team.league),
+        'league' : user_team.league
         })
 
 @login_required
