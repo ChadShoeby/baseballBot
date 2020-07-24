@@ -113,6 +113,10 @@ class YahooQueryUtil():
         query_result_data = self.yahoo_query.get_team_roster_player_info_by_week(team_id)
         return query_result_data
 
+    def get_team_roster_player_info_by_date(self, team_id):
+        query_result_data = self.yahoo_query.get_team_roster_player_info_by_date(team_id)
+        return query_result_data
+        
     def get_league_teams(self):
         query_result_data = self.yahoo_query.get_league_teams()
         return query_result_data

@@ -1,0 +1,94 @@
+{% extends "../base.html" %}
+
+{% load static define_action %}
+
+{% block title %}{{ league.name }}{% endblock %}
+{% block dashboardTitle %}{{ league.name }} {% endblock %}
+
+{% block dashboardBody %}
+<div class="row">
+<!--Lineup Card-->
+  <div class="col">
+    <div class="card shadow mb-4">
+      <!-- Card Header - Dropdown -->
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h5> Season Projections</h5>
+      </div>
+          
+      <!-- Card Body -->
+      <div class="card-body">
+        <table class="player_table table table-striped table-dark table-hover">
+            <thead>
+                
+                <tr>
+                    <th>Team</th>
+                    <th>Total Cats Won</th>
+                    <th>Hits</th>
+                    <th>Runs</th>
+                    <th>Singles</th>
+                    <th>Doubles</th>
+                    <th>Triples</th>
+                    <th>Home Runs</th>
+                    <th>Runs Batted In</th>
+                    <th>Stolen Bases</th>
+                    <th>Walks</th>
+                    <th>Hit By Pitch</th>
+                </tr>
+               
+            </thead>
+            <tbody>
+            {% for team in teams  %}
+                <tr>
+                    <td>
+                        {% if team.yahoo_team_logo_url %}
+                            <img style="height:50px;" src="{{ team.yahoo_team_logo_url }}" class="img-thumbnail" onerror="this.onerror=null;this.src='{% static "baseballBot/img/wiz_player_profile.png" %}';">
+                        {% else %}
+                            <img src="{% static "baseballBot/img/wiz_player_profile.png" %}" class="img-thumbnail">
+                        {% endif %}
+                        {{ team }}
+                    </td>
+                    <td>{{ team.roto_totals }}</td>
+                {% if team.stat_projections %}
+
+                    <td>{{ team.stat_projections.hits }} :: {{ team.roto_points_hits }}
+                    </td>
+                    <td>{{ team.stat_projections.runs }}:: {{ team.roto_points_runs }}
+                    </td>
+                    <td>{{ team.stat_projections.singles }}:: {{ team.roto_points_singles }}
+                    </td>
+                    <td>{{ team.stat_projections.doubles }}:: {{ team.roto_points_doubles }}
+                    </td>
+                    <td>{{ team.stat_projections.triples }}:: {{ team.roto_points_triples }}
+                    </td>
+                    <td>{{ team.stat_projections.homeruns }}:: {{ team.roto_points_homeruns }}
+                    </td>
+                    <td>{{ team.stat_projections.rbis }}:: {{ team.roto_points_rbis }}
+                    </td>
+                    <td>{{ team.stat_projections.stolen_bases }}:: {{ team.roto_points_stolen_bases }}
+                    </td>
+                    <td>{{ team.stat_projections.walks }}:: {{ team.roto_points_walks }}
+                    </td>
+                    <td>{{ team.stat_projections.hbps }}:: {{ team.roto_points_hbps }}
+                    </td>
+    
+                {% endif %}
+            
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div> <!-- end lineup card-->
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+$(document).ready(function() {
+    playerTable = $('.player_table').DataTable();
+
+});
+</script>
+{% endblock %}

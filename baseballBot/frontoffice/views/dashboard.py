@@ -68,7 +68,6 @@ def index(request):
     else:
         current_roster = team_service.get_team_roster(user_team,by_position=True)
 
-
     return render(request, 
         'frontoffice/dashboard.html',
         {
@@ -114,12 +113,93 @@ def best_lineup(request):
         'best_lineup_total_points': best_lineup_total_points,
          })
 
+def get_team_stat_projections(league, roster):
+    stat_categories = league.stat_categories_with_modifiers_batting
+
+    stat_totals = {}
+    for sc in stat_categories:
+        if stat_categories[sc]:
+            stat_totals[sc] = 0
+
+    for position in roster:
+        if position not in ["BN","IL"]:
+            for proj in roster[position]:      
+                for sc in stat_categories:
+                    stat_totals[sc] += getattr(proj, sc, 0)
+
+    return stat_totals
+
+def set_teams_projected_category_points(league, teams):
+    number_of_teams = len(teams)
+
+    for team in teams:
+        team.roto_totals = 0
+
+    stat_categories = league.stat_categories_with_modifiers_batting
+
+    for sc in stat_categories:
+        category_rankings = []
+        for team in teams:
+            category_rankings.append((team, team.stat_projections.get(sc)))
+
+        category_rankings = sorted(category_rankings, key = lambda x: x[1])
+
+        # assign points for category 
+        for i in range(len(category_rankings)):
+            setattr(category_rankings[i][0],"roto_points_"+sc, i+1 )
+            category_rankings[i][0].roto_totals += i+1
+
+    return
+
+@login_required
+def league_roto_projections(request):
+    team_service = TeamService(request.user)
+    league = team_service.league
+    teams = league.teams_in_league.all()
+
+    # set team totals
+    for team in teams:
+        team_roster = team_service.get_team_roster(team,by_position=True, with_proj_points=True)
+        team.stat_projections = get_team_stat_projections(team_service.league, team_roster)
+
+    set_teams_projected_category_points(team_service.league, teams)
+
+    return render(request, 
+        'frontoffice/league_roto_projections.html',
+        {
+        'teams': teams,
+        'league': league,
+         })
+
+@login_required
+def team_roster_projections(request):
+    team_service = TeamService(request.user)
+    user_team = team_service.get_team()
+    current_roster = team_service.get_team_roster(user_team,by_position=True, with_proj_points=True)
+
+    if team_service.league.scoring_type == "headpoint":
+        current_roster_total_points = get_total_points_by_roster(current_roster)
+    else:
+        current_roster_total_points = 0
+
+    if team_service.league.scoring_type == "roto":
+        user_team.stat_projections = get_team_stat_projections(team_service.league, current_roster)        
+    
+
+    return render(request, 
+        'frontoffice/team_roster_projections.html',
+        {
+        'team': user_team,
+        'current_roster': current_roster,
+        'current_roster_total_points': current_roster_total_points,
+         })
+
 @login_required
 def current_matchup(request):
     team_service = TeamService(request.user)
     user_team = team_service.get_team()
 
-    current_week = team_service.get_current_week(user_team.league)
+    current_week = team_service.get_current_week()
     if current_week == 0 or not isinstance(current_week,int):
         current_week = 1
 

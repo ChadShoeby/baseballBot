@@ -60,7 +60,7 @@ class League(models.Model):
             'Triples': 'triples',
             'Home Runs':'homeruns',
             'Runs Batted In': 'rbis',
-            'Stolen Base':'stolen_bases',
+            'Stolen Bases':'stolen_bases',
             'Walks':'walks',
             'Hit By Pitch':'hbps',
             }

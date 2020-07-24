@@ -1,0 +1,106 @@
+{% extends "../base.html" %}
+
+{% load static define_action %}
+
+{% block title %}{{ team }} Front Office{% endblock %}
+{% block dashboardTitle %}{{ team }} {% endblock %}
+
+{% block dashboardBody %}
+<div class="row">
+<!--Lineup Card-->
+  <div class="col">
+    <div class="card shadow mb-4">
+      <!-- Card Header - Dropdown -->
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h5> Season Projections</h5>
+        {% if total_points %}
+          <h7 class="font-italic font-weight-light">Projected Total Points: {{ total_points }}</h7>
+        {% elif team.total_projected_points %}
+          <h7 class="font-italic font-weight-light">Projected Total Points: {{ team.total_projected_points }}</h7>
+        {% endif %}
+
+        {% if team %}
+        <small class="font-italic font-weight-light text-muted">last updated: {{ team.roster_last_updated_at|date:"SHORT_DATETIME_FORMAT" }}</small>
+        {% endif %}
+      </div>
+          
+      <!-- Card Body -->
+      <div class="card-body">
+        <table class="player_table table table-striped table-dark table-hover">
+            <thead>
+                {% if team.stat_projections %}
+                <tr>
+                    <th>{{ team }} Total</th>
+                    <th></th>
+                    <th>{{ team.stat_projections.hits }}</th>
+                    <th>{{ team.stat_projections.runs }}</th>
+                    <th>{{ team.stat_projections.singles }}</th>
+                    <th>{{ team.stat_projections.doubles }}</th>
+                    <th>{{ team.stat_projections.triples }}</th>
+                    <th>{{ team.stat_projections.homeruns }}</th>
+                    <th>{{ team.stat_projections.rbis }}</th>
+                    <th>{{ team.stat_projections.stolen_bases }}</th>
+                    <th>{{ team.stat_projections.walks }}</th>
+                    <th>{{ team.stat_projections.hbps }}</th>
+                </tr>
+                {% endif %}
+                <tr>
+                    <th>Player</th>
+                    <th>Position</th>
+                    <th>Hits</th>
+                    <th>Runs</th>
+                    <th>Singles</th>
+                    <th>Doubles</th>
+                    <th>Triples</th>
+                    <th>Home Runs</th>
+                    <th>Runs Batted In</th>
+                    <th>Stolen Bases</th>
+                    <th>Walks</th>
+                    <th>Hit By Pitch</th>
+                </tr>
+               
+            </thead>
+            <tbody>
+            {% for position, players in current_roster.items  %}
+                {% for data in players %}
+                    {% define data.player as player %}
+                <tr>
+                    <td class="w-10">
+                        {% if player.headshot_url %}
+                            <img src="{{ player.headshot_url }}" onerror="this.onerror=null;this.src='{% static "baseballBot/img/wiz_player_profile.png" %}';">
+                        {% else %}
+                            <img src="{% static "baseballBot/img/wiz_player_profile.png" %}">
+                        {% endif %}
+                        {{ player.full_name }} ({{ player.display_position }})
+                    </td>
+                    <td>{{ position }} ({{ player.position_type }})</td>
+                    <td>{{ data.hits }}</td>
+                    <td>{{ data.runs }}</td>
+                    <td>{{ data.singles }}</td>
+                    <td>{{ data.doubles }}</td>
+                    <td>{{ data.triples }}</td>
+                    <td>{{ data.homeruns }}</td>
+                    <td>{{ data.rbis }}</td>
+                    <td>{{ data.stolen_bases }}</td>
+                    <td>{{ data.walks }}</td>
+                    <td>{{ data.hbps }}</td>
+                </tr>
+                {% endfor %}
+            {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div> <!-- end lineup card-->
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+$(document).ready(function() {
+    playerTable = $('.player_table').DataTable();
+
+});
+</script>
+{% endblock %}

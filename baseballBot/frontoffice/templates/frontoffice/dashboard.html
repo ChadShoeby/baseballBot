@@ -33,8 +33,9 @@
             </div>
           </div>
           <div class="row mt-2">
-            <div class="col-6"><span class="small font-weight-bold">Next Matchup</span><br>
-            {{ matchup.opposing_team }}</div>
+            {% if matchup %}
+            <div class="col-6"><span class="small font-weight-bold">Next Matchup</span><br>{{ matchup.opposing_team }}</div>
+            {% endif %}
             {% if league.scoring_type == "headpoint" %}
               <div class="col-6"><span class="small font-weight-bold">Projected Total Points</span><br>{{ team.total_projected_points }} </div>
             {% endif %}

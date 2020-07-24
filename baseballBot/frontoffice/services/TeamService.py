@@ -21,7 +21,7 @@ class TeamService():
 
         if not initial_setup and self.league:
             self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id, league_key=self.league.yahoo_key)
-            
+
             if not self.league.updated_at:
                 self.initialize_data_from_yahoo()
                 self.initialize_game_weeks()
@@ -34,7 +34,8 @@ class TeamService():
         team = self.get_team()
         self.update_league_rosters(forceUpdate=True)
         self.update_league_settings()
-        self.update_team_matchups(team)
+        if self.league.scoring_type != "roto":
+            self.update_team_matchups(team)
 
     def initialize_game_weeks(self):
         yqu = self.yahoo_query_utility
@@ -234,7 +235,10 @@ class TeamService():
             if str(sc['stat'].stat_id) in stat_modifiers:
                 stat_category.stat_modifier = stat_modifiers[str(sc['stat'].stat_id)]
             else:
-                stat_category.stat_modifier = None
+                if sc['stat'].stat_position_types['stat_position_type'].is_only_display_stat:
+                    stat_category.stat_modifier = None
+                else:
+                    stat_category.stat_modifier = 1
 
             stat_category.league = self.league
             stat_category.save()
@@ -409,7 +413,7 @@ class TeamService():
         if not team.yahoo_team_id:
             return False
 
-        team_roster_from_yahoo = yqu.get_team_roster_player_info_by_week(team.yahoo_team_id)
+        team_roster_from_yahoo = yqu.get_team_roster_player_info_by_date(team.yahoo_team_id)
          
         if playersByYahooId == None:
             playersInDB = Player.objects.all()
@@ -504,7 +508,6 @@ class TeamService():
         return list(proj_points_batters_query) + list(proj_points_pitchers_query)
 
     def get_queryset_proj_player_points_by_league(self, league, for_players_sub_query=False, position_type="B", limit=False):
-
         params = {
             'league_id': league.id
             }
@@ -618,10 +621,23 @@ class TeamService():
 
         if league.scoring_type == "headpoint":
             return self.get_best_lineup_headpoint(team, league)
+        elif league.scoring_type == "roto":
+            return self.get_best_lineup_roto(team, league)
         else:
             return self.get_best_lineup_head(team, league)
 
+    def get_best_lineup_roto(self, team, league):
+        return []
+
     def get_best_lineup_head(self, team, league):
+        roster_slots= league.roster_slots
+        logger.debug(roster_slots)
+        
+        best_available_players = {}
+        best_roster_to_field = {}
+
+        matchup = self.get_team_matchup_for_week(team)
+
         return []
 
     def get_best_lineup_headpoint(self, team, league):
@@ -646,14 +662,10 @@ class TeamService():
             else:
                 availabe_player_query_sql = self.get_available_players_query(team, as_sql=True, exclude_these=best_available_players.keys(), for_position=position)
 
-            logger.debug(availabe_player_query_sql)
             proj_points_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=availabe_player_query_sql, position_type=position_type,limit=slot_count)
-
             best_available_for_position = list(proj_points_query)
 
             best_roster_to_field[position] = []
-            logger.debug(position)
-            logger.debug(best_available_for_position)
             for player_proj in best_available_for_position:
                 if player_proj.player.id not in best_available_players:
                     best_available_players[player_proj.player.id] = player_proj.player
@@ -695,7 +707,14 @@ class TeamService():
 
         return result
 
-    def get_team_matchup_for_week(self, team, week=1):
+    def get_team_matchup_for_week(self, team, week=None):
+        if team.league.scoring_type == "roto":
+            return False
+
+        if week is None:
+            week = self.get_current_week()
+            if week == 0 or not isinstance(week,int):
+                week = 1
         try:
             matchup = Matchup.objects.get(user_team=team,week=week)
         except ObjectDoesNotExist:
@@ -706,12 +725,12 @@ class TeamService():
                 return []
         return matchup
 
-    def get_current_week(self, league):
+    def get_current_week(self):
         today = date.today()
         # logger.debug(today)
         # today = datetime.strptime("2020-07-28", '%Y-%m-%d').date()
         # logger.debug(today)
-        results = GameWeek.objects.filter(league=league, start__lt=today, end__gt=today).all()
+        results = GameWeek.objects.filter(league=self.league, start__lt=today, end__gt=today).all()
 
         if len(results) == 0:
             # to do figure out pre and post season
