@@ -7,6 +7,7 @@ class AbstractPlayerRecord(models.Model):
     season_year = models.IntegerField(default=2020)
     game_week = models.IntegerField(default=1)
     fangraphs_id = models.CharField(max_length=20,default="NA")
+    average_draft_postions = models.FloatField(default=0)
 
     #offensive scoring fields
     hits = models.IntegerField(default=0)
@@ -21,6 +22,14 @@ class AbstractPlayerRecord(models.Model):
     caught_stealings = models.IntegerField(default=0)
     rbis = models.IntegerField(default=0)
     runs = models.IntegerField(default=0)
+    batting_averages = models.FloatField(default=0)
+    on_base_percentages = models.FloatField(default=0)
+    slugging_percentages = models.FloatField(default=0)
+    on_base_plus_sluggings = models.FloatField(default=0)
+
+
+
+
 
     #pitcher scoring fields
     innings_pitched = models.FloatField(default=0)
@@ -31,6 +40,13 @@ class AbstractPlayerRecord(models.Model):
     homeruns_pitcher = models.IntegerField(default=0)
     saves = models.IntegerField(default=0)
     holds = models.IntegerField(default=0)
+    wins = models.IntegerField(default=0) 
+    loses = models.IntegerField(default=0)
+    era = models.FloatField(default=0)
+    games_started = models.IntegerField(default=0)
+    blown_saves = models.IntegerField(default=0)
+    whips = models.FloatField(default=0)
+
 
     class Meta:
         abstract = True

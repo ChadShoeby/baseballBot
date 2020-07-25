@@ -183,10 +183,10 @@ class PlayerAdmin(admin.ModelAdmin):
                 # since ERA is a pitcher only stat we know this is pitcher
                 if "ERA" in row:
                     is_pitcher_import = True
-                    stat_list = {"innings_pitched":"IP", "hits_pitcher":"H","homeruns_pitcher":"HR","strikeouts":"SO", "walks_pitcher":"BB", "holds":"HLD", "saves":"SV", "hbps_pitcher":"HBP"}
+                    stat_list = {"innings_pitched":"IP", "hits_pitcher":"H","homeruns_pitcher":"HR","strikeouts":"SO", "walks_pitcher":"BB", "holds":"HLD", "saves":"SV", "hbps_pitcher":"HBP", "wins":"W", "loses":"L", "era":"ERA", "games_started":"GS", "blown_saves":"BS", "whips":"WHIP", "average_draft_postions":"ADP"}
                 else:
                     is_pitcher_import = False
-                    stat_list = {"atbats":"AB", "hits":"H", "doubles":"2B", "triples":"3B", "homeruns":"HR", "runs":"R", "rbis":"RBI", "walks":"BB", "hbps":"HBP", "caught_stealings":"CS", "stolen_bases":"SB"}
+                    stat_list = {"atbats":"AB", "hits":"H", "doubles":"2B", "triples":"3B", "homeruns":"HR", "runs":"R", "rbis":"RBI", "walks":"BB", "hbps":"HBP", "caught_stealings":"CS", "stolen_bases":"SB" , "batting_averages":"AVG", "on_base_percentages":"OBP", "slugging_percentages":"SLG", "on_base_plus_sluggings":"OPS", "average_draft_postions":"ADP"}
                 
                 header = False
                 continue
@@ -223,10 +223,12 @@ class PlayerAdmin(admin.ModelAdmin):
             if not is_pitcher_import:
                 #Singles is computed
                 player_record.singles = int(row[stat_col[ stat_list["hits"]]]) - (int(row[stat_col[ stat_list["doubles"]]]) + int(row[stat_col[ stat_list["triples"]]]) +int(row[stat_col[ stat_list["homeruns"]]]))                
-
+            else:
+                #Whips is computed
+                player_record.whips = (int(row[stat_col[ stat_list["walks_pitcher"]]]) + int(row[stat_col[ stat_list["hits_pitcher"]]])) / float(row[stat_col[ stat_list["innings_pitched"]]])
             newPlayerCounter +=1
         
-        update_col_values = ['player','atbats','hits','singles','doubles','triples','homeruns','walks','hbps','holds','innings_pitched','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts','fangraphs_id', 'runs', 'rbis','caught_stealings','stolen_bases']
+        update_col_values = ['player','fangraphs_id','atbats','hits','singles','doubles','triples','homeruns','walks','hbps', 'runs', 'rbis','caught_stealings','stolen_bases', 'batting_averages', 'on_base_percentages', 'slugging_percentages', 'on_base_plus_sluggings','innings_pitched','holds','hits_pitcher','homeruns_pitcher','walks_pitcher','strikeouts', 'wins', 'loses', 'era', 'games_started', 'blown_saves', 'whips', 'average_draft_postions']
         
         if csv_type == "PR":
             if len(newPlayers) > 0:
