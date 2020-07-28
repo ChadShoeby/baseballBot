@@ -7,7 +7,10 @@ from django.db import transaction
 from django.db.models import F
 
 from frontoffice.services.YahooQueryUtil import YahooQueryUtil
-from frontoffice.models import GameWeek, Matchup, RosterEntry, Team, League, ManagerProfile, TeamRecord, Player, RosterEntry, StatCategory, PlayerProjection
+from frontoffice.models import GameWeek, Matchup, RosterEntry, \
+    Team, League, ManagerProfile, TeamRecord, Player, \
+    RosterEntry, StatCategory, PlayerProjection, \
+    TeamRotoProjectedRecord
 
 logger = logging.getLogger(__name__)
 
@@ -506,6 +509,69 @@ class TeamService():
         proj_points_batters_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=free_agent_batters_query, position_type="B")
         proj_points_pitchers_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=free_agent_pitchers_query, position_type="P")
         return list(proj_points_batters_query) + list(proj_points_pitchers_query)
+
+    def set_roto_league_team_proj_score(self, league):
+        return self.get_roto_league_team_proj_cat_totals(league)
+
+    # def set_roto_league_team_proj_cat(self, league):
+    #     self.get_roto_league_team_proj_cat_totals(league)
+    #     return []
+
+    """
+    This groups and totals the team proj outcomes by catagory
+
+    example query
+    SELECT
+    sum(pj.atbats) AS atbats, 
+    sum(pj.runs ) AS runs, 
+    sum(pj.hits) AS hits, 
+    team.id
+    FROM frontoffice_playerprojection as pj 
+    Right Join frontoffice_rosterentry as re on re.player_id = pj.player_id and re.at_position not in ("BN","IL")
+    Join frontoffice_team as team on team.id = re.team_id and team.league_id = '24' 
+    WHERE pj.player_id is not null 
+    GROUP BY team.id
+    """
+    def get_roto_league_team_proj_cat_totals(self, league):
+        params = {
+            }
+
+        # get statCategories by league that translate to points
+        stat_modifiers = league.stat_categories_with_modifiers_batting
+        stat_modifiers.update(league.stat_categories_with_modifiers_pitching)
+
+        # build a projection table according to points
+        query = "SELECT "
+
+        for sm in stat_modifiers:
+            query +=  "sum(pj."+sm+") AS "+sm+", "
+                
+        #add in the total_points_subquery
+        query += """team.id, team.id as team_id \
+            FROM frontoffice_playerprojection as pj \
+            Right Join frontoffice_rosterentry as re on re.player_id = pj.player_id and re.at_position not in ("BN","IL") \
+            Join frontoffice_team as team on team.id = re.team_id and team.league_id = '""" +str(league.id)+"""' \
+            WHERE pj.player_id is not null \
+            GROUP BY team.id """
+
+        team_projs = TeamRotoProjectedRecord.objects.raw(query, params = params)
+        logger.debug(team_projs.query)
+        logger.debug(list(team_projs))
+        temp_projections = []
+        for team_proj in team_projs:
+            # logger.debug(team_proj)
+            # logger.debug(team_proj.hits)
+            # # logger.debug(team_proj.id)
+            # team_id = int(team_proj.team_id)
+            team = Team.objects.filter(id=team_proj.id).get()
+            team_proj.team = team
+            # logger.debug(team.yahoo_team_logo_url)
+            # team.team_projection = team_proj
+            temp_projections.append(team_proj)
+
+        league.teams_projections = temp_projections
+
+        return league
 
     def get_queryset_proj_player_points_by_league(self, league, for_players_sub_query=False, position_type="B", limit=False):
         params = {

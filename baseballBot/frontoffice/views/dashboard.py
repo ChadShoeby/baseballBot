@@ -172,6 +172,26 @@ def league_roto_projections(request):
          })
 
 @login_required
+def league_roto_projections_new(request):
+    team_service = TeamService(request.user)
+    league = team_service.league
+    # teams = league.teams_in_league.all()
+    league = team_service.set_roto_league_team_proj_score(league)
+    
+    # # set team totals
+    # for team in teams:
+    #     team_roster = team_service.get_team_roster(team,by_position=True, with_proj_points=True)
+    #     team.stat_projections = get_team_stat_projections(team_service.league, team_roster)
+
+
+    return render(request, 
+        'frontoffice/league_roto_projections.html',
+        {
+        'teams_projections': league.teams_projections,
+        'league': league,
+         })
+
+@login_required
 def team_roster_projections(request):
     team_service = TeamService(request.user)
     user_team = team_service.get_team()
