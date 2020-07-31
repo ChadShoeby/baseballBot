@@ -18,9 +18,9 @@
       <!-- Card Body -->
       <div class="card-body">
         
-        {% include 'frontoffice/lineup_table.html' with roster=roster editableRoster=editableRoster %}
+        {% include 'frontoffice/lineup_table.html' with roster=roster editable_roster=editable_roster %}
 
-        {% if editableRoster %}
+        {% if editable_roster %}
         <div class="float-right">
           <button id="update_team_roster" type="button" class="btn btn-info btn-sm">Update Roster</button>
         </div>

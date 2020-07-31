@@ -123,7 +123,7 @@
 
 </div> 
 
-{% include 'frontoffice/lineup_card.html' with team=team roster=current_roster card_title="Current Lineup" total_points=team.total_projected_points %} 
+{% include 'frontoffice/lineup_card.html' with team=team roster=current_roster card_title="Current Lineup" total_points=team.total_projected_points editable_roster=editable_roster %} 
 
 </div>
 {% endblock %}
@@ -131,19 +131,17 @@
 {% block javascript %}
   <script>
     $(document).on('click', "#update_team_roster",function () {
-  // $("#update_team_roster").click(function () {
-    $.ajax({
-      url: '{% url "ajax_update_team_roster" %}',
+      $.ajax({
+        url: '{% url "ajax_update_team_roster" %}',
 
-      dataType: 'json',
-      success: function (data) {
-        if (data) {
-          console.log("response is "+data.data);
-          location.reload();
+        dataType: 'json',
+        success: function (data) {
+          if (data) {
+            console.log("response is "+data.data);
+            location.reload();
+          }
         }
-      }
-    });
-
+      });
   });
 
   $(document).on('click', "#update_league_info",function () {

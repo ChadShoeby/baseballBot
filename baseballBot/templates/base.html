@@ -50,7 +50,7 @@ main
               <li class="nav-item">
                 <a class="nav-link" href="{% url "league_roto_projections" %}">League Projections</a>
               </li>
-              {% else %}
+              {% elif league %}
               <li class="nav-item">
                 <a class="nav-link" href="{% url "best_lineup" %}">Best Lineup</a>
               </li>

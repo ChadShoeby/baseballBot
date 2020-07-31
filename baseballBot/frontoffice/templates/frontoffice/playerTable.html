@@ -8,14 +8,14 @@
             <th>MLB Team</th>
             <th>Player key</th>
             <th>Position Type</th>
-            {% if editableRoster or canAddPlayers %}
+            {% if editable_roster or canAddPlayers %}
             <th>Actions</th>
             {% endif %}
         </tr>
     </thead>
     <tbody>
         {% for data in players  %}
-            <tr {% if editableRoster and data.class_name == "RosterEntry"%}
+            <tr {% if editable_roster and data.class_name == "RosterEntry"%}
             id="roster_entry_row_{{ data.id }}"
             {% elif canAdd %}
             id="player_row_{{ data.player.id }}"
@@ -46,7 +46,7 @@
                 <td>{{ data.player.player_key }}</td>
 
                 <td>{{ data.player.position_type }}</td>
-                {% if editableRoster or canAddPlayers %}
+                {% if editable_roster or canAddPlayers %}
                 <td>
                     {% if canAddPlayers %}
                     <button id="add_player_{{ data.player.id }}" type="button" class="add_player btn btn-info btn-sm" data-player="{{ data.player.id }}">Add</button>
@@ -69,7 +69,7 @@ $(document).ready(function() {
     playerTable = $('#'+playerTableId).DataTable();
 
 
-    {% if editableRoster %}
+    {% if editable_roster %}
     $('#'+playerTableId).on('click', ".drop_player_roster",function () {
       $.ajax({
         url: '{% url "ajax_drop_player" %}',
