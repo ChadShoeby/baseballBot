@@ -46,9 +46,15 @@ main
         Wiz Draft
       </a>
           <ul class="navbar-nav px-3 flex-sm-row" style="margin-right: 50px;">
+              {% if league and league.scoring_type == 'roto' %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url "league_roto_projections" %}">League Projections</a>
+              </li>
+              {% else %}
               <li class="nav-item">
                 <a class="nav-link" href="{% url "best_lineup" %}">Best Lineup</a>
               </li>
+              {% endif %}
               <li class="nav-item dropdown px-sm-3">
                 <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     League

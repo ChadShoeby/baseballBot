@@ -560,13 +560,8 @@ class TeamService():
         temp_projections = []
         for team_proj in team_projs:
             # logger.debug(team_proj)
-            # logger.debug(team_proj.hits)
-            # # logger.debug(team_proj.id)
-            # team_id = int(team_proj.team_id)
             team = Team.objects.filter(id=team_proj.id).get()
             team_proj.team = team
-            # logger.debug(team.yahoo_team_logo_url)
-            # team.team_projection = team_proj
             temp_projections.append(team_proj)
 
         league.teams_projections = temp_projections

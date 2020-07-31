@@ -50,32 +50,32 @@
                         {% endif %}
                         {{ team }}
                     </td>
-                    <td>{{ team.roto_totals }}</td>
+                    
                 {% if team.stat_projections %}
                     {% define team.stat_projections as projections  %}
                 {% elif team.team_projection %}
                     {% define team.team_projection as projections  %}
                 {% endif %}
-
-                    <td>{{ projections.hits }} :: {{ team.roto_points_hits }}
+                    <td>{{ projections.roto_totals }}</td>
+                    <td>{{ projections.hits }} :: {{ projections.roto_points_hits }}
                     </td>
-                    <td>{{ projections.runs }}:: {{ team.roto_points_runs }}
+                    <td>{{ projections.runs }}:: {{ projections.roto_points_runs }}
                     </td>
-                    <td>{{ projections.singles }}:: {{ team.roto_points_singles }}
+                    <td>{{ projections.singles }}:: {{ projections.roto_points_singles }}
                     </td>
-                    <td>{{ projections.doubles }}:: {{ team.roto_points_doubles }}
+                    <td>{{ projections.doubles }}:: {{ projections.roto_points_doubles }}
                     </td>
-                    <td>{{ projections.triples }}:: {{ team.roto_points_triples }}
+                    <td>{{ projections.triples }}:: {{ projections.roto_points_triples }}
                     </td>
-                    <td>{{ projections.homeruns }}:: {{ team.roto_points_homeruns }}
+                    <td>{{ projections.homeruns }}:: {{ projections.roto_points_homeruns }}
                     </td>
-                    <td>{{ projections.rbis }}:: {{ team.roto_points_rbis }}
+                    <td>{{ projections.rbis }}:: {{ projections.roto_points_rbis }}
                     </td>
-                    <td>{{ projections.stolen_bases }}:: {{ team.roto_points_stolen_bases }}
+                    <td>{{ projections.stolen_bases }}:: {{ projections.roto_points_stolen_bases }}
                     </td>
-                    <td>{{ projections.walks }}:: {{ team.roto_points_walks }}
+                    <td>{{ projections.walks }}:: {{ projections.roto_points_walks }}
                     </td>
-                    <td>{{ projections.hbps }}:: {{ team.roto_points_hbps }}
+                    <td>{{ projections.hbps }}:: {{ projections.roto_points_hbps }}
                     </td>
     
                 {# {% endif %} #}
