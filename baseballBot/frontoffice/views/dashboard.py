@@ -78,6 +78,7 @@ def index(request):
         'other_league_teams': other_league_teams,
         'matchup': team_service.get_team_matchup_for_week(user_team),
         'editable_roster' : True,
+        'league_standings' : team_service.get_league_standings(),
         })
 
 # total points for a given roster

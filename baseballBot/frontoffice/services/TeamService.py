@@ -100,11 +100,29 @@ class TeamService():
 
         return league
 
-
     def get_leagues_from_yahoo(self):
         yqu = YahooQueryUtil(self.user.id)
         leagues_from_yahoo = yqu.get_user_leagues_by_game_key()
         return leagues_from_yahoo
+
+    def get_league_standings(self):
+        yqu = YahooQueryUtil(self.user.id)
+        leagues_standings_from_yahoo = yqu.get_league_standings()
+
+        league_standings = {}
+        teams_by_yahoo_key = {}
+        for team in self.league.teams_in_league.all():
+            teams_by_yahoo_key[team.yahoo_team_key] = team
+
+        for data in leagues_standings_from_yahoo.teams:
+            team_from_db = teams_by_yahoo_key[data['team'].team_key]
+            league_standings[data['team'].team_key] = { 
+                'points' : data['team'].team_standings.points_for,
+                'rank'   : data['team'].team_standings.rank,
+                'team'   : team_from_db,
+            }
+
+        return league_standings
 
     # for testing and development
     def delete_yahoo_data(self):

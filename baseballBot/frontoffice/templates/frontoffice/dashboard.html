@@ -58,30 +58,59 @@
     <div class="card-body">
         <div class="container" style="display: block;">
           <div class="row mt-2">
+            {% if league.scoring_type == "roto" %}
+            <div class="col-2"><span class="small font-weight-bold">Rank</span></div>
+            {% endif %}
             <div class="col-6"><span class="small font-weight-bold">Team</span><br></div>
             {% if league.scoring_type == "headpoint" %}
             <div class="col-6"><span class="small font-weight-bold">Project Points</span></div>
+            {% elif league.scoring_type == "roto" %}
+            <div class="col-3"><span class="small font-weight-bold">Points</span></div>
             {% endif %}
           </div>
 
-          {% for otherTeam in other_league_teams %}
-          <div class="row mt-2">
-            <div class="col-6">
-            {% if otherTeam.yahoo_team_logo_url %}
-            <img style="height:50px;" src="{{ otherTeam.yahoo_team_logo_url }}" class="img-thumbnail">
-            {% endif %}
-            {{ otherTeam }}</div>
-            {% if league.scoring_type == "headpoint" %}
-            <div class="col-6">{{ otherTeam.total_projected_points }}
+          {% if league_standings %}
+
+            {% for key, ts in league_standings.items %}
+            <div class="row mt-2">
+              <div class="col-2">{{ ts.rank }} </div>
+              <div class="col-6">
+                {% if ts.team.yahoo_team_logo_url %}
+                <img style="height:50px;" src="{{ ts.team.yahoo_team_logo_url }}" class="img-thumbnail">
+                {% endif %}
+
+                {{ ts.team.name }}
+              </div>
+              
+              
+              <div class="col-3">{{ ts.points }}</div>
             </div>
-            {% endif %}
+            {% endfor %}
+
+          {% else %}  
+            {% for otherTeam in other_league_teams %}
+            <div class="row mt-2">
+              <div class="col-6">
+              {% if otherTeam.yahoo_team_logo_url %}
+              <img style="height:50px;" src="{{ otherTeam.yahoo_team_logo_url }}" class="img-thumbnail">
+              {% endif %}
+              {{ otherTeam }}</div>
+              {% if league.scoring_type == "headpoint" %}
+              <div class="col-6">{{ otherTeam.total_projected_points }}
+              </div>
+              {% elif league.scoring_type == "roto" %}
+              <div class="col-6">{{ otherTeam.total_projected_points }}
+              </div>
+              {% endif %}
           </div>
           {% endfor %}
+          {% endif %}
 
+{% if False %} 
           <div class="float-right">
               <button id="update_league_info" type="button" class="btn btn-info btn-sm">Update League</button>
           </div>
-
+{% endif %} 
         </div>
     </div>
   </div> <!-- end league info card--> 
