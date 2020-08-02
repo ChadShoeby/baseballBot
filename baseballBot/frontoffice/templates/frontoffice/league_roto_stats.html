@@ -37,10 +37,10 @@
                
             </thead>
             <tbody>
-            {% for team_proj in teams_projections  %}
+            {% for data in teams_stats  %}
 
-                {% define team_proj.team as team  %}
-                {% define team_proj as projections  %}
+                {% define data.team as team  %}
+                {% define data as stats  %}
                 <tr>
                     <td>
                         {% if team.yahoo_team_logo_url %}
@@ -51,31 +51,26 @@
                         {{ team }}
                     </td>
                     
-                {% if team.stat_projections %}
-                    {% define team.stat_projections as projections  %}
-                {% elif team.team_projection %}
-                    {% define team.team_projection as projections  %}
-                {% endif %}
-                    <td>{{ projections.roto_totals }}</td>
-                    <td>{{ projections.hits }} :: {{ projections.roto_points_hits }}
+                    <td>{{ stats.roto_totals }}</td>
+                    <td>{{ stats.hits }} :: {{ stats.roto_points_hits }}
                     </td>
-                    <td>{{ projections.runs }}:: {{ projections.roto_points_runs }}
+                    <td>{{ stats.runs }}:: {{ stats.roto_points_runs }}
                     </td>
-                    <td>{{ projections.singles }}:: {{ projections.roto_points_singles }}
+                    <td>{{ stats.singles }}:: {{ stats.roto_points_singles }}
                     </td>
-                    <td>{{ projections.doubles }}:: {{ projections.roto_points_doubles }}
+                    <td>{{ stats.doubles }}:: {{ stats.roto_points_doubles }}
                     </td>
-                    <td>{{ projections.triples }}:: {{ projections.roto_points_triples }}
+                    <td>{{ stats.triples }}:: {{ stats.roto_points_triples }}
                     </td>
-                    <td>{{ projections.homeruns }}:: {{ projections.roto_points_homeruns }}
+                    <td>{{ stats.homeruns }}:: {{ stats.roto_points_homeruns }}
                     </td>
-                    <td>{{ projections.rbis }}:: {{ projections.roto_points_rbis }}
+                    <td>{{ stats.rbis }}:: {{ stats.roto_points_rbis }}
                     </td>
-                    <td>{{ projections.stolen_bases }}:: {{ projections.roto_points_stolen_bases }}
+                    <td>{{ stats.stolen_bases }}:: {{ stats.roto_points_stolen_bases }}
                     </td>
-                    <td>{{ projections.walks }}:: {{ projections.roto_points_walks }}
+                    <td>{{ stats.walks }}:: {{ stats.roto_points_walks }}
                     </td>
-                    <td>{{ projections.hbps }}:: {{ projections.roto_points_hbps }}
+                    <td>{{ stats.hbps }}:: {{ stats.roto_points_hbps }}
                     </td>
     
                 {# {% endif %} #}
