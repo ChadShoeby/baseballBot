@@ -55,7 +55,6 @@ def index(request):
         return redirect('choose_league')
 
     user_team = team_service.get_team()
-    
     other_league_teams = league.teams_in_league.exclude(id=user_team.id)
 
     if league.scoring_type == "headpoint":
@@ -162,9 +161,26 @@ def league_roto_projections(request):
     set_teams_projected_category_points(team_service.league, league.teams_projections)
 
     return render(request, 
-        'frontoffice/league_roto_projections.html',
+        'frontoffice/league_roto_stats.html',
         {
-        'teams_projections': league.teams_projections,
+        'teams_stats': league.teams_projections,
+        'league': league,
+         })
+
+@login_required
+def get_roto_league_stats(request):
+    team_service = TeamService(request.user)
+    league = team_service.league
+
+    league_stats = team_service.get_league_stats()
+    logger.debug(league_stats)
+    
+    # set_teams_projected_category_points(team_service.league, league.teams_projections)
+
+    return render(request, 
+        'frontoffice/league_roto_stats.html',
+        {
+        'teams_stats': league.teams_projections,
         'league': league,
          })
 
