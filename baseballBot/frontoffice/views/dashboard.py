@@ -168,19 +168,19 @@ def league_roto_projections(request):
          })
 
 @login_required
-def get_roto_league_stats(request):
+def league_roto_stats(request):
     team_service = TeamService(request.user)
     league = team_service.league
 
     league_stats = team_service.get_league_stats()
     logger.debug(league_stats)
     
-    # set_teams_projected_category_points(team_service.league, league.teams_projections)
+    set_teams_projected_category_points(league, league_stats)
 
     return render(request, 
         'frontoffice/league_roto_stats.html',
         {
-        'teams_stats': league.teams_projections,
+        'teams_stats': league_stats,
         'league': league,
          })
 

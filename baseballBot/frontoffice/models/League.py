@@ -48,10 +48,10 @@ class League(models.Model):
                 
         return formatted_roster_slots
 
+    #map any yahoo stat category to the appropriate field in the player table
     @property
-    def stat_categories_with_modifiers_batting(self):
-        #map any yahoo stat category to the appropriate field in the player table
-        mapStatCategoryToRecordColumn = {
+    def stat_categories_mappings_batting(self):
+        return {
             'At Bats' : 'atbats',
             'Runs': 'runs',
             'Hits': 'hits',
@@ -65,25 +65,38 @@ class League(models.Model):
             'Hit By Pitch':'hbps',
             }
 
-        return self.stat_categories_with_modifiers(position_type='B', mapStatCat=mapStatCategoryToRecordColumn)
-
     @property
-    def stat_categories_with_modifiers_pitching(self):
-        #map any yahoo stat category to the appropriate field in the player table
-        mapStatCategoryToRecordColumn = {
-            # 'Wins' : '',
+    def stat_categories_mappings_pitching(self):
+        return {
+            'Wins' : 'wins',
             'Saves': 'saves',
-            # 'Outs': '',
+            'Outs': 'outs',
             'Hits': 'hits_pitcher',
-            # 'Earned Runs': '',
+            'Earned Runs': 'earned_runs',
             'Walks': 'walks_pitcher',
             'Hit Batters':'homeruns',
             'Strikeouts': 'strikeouts',
             }
-        return self.stat_categories_with_modifiers(position_type='P', mapStatCat=mapStatCategoryToRecordColumn)
+
+    @property
+    def stat_categories_mapping(self):
+        stats_mapping = self.stat_categories_mappings_batting
+        stats_mapping.update(self.stat_categories_mappings_pitching)
+        return stats_mapping
+    
+    @property
+    def stat_categories_with_modifiers_batting(self):
+        return self.stat_categories_with_modifiers(
+            position_type='B', 
+            mapStatCat=self.stat_categories_mappings_batting)
+
+    @property
+    def stat_categories_with_modifiers_pitching(self):
+        return self.stat_categories_with_modifiers(
+            position_type='P', 
+            mapStatCat=self.stat_categories_mappings_pitching)
 
     def stat_categories_with_modifiers(self, position_type, mapStatCat):
-
         # build value dictionary
         result = {}
         for sc in self.stat_categories.all():

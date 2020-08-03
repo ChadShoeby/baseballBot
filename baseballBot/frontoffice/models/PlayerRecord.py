@@ -28,11 +28,9 @@ class AbstractPlayerRecord(models.Model):
     on_base_plus_sluggings = models.FloatField(default=0)
 
 
-
-
-
     #pitcher scoring fields
     innings_pitched = models.FloatField(default=0)
+    outs = models.FloatField(default=0)
     strikeouts = models.IntegerField(default=0)
     hits_pitcher = models.IntegerField(default=0)
     walks_pitcher = models.IntegerField(default=0)
@@ -43,6 +41,7 @@ class AbstractPlayerRecord(models.Model):
     wins = models.IntegerField(default=0) 
     loses = models.IntegerField(default=0)
     era = models.FloatField(default=0)
+    earned_runs = models.IntegerField(default=0)
     games_started = models.IntegerField(default=0)
     blown_saves = models.IntegerField(default=0)
     whips = models.FloatField(default=0)

@@ -124,6 +124,45 @@ class TeamService():
 
         return league_standings
 
+    def get_league_stats(self):
+        yqu = self.yahoo_query_utility
+
+        stat_categories_in_db = StatCategory.objects.filter(league=self.league)
+        stat_categories = {}
+
+        # get statCategories by league mapping that translates to our points
+        stats_mapping_batting = self.league.stat_categories_mappings_batting
+        stats_mapping_pitching = self.league.stat_categories_mappings_pitching
+
+        for scdb in stat_categories_in_db:
+            stat_categories[str(scdb.yahoo_id)] = scdb
+
+        league_stats = []
+        for team in self.league.teams_in_league.all():
+            team_stats_from_yahoo = yqu.get_team_stats(team.yahoo_team_id)
+            logger.debug(team_stats_from_yahoo)
+
+            # league_stats[team.id] = {}
+            team_record = TeamRecord()
+            team_record.team = team
+
+            for data in team_stats_from_yahoo.stats:
+                if data['stat'].value:
+                    
+                    # use pitching or batting
+                    sc_name = stat_categories[ data['stat'].stat_id ].name
+                    if stat_categories[ data['stat'].stat_id ].position_type == "B":
+                        stat_col_name = stats_mapping_batting[sc_name]
+                    else:
+                        stat_col_name = stats_mapping_pitching[sc_name]
+
+                    setattr(team_record, stat_col_name, data['stat'].value )
+
+            # add team record to league_stats
+            league_stats.append(team_record)
+
+        return league_stats
+
     # for testing and development
     def delete_yahoo_data(self):
         team = self.get_team()
@@ -529,7 +568,8 @@ class TeamService():
         return list(proj_points_batters_query) + list(proj_points_pitchers_query)
 
     def set_roto_league_team_proj_score(self, league):
-        return self.get_roto_league_team_proj_cat_totals(league)
+        league.teams_projections = self.get_roto_league_team_proj_cat_totals(league)
+        return league
 
     # def set_roto_league_team_proj_cat(self, league):
     #     self.get_roto_league_team_proj_cat_totals(league)
@@ -582,9 +622,8 @@ class TeamService():
             team_proj.team = team
             temp_projections.append(team_proj)
 
-        league.teams_projections = temp_projections
 
-        return league
+        return temp_projections
 
     def get_queryset_proj_player_points_by_league(self, league, for_players_sub_query=False, position_type="B", limit=False):
         params = {
@@ -817,7 +856,4 @@ class TeamService():
             return "No week"
         else:
             return results[0]
-
-
-
         

@@ -338,6 +338,7 @@ class TeamPoints(YahooFantasyObject):
         self.season = self.extracted_data.get("season", "")
         self.total = self.extracted_data.get("total", 0)
         self.week = self.extracted_data.get("week", "")
+        self.stats = self.extracted_data.get("stats", "")
 
 
 class TeamProjectedPoints(YahooFantasyObject):
