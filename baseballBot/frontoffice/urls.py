@@ -10,6 +10,7 @@ urlpatterns = [
     path('best-lineup', dashboard.best_lineup, name='best_lineup'),
     path('team-roster-projections', dashboard.team_roster_projections, name='team_roster_projections'),
     path('league-projections', dashboard.league_roto_projections, name='league_roto_projections'),
+    path('league-projections-only', dashboard.league_roto_projections_only, name='league_roto_projections_only'),
     path('league-stats', dashboard.league_roto_stats, name='league_roto_stats'),
     path('matchup', dashboard.current_matchup, name='matchup'),
     url(r'^ajax/initialize_league/$', dashboard.ajax_initialize_league, name='ajax_initialize_league'),

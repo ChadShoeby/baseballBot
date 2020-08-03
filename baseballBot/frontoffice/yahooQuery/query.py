@@ -1428,7 +1428,7 @@ class YahooFantasySportsQuery(object):
         team_key = self.get_league_key() + ".t." + str(team_id)
         return self.query(
             "https://fantasysports.yahooapis.com/fantasy/v2/team/" + str(team_key) + "/stats",
-            ["team", "team_points"], TeamPoints)
+            ["team", ["team_points", "team_stats"]])
 
     def get_team_stats_by_week(self, team_id, chosen_week="current"):
         """Retrieve stats of specific team by team_id and by week for chosen league.

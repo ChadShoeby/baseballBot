@@ -130,18 +130,18 @@ def get_team_stat_projections(league, roster):
 
     return stat_totals
 
-def set_teams_projected_category_points(league, team_projections):
-    number_of_teams = len(team_projections)
+def set_teams_projected_category_points(league, team_records):
+    number_of_teams = len(team_records)
 
-    for team_proj in team_projections:
-        team_proj.roto_totals = 0
+    for team_record in team_records:
+        team_record.roto_totals = 0
 
     stat_categories = league.stat_categories_with_modifiers_batting
 
     for sc in stat_categories:
         category_rankings = []
-        for team_proj in team_projections:
-            category_rankings.append((team_proj, getattr(team_proj,sc)))
+        for team_record in team_records:
+            category_rankings.append((team_record, getattr(team_record,sc)))
 
         category_rankings = sorted(category_rankings, key = lambda x: x[1])
 
@@ -153,10 +153,21 @@ def set_teams_projected_category_points(league, team_projections):
     return
 
 @login_required
-def league_roto_projections(request):
+def league_roto_projections_only(request):
+    return league_roto_projections(request, projections_only=True)
+
+@login_required
+def league_roto_projections(request, projections_only=False):
     team_service = TeamService(request.user)
     league = team_service.league
-    league = team_service.set_roto_league_team_proj_score(league)
+    
+    
+    if projections_only:
+        league = team_service.set_roto_league_team_proj_score(league)
+    
+    else:
+        # add league points so far plus the projections for remainder of season
+        league = team_service.set_roto_league_team_proj_score(league, for_remaining_season=True)      
     
     set_teams_projected_category_points(team_service.league, league.teams_projections)
 

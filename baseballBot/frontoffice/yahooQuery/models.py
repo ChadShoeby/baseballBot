@@ -230,6 +230,7 @@ class Team(YahooFantasyObject):
         self.team_key = self.extracted_data.get("team_key", "")
         self.team_logos = self.extracted_data.get("team_logos", "")
         self.team_points = self.extracted_data.get("team_points", TeamPoints({}))  # type: TeamPoints
+        self.team_stats = self.extracted_data.get("team_stats", TeamStats({}))  # type: TeamStats
         self.points = float(self.team_points.total)
         self.team_projected_points = self.extracted_data.get("team_projected_points",
                                                              TeamProjectedPoints({}))  # type: TeamProjectedPoints
@@ -340,6 +341,14 @@ class TeamPoints(YahooFantasyObject):
         self.week = self.extracted_data.get("week", "")
         self.stats = self.extracted_data.get("stats", "")
 
+class TeamStats(YahooFantasyObject):
+    """Yahoo fantasy object for "team_points" data key.
+    """
+    def __init__(self, extracted_data):
+        YahooFantasyObject.__init__(self, extracted_data)
+        self.coverage_type = self.extracted_data.get("coverage_type", "")
+        self.season = self.extracted_data.get("season", "")
+        self.stats = self.extracted_data.get("stats", "")
 
 class TeamProjectedPoints(YahooFantasyObject):
     """Yahoo fantasy object for "team_projected_points" data key.

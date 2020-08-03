@@ -140,14 +140,13 @@ class TeamService():
         league_stats = []
         for team in self.league.teams_in_league.all():
             team_stats_from_yahoo = yqu.get_team_stats(team.yahoo_team_id)
-            logger.debug(team_stats_from_yahoo)
 
-            # league_stats[team.id] = {}
             team_record = TeamRecord()
             team_record.team = team
 
-            for data in team_stats_from_yahoo.stats:
-                if data['stat'].value:
+            for data in team_stats_from_yahoo['team_stats'].stats:
+                if data['stat'].value and data['stat'].stat_id in stat_categories \
+                    and stat_categories[ data['stat'].stat_id ].stat_modifier:
                     
                     # use pitching or batting
                     sc_name = stat_categories[ data['stat'].stat_id ].name
@@ -155,7 +154,6 @@ class TeamService():
                         stat_col_name = stats_mapping_batting[sc_name]
                     else:
                         stat_col_name = stats_mapping_pitching[sc_name]
-
                     setattr(team_record, stat_col_name, data['stat'].value )
 
             # add team record to league_stats
@@ -567,8 +565,8 @@ class TeamService():
         proj_points_pitchers_query = self.get_queryset_proj_player_points_by_league(league, for_players_sub_query=free_agent_pitchers_query, position_type="P")
         return list(proj_points_batters_query) + list(proj_points_pitchers_query)
 
-    def set_roto_league_team_proj_score(self, league):
-        league.teams_projections = self.get_roto_league_team_proj_cat_totals(league)
+    def set_roto_league_team_proj_score(self, league, for_remaining_season=False):
+        league.teams_projections = self.get_roto_league_team_proj_cat_totals(league, for_remaining_season=for_remaining_season)
         return league
 
     # def set_roto_league_team_proj_cat(self, league):
@@ -590,7 +588,7 @@ class TeamService():
     WHERE pj.player_id is not null 
     GROUP BY team.id
     """
-    def get_roto_league_team_proj_cat_totals(self, league):
+    def get_roto_league_team_proj_cat_totals(self, league, for_remaining_season = False):
         params = {
             }
 
@@ -598,11 +596,22 @@ class TeamService():
         stat_modifiers = league.stat_categories_with_modifiers_batting
         stat_modifiers.update(league.stat_categories_with_modifiers_pitching)
 
+        if for_remaining_season:
+            # projections / number of weeks in league * weeks left
+            total_weeks_in_league = GameWeek.objects.filter(league=league).count()
+            current_week = self.get_current_week(number_only=True)
+            weeks_left = total_weeks_in_league - int(current_week)
+
+            projection_adjustment = str(round(weeks_left/total_weeks_in_league,2))
+
         # build a projection table according to points
         query = "SELECT "
 
         for sm in stat_modifiers:
-            query +=  "sum(pj."+sm+") AS "+sm+", "
+            if for_remaining_season:
+                query +=  "sum(pj."+sm+")*"+projection_adjustment+" AS "+sm+", "
+            else:
+                query +=  "sum(pj."+sm+") AS "+sm+", "
                 
         #add in the total_points_subquery
         query += """team.id, team.id as team_id \
@@ -613,15 +622,30 @@ class TeamService():
             GROUP BY team.id """
 
         team_projs = TeamRotoProjectedRecord.objects.raw(query, params = params)
-        logger.debug(team_projs.query)
-        logger.debug(list(team_projs))
+
+        if for_remaining_season:
+            league_stats = self.get_league_stats()
+            team_stats_by_id = {}
+            for team_stats in league_stats:
+                logger.debug(team_stats.team.id)
+                team_stats_by_id[team_stats.team.id] = team_stats
+
         temp_projections = []
         for team_proj in team_projs:
-            # logger.debug(team_proj)
-            team = Team.objects.filter(id=team_proj.id).get()
-            team_proj.team = team
-            temp_projections.append(team_proj)
 
+            if for_remaining_season:
+                team_record = team_stats_by_id[team_proj.id]
+                team_proj.team = team_record.team
+                
+                # update projections based on current performance
+                for sm in stat_modifiers:
+                    setattr(team_proj, sm, float(getattr(team_proj,sm)) + float(getattr(team_record,sm)) )
+
+            else: 
+                team = Team.objects.filter(id=team_proj.id).get()
+                team_proj.team = team
+
+            temp_projections.append(team_proj)
 
         return temp_projections
 
@@ -843,17 +867,22 @@ class TeamService():
                 return []
         return matchup
 
-    def get_current_week(self):
+    def get_current_week(self, number_only=False):
         today = date.today()
         # logger.debug(today)
         # today = datetime.strptime("2020-07-28", '%Y-%m-%d').date()
         # logger.debug(today)
-        results = GameWeek.objects.filter(league=self.league, start__lt=today, end__gt=today).all()
+        results = GameWeek.objects.filter(league=self.league, start__lt=today, end__gte=today).all()
 
+        logger.debug(results.query)
         if len(results) == 0:
             # to do figure out pre and post season
             # GameWeek.objects.filter(league=league, max(end) ).all()
+            if number_only:
+                return 0
             return "No week"
         else:
+            if number_only:
+                return results[0].week_number
             return results[0]
         
