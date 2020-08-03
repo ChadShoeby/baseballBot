@@ -2,8 +2,8 @@
 
 {% load static define_action %}
 
-{% block title %}{{ league.name }}{% endblock %}
-{% block dashboardTitle %}{{ league.name }} {% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block dashboardTitle %}{{ page_title }} {% endblock %}
 
 {% block dashboardBody %}
 <div class="row">
@@ -12,7 +12,10 @@
     <div class="card shadow mb-4">
       <!-- Card Header - Dropdown -->
       <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h5> Season Projections</h5>
+        {# <h5>{{ league.name }}</h5> #}
+        {% if description %}
+        <div class="col-6">{{ description }}</div>
+        {% endif %}
       </div>
           
       <!-- Card Body -->

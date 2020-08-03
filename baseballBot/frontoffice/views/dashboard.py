@@ -164,18 +164,32 @@ def league_roto_projections(request, projections_only=False):
     
     if projections_only:
         league = team_service.set_roto_league_team_proj_score(league)
-    
+        
+        page_title = 'Pure Projections'
+        description = """These projections are taken from the ZIPS forecast. 
+                        These only show projections from the time 
+                        they are uploaded and are NOT adjusted by Wiz Draft. 
+                        They are only summed by roster."""
     else:
         # add league points so far plus the projections for remainder of season
         league = team_service.set_roto_league_team_proj_score(league, for_remaining_season=True)      
-    
+        
+        page_title = 'Projections'
+        description = """These projections are taken from the ZIPS forecast. 
+                        They are pro-rated by the remaining weeks and added to 
+                        the current team stats."""
+
     set_teams_projected_category_points(team_service.league, league.teams_projections)
+
+
 
     return render(request, 
         'frontoffice/league_roto_stats.html',
         {
         'teams_stats': league.teams_projections,
         'league': league,
+        'page_title': page_title,
+        'description': description,
          })
 
 @login_required
@@ -193,6 +207,8 @@ def league_roto_stats(request):
         {
         'teams_stats': league_stats,
         'league': league,
+        'page_title': 'League Standings',
+        'description': "Taken directly from Yahoo. They don't include live stats.",
          })
 
 @login_required

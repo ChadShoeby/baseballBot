@@ -19,11 +19,10 @@
     
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.21/datatables.min.css"/>
-{#     <link href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet"> #}
     <link href="{% static "baseballBot/css/base.css" %}" rel="stylesheet">
 
-    <title>{% block title %}Baseball Bot{% endblock %}</title>
-    <style>
+    <title>{% block title %}Wiz Draft{% endblock %}</title>
+<style>
 main
 {
   background-image: url({% static "baseballBot/img/stadium_lights_wind_main.jpg" %});
@@ -33,91 +32,50 @@ main
   height: 100%;
   width:100%;
 }
-    </style>
+</style>
     {% block extra_css %}{% endblock %}
 </head>
 {% endblock %}
 
 {% block body %}
-    <body>
+  <body>
 
-    <nav class="navbar navbar-dark sticky-top bg-dark flex-row-md-nowrap p-0">
-      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{% url "home" %}">
-        Wiz Draft
-      </a>
-          <ul class="navbar-nav px-3 flex-sm-row" style="margin-right: 50px;">
-              {% if league and league.scoring_type == 'roto' %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url "league_roto_projections" %}">League Projections</a>
-              </li>
-              {% elif league %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url "best_lineup" %}">Best Lineup</a>
-              </li>
-              {% endif %}
-              <li class="nav-item dropdown px-sm-3">
-                <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    League
-                </a>
-                <div class="dropdown-menu" style="position:absolute;" aria-labelledby="navbarDropdownMenuLink">
-                  <a class="dropdown-item" href="{% url "players_all" %}">Players</a>
-                  <a class="dropdown-item" href="{% url "free_agents" %}">Free Agents</a>
-                </div>
-              </li>
-
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Account
-                </a>
-                <div class="dropdown-menu" style="position:absolute;" aria-labelledby="navbarDropdownMenuLink">
-                  <a class="dropdown-item" href="{% url 'home' %}">Dashboard</a>
-                  <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
-                </div>
-              </li>
-            </ul>
-    </nav> 
-
-
-    
+    {% include "nav_bar.html" %}
 
     {% block body_content %}
-        <div class="container-fluid">
-            <div class="row">
+    <div class="container-fluid">
+      <div class="row">
 
-                {# put side navbar here #}
-                {# {% include "sideNav.html" %}    #}
+        {% include "messages.html" %} 
 
-                {% include "messages.html" %} 
-
-                <main role="main" class="ml-sm-auto pt-3 px-4">
-                  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-
-                  <div class="card">
-                    <div class="card-header">
-                      <h3>
-                        {% block dashboardTitle %}{% endblock %}
-                      </h3>
-                    </div>
-                  </div>
-                    </div>
-
-                {% block dashboardBody %}{% endblock %}
-                </main>
+        <main role="main" class="ml-sm-auto pt-3 px-4">
+          
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <div class="card">
+              <div class="card-header">
+                <h3>
+                  {% block dashboardTitle %}
+                  {% endblock %}
+                </h3>
+              </div>
             </div>
-        </div>
+          </div>
+
+        {% block dashboardBody %}{% endblock %}
+        
+        </main>
+      </div>
+    </div>
     {% endblock %}
 
-   {#  {% block foot %} #}
-        {# <footer> #}
-            {# {% block footer %}{% endblock %} #}
-            {% include "footer.html" %}
-        {# </footer> #}
-    {# {% endblock %} #}
+    {% include "footer.html" %}
 
-    {% block javascript %}{% endblock %}
-    {#} <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>#}
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/dt-1.10.21/datatables.min.js"></script>
+    
+    {% block javascript %}{% endblock %}
+  
   </body>
 {% endblock %}
+
 </html>
 {% endblock %}

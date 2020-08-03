@@ -1,0 +1,57 @@
+<nav class="navbar navbar-dark sticky-top bg-dark flex-row-md-nowrap p-0">
+  <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{% url "home" %}">
+    Wiz Draft
+  </a>
+
+  <ul class="navbar-nav px-3 flex-sm-row" style="margin-right: 50px;">
+    
+    {% if league and league.scoring_type == 'roto' %}
+    <li class="nav-item">
+      <a class="nav-link" href="{% url "home" %}">Dashboard</a>
+    </li>
+    <li class="nav-item dropdown px-sm-3">
+      <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Standings</a>
+      
+      <div class="dropdown-menu" style="position:absolute;" aria-labelledby="navbarDropdownMenuLink">
+        
+        <a class="dropdown-item" href="{% url "league_roto_stats" %}">Current</a>
+        
+        <a class="dropdown-item" href="{% url "league_roto_projections" %}">Projections</a>
+
+        <a class="dropdown-item" href="{% url "league_roto_projections_only" %}">Pure Projections</a>
+      
+      </div>
+    </li>
+    
+    {% elif league %}
+    <li class="nav-item">
+      <a class="nav-link" href="{% url "best_lineup" %}">Best Lineup</a>
+    </li>
+    {% endif %}
+    
+    <li class="nav-item dropdown px-sm-3">
+      <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      League</a>
+      
+      <div class="dropdown-menu" style="position:absolute;" aria-labelledby="navbarDropdownMenuLink">
+        
+        <a class="dropdown-item" href="{% url "players_all" %}">Players</a>
+        
+        <a class="dropdown-item" href="{% url "free_agents" %}">Free Agents</a>
+      
+      </div>
+    </li>
+
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Account</a>
+      <div class="dropdown-menu" style="position:absolute;" aria-labelledby="navbarDropdownMenuLink">
+        <a class="dropdown-item" href="{% url 'password_reset' %}">Reset Password</a>
+        
+        <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
+      </div>
+    </li>
+
+  </ul>
+</nav>
