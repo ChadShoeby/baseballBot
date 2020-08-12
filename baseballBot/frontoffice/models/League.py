@@ -19,7 +19,6 @@ class League(models.Model):
 
     def league_updated(self):
         self.updated_at = datetime.now()
-        return 
 
     def can_update_leauge(self):
         diff = (timezone.now() - self.updated_at ).total_seconds()

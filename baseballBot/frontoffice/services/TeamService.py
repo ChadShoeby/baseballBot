@@ -20,7 +20,6 @@ class TeamService():
         self.user = user
         self.manager_profile = self.get_manager_profile()
         self.league = self.get_league()
-        
 
         if not initial_setup and self.league:
             self.yahoo_query_utility = YahooQueryUtil(user.id,league_id=self.league.yahoo_id, league_key=self.league.yahoo_key)
@@ -336,7 +335,7 @@ class TeamService():
                 team = self.update_team_data(team, forceUpdate=True)
 
         else:
-            print("can't find team by user id. trying to update by querying yahoo.")
+            logger.debug("can't find team by user id. trying to update by querying yahoo.")
             # try to get it from yahoo
             yqu = self.yahoo_query_utility
             yahoo_data = yqu.get_user_teams()

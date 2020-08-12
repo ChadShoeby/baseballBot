@@ -4,9 +4,9 @@ from yahoo_oauth.utils import get_data, services, CALLBACK_URI
 
 class OauthGetAuthKeyHelper(object):
 
-    def __init__(self, token_file_dir, oauth_version = 'oauth2'):
+    def __init__(self, token_file_dir_num, oauth_version = 'oauth2'):
         self.auth_dir = os.path.dirname(os.path.dirname(__file__))
-        self.token_file_dir = "token" + str(token_file_dir)
+        self.token_file_dir = "token" + str(token_file_dir_num)
         self.oauth_version = oauth_version
 
         auth_dir = os.path.dirname(os.path.dirname(__file__))

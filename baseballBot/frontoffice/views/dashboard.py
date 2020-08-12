@@ -181,8 +181,6 @@ def league_roto_projections(request, projections_only=False):
 
     set_teams_projected_category_points(team_service.league, league.teams_projections)
 
-
-
     return render(request, 
         'frontoffice/league_roto_stats.html',
         {
@@ -198,7 +196,6 @@ def league_roto_stats(request):
     league = team_service.league
 
     league_stats = team_service.get_league_stats()
-    logger.debug(league_stats)
     
     set_teams_projected_category_points(league, league_stats)
 
