@@ -55,25 +55,25 @@
                     </td>
                     
                     <td>{{ stats.roto_totals }}</td>
-                    <td>{{ stats.hits }} :: {{ stats.roto_points_hits }}
+                    <td>{{ stats.hits|floatformat }} :: {{ stats.roto_points_hits }}
                     </td>
-                    <td>{{ stats.runs }}:: {{ stats.roto_points_runs }}
+                    <td>{{ stats.runs|floatformat }}:: {{ stats.roto_points_runs }}
                     </td>
-                    <td>{{ stats.singles }}:: {{ stats.roto_points_singles }}
+                    <td>{{ stats.singles|floatformat }}:: {{ stats.roto_points_singles }}
                     </td>
-                    <td>{{ stats.doubles }}:: {{ stats.roto_points_doubles }}
+                    <td>{{ stats.doubles|floatformat }}:: {{ stats.roto_points_doubles }}
                     </td>
-                    <td>{{ stats.triples }}:: {{ stats.roto_points_triples }}
+                    <td>{{ stats.triples|floatformat }}:: {{ stats.roto_points_triples }}
                     </td>
-                    <td>{{ stats.homeruns }}:: {{ stats.roto_points_homeruns }}
+                    <td>{{ stats.homeruns|floatformat }}:: {{ stats.roto_points_homeruns }}
                     </td>
-                    <td>{{ stats.rbis }}:: {{ stats.roto_points_rbis }}
+                    <td>{{ stats.rbis|floatformat }}:: {{ stats.roto_points_rbis }}
                     </td>
-                    <td>{{ stats.stolen_bases }}:: {{ stats.roto_points_stolen_bases }}
+                    <td>{{ stats.stolen_bases|floatformat }}:: {{ stats.roto_points_stolen_bases }}
                     </td>
-                    <td>{{ stats.walks }}:: {{ stats.roto_points_walks }}
+                    <td>{{ stats.walks|floatformat }}:: {{ stats.roto_points_walks }}
                     </td>
-                    <td>{{ stats.hbps }}:: {{ stats.roto_points_hbps }}
+                    <td>{{ stats.hbps|floatformat }}:: {{ stats.roto_points_hbps }}
                     </td>
     
                 {# {% endif %} #}
